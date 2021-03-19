@@ -1,0 +1,6 @@
+[submodule "Aaru"]
+	path = Aaru
+	url = https://github.com/aaru-dps/Aaru.git
+[submodule "cscore"]
+	path = cscore
+	url = https://github.com/deagahelio/cscore.git

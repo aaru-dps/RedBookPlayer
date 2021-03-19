@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="RedBookPlayer.PlayerView"
+             Width="900" Height="300">
+    <StackPanel Margin="16" VerticalAlignment="Center">
+        <Button Click="LoadButton_Click" Margin="32,0,32,16">Load</Button>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <Button Click="PlayButton_Click" Width="100" Margin="0,0,16,0">Play</Button>
+            <Button Click="PauseButton_Click" Width="100" Margin="0,0,16,0">Pause</Button>
+            <Button Click="StopButton_Click" Width="100" Margin="0,0,16,0">Stop</Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <Button Click="PreviousTrackButton_Click" Width="100" Margin="0,0,16,0">Previous Track</Button>
+            <Button Click="NextTrackButton_Click" Width="100" Margin="0,0,16,0">Next Track</Button>
+            <Button Click="PreviousIndexButton_Click" Width="100" Margin="0,0,16,0">Previous Index</Button>
+            <Button Click="NextIndexButton_Click" Width="100" Margin="0,0,16,0">Next Index</Button>
+            <RepeatButton Click="RewindButton_Click" Width="100" Margin="0,0,16,0">Rewind</RepeatButton>
+            <RepeatButton Click="FastForwardButton_Click" Width="100">Fast Forward</RepeatButton>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <StackPanel Margin="0,0,32,0">
+                <TextBlock Margin="0,0,0,4">TRACK</TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Name="TrackDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TrackDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="0,0,32,0">
+                <TextBlock Margin="0,0,0,4">INDEX</TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Name="IndexDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="IndexDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Margin="0,0,0,4">TIME</TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Name="TimeDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TimeDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Width="11" Height="51" Source="/Assets/:.png"></Image>
+                    <Image Name="TimeDigit3" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TimeDigit4" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Width="11" Height="51" Source="/Assets/:.png"></Image>
+                    <Image Name="TimeDigit5" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TimeDigit6" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Click="EnableDeEmphasisButton_Click" IsVisible="{Binding !PreEmphasis}" Width="200" Margin="0,0,16,0">Enable De-Emphasis</Button>
+            <Button Click="DisableDeEmphasisButton_Click" IsVisible="{Binding PreEmphasis}" Width="200" Margin="0,0,16,0">Disable De-Emphasis</Button>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
