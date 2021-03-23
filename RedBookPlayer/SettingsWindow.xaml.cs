@@ -7,12 +7,12 @@ using Avalonia.Markup.Xaml;
 
 namespace RedBookPlayer
 {
-    public class ThemeSelectionWindow : Window
+    public class SettingsWindow : Window
     {
         ListBox themeList;
         string selectedTheme;
 
-        public ThemeSelectionWindow()
+        public SettingsWindow()
         {
             InitializeComponent();
         }

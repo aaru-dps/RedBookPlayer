@@ -8,7 +8,7 @@ namespace RedBookPlayer
     {
         public static MainWindow Instance;
         public ContentControl ContentControl;
-        public Window themeSelectionWindow;
+        public Window settingsWindow;
 
         public MainWindow()
         {
@@ -20,8 +20,8 @@ namespace RedBookPlayer
         {
             if (e.Key == Key.F1)
             {
-                themeSelectionWindow = new ThemeSelectionWindow();
-                themeSelectionWindow.Show();
+                settingsWindow = new SettingsWindow();
+                settingsWindow.Show();
             }
         }
 
@@ -42,8 +42,8 @@ namespace RedBookPlayer
             this.KeyDown += OnKeyDown;
             this.Closing += (s, e) =>
             {
-                themeSelectionWindow?.Close();
-                themeSelectionWindow = null;
+                settingsWindow?.Close();
+                settingsWindow = null;
             };
 
             this.Closing += (e, f) =>
