@@ -72,6 +72,12 @@ namespace RedBookPlayer
                         CurrentTrack--;
                     }
 
+                    byte[] subchannel = Image.ReadSectorTag(0, SectorTagType.CdSectorSubchannel);
+                    if (!HasPreEmphasis)
+                    {
+                        HasPreEmphasis = (subchannel[3] & 0b01000000) != 0;
+                    }
+
                     foreach (var item in Image.Tracks[CurrentTrack].Indexes.Reverse())
                     {
                         if ((int)CurrentSector >= item.Value)
