@@ -139,7 +139,6 @@ namespace RedBookPlayer
             deEmphasisFilterRight = new DeEmphasisFilter();
             source = new PlayerSource(ProviderRead);
 
-            soundOut?.Dispose();
             soundOut = new ALSoundOut(50);
             soundOut.Initialize(source);
             soundOut.Play();
