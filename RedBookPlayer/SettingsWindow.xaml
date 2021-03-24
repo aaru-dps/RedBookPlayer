@@ -8,7 +8,13 @@
         Width="450" Height="600">
     <DockPanel Margin="16">
         <TextBlock DockPanel.Dock="Top" Margin="0,0,0,4">Themes</TextBlock>
-        <Button DockPanel.Dock="Bottom" Name="ApplyButton">Apply</Button>
+        <StackPanel DockPanel.Dock="Bottom">
+            <WrapPanel Margin="0,0,0,16">
+                <CheckBox Name="AutoPlay" Margin="0,0,8,0"/>
+                <TextBlock VerticalAlignment="Center">Auto-play CD on load</TextBlock>
+            </WrapPanel>
+            <Button Name="ApplyButton">Apply</Button>
+        </StackPanel>
         <ListBox Name="ThemeList" SelectionMode="Single" Margin="0,0,0,16"/>
     </DockPanel>
 </Window>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -9,11 +10,16 @@ namespace RedBookPlayer
 {
     public class SettingsWindow : Window
     {
+        Settings settings;
         ListBox themeList;
         string selectedTheme;
+        CheckBox autoPlay;
 
-        public SettingsWindow()
+        public SettingsWindow() { }
+
+        public SettingsWindow(Settings settings)
         {
+            this.settings = settings;
             InitializeComponent();
         }
 
@@ -27,39 +33,21 @@ namespace RedBookPlayer
             selectedTheme = (string)e.AddedItems[0];
         }
 
-        public void ApplyTheme(object sender, RoutedEventArgs e)
+        public void LoadSettings()
         {
-            if (selectedTheme == "" || selectedTheme == null)
+            autoPlay.IsChecked = settings.AutoPlay;
+        }
+
+        public void ApplySettings(object sender, RoutedEventArgs e)
+        {
+            if ((selectedTheme ?? "") != "")
             {
-                return;
+                settings.SelectedTheme = selectedTheme;
+                MainWindow.ApplyTheme(selectedTheme);
             }
 
-            if (selectedTheme == "default")
-            {
-                MainWindow.Instance.ContentControl.Content = new PlayerView();
-            }
-            else
-            {
-                string themeDirectory = Directory.GetCurrentDirectory() + "/themes/" + selectedTheme;
-                string xamlPath = themeDirectory + "/view.xaml";
-
-                try
-                {
-                    MainWindow.Instance.ContentControl.Content = new PlayerView(
-                        File.ReadAllText(xamlPath).Replace("Source=\"", $"Source=\"file://{themeDirectory}/")
-                    );
-                }
-                catch (System.Xml.XmlException ex)
-                {
-                    Console.WriteLine($"Error: invalid theme XAML ({ex.Message}), reverting to default");
-                    MainWindow.Instance.ContentControl.Content = new PlayerView();
-                }
-            }
-
-            MainWindow.Instance.Width = ((PlayerView)MainWindow.Instance.ContentControl.Content).Width;
-            MainWindow.Instance.Height = ((PlayerView)MainWindow.Instance.ContentControl.Content).Height;
-
-            App.CurrentTheme = selectedTheme;
+            settings.AutoPlay = autoPlay.IsChecked ?? false;
+            settings.Save();
         }
 
         private void InitializeComponent()
@@ -89,7 +77,10 @@ namespace RedBookPlayer
 
             themeList.Items = items;
 
-            this.FindControl<Button>("ApplyButton").Click += ApplyTheme;
+            autoPlay = this.FindControl<CheckBox>("AutoPlay");
+            LoadSettings();
+
+            this.FindControl<Button>("ApplyButton").Click += ApplySettings;
         }
     }
 }

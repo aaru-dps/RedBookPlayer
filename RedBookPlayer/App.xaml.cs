@@ -9,7 +9,7 @@ namespace RedBookPlayer
 {
     public class App : Application
     {
-        public static string CurrentTheme = "default";
+        public static Settings Settings;
 
         static App()
         {
@@ -32,6 +32,8 @@ namespace RedBookPlayer
             {
                 desktop.MainWindow = new MainWindow();
                 desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
+
+                Settings = Settings.Load("settings.json");
             }
 
             base.OnFrameworkInitializationCompleted();

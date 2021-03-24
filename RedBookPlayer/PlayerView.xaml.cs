@@ -168,14 +168,14 @@ namespace RedBookPlayer
 
         private Bitmap GetBitmap(char character)
         {
-            if (App.CurrentTheme == "default")
+            if (App.Settings.SelectedTheme == "default")
             {
                 IAssetLoader assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
                 return new Bitmap(assets.Open(new Uri($"avares://RedBookPlayer/Assets/{character}.png")));
             }
             else
             {
-                string themeDirectory = Directory.GetCurrentDirectory() + "/themes/" + App.CurrentTheme;
+                string themeDirectory = Directory.GetCurrentDirectory() + "/themes/" + App.Settings.SelectedTheme;
                 Bitmap bitmap;
                 using (FileStream stream = File.Open(themeDirectory + $"/{character}.png", FileMode.Open))
                 {

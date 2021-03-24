@@ -1,6 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Input;
+using System;
+using System.IO;
 
 namespace RedBookPlayer
 {
@@ -16,11 +18,50 @@ namespace RedBookPlayer
             InitializeComponent();
         }
 
+        public static void ApplyTheme(string theme)
+        {
+            if ((theme ?? "") == "")
+            {
+                return;
+            }
+
+            if (theme == "default")
+            {
+                MainWindow.Instance.ContentControl.Content = new PlayerView();
+            }
+            else
+            {
+                string themeDirectory = Directory.GetCurrentDirectory() + "/themes/" + theme;
+                string xamlPath = themeDirectory + "/view.xaml";
+
+                if (!File.Exists(xamlPath))
+                {
+                    Console.WriteLine($"Warning: specified theme doesn't exist, reverting to default");
+                    return;
+                }
+
+                try
+                {
+                    MainWindow.Instance.ContentControl.Content = new PlayerView(
+                        File.ReadAllText(xamlPath).Replace("Source=\"", $"Source=\"file://{themeDirectory}/")
+                    );
+                }
+                catch (System.Xml.XmlException ex)
+                {
+                    Console.WriteLine($"Error: invalid theme XAML ({ex.Message}), reverting to default");
+                    MainWindow.Instance.ContentControl.Content = new PlayerView();
+                }
+            }
+
+            MainWindow.Instance.Width = ((PlayerView)MainWindow.Instance.ContentControl.Content).Width;
+            MainWindow.Instance.Height = ((PlayerView)MainWindow.Instance.ContentControl.Content).Height;
+        }
+
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.F1)
             {
-                settingsWindow = new SettingsWindow();
+                settingsWindow = new SettingsWindow(App.Settings);
                 settingsWindow.Show();
             }
         }
