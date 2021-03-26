@@ -137,18 +137,27 @@ namespace RedBookPlayer
         {
             if (player.Initialized)
             {
-                string track = (player.CurrentTrack + 1).ToString().PadLeft(2, '0');
-                string index = (player.CurrentIndex).ToString().PadLeft(2, '0');
-                string frames = (player.CurrentSector % 75).ToString().PadLeft(2, '0');
-                string seconds = ((player.CurrentSector / 75) % 60).ToString().PadLeft(2, '0');
-                string minutes = ((player.CurrentSector / (75 * 60)) % 60).ToString().PadLeft(2, '0');
+                int[] numbers = new int[]{
+                    player.CurrentTrack + 1,
+                    player.CurrentIndex,
+                    (int)((player.CurrentSector / (75 * 60)) % 60),
+                    (int)((player.CurrentSector / 75) % 60),
+                    (int)(player.CurrentSector % 75),
+                    player.TotalTracks,
+                    player.TotalIndexes
+                };
+
+                string digitString = String.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
 
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    int i = 0;
-                    foreach (char digit in track + index + minutes + seconds + frames)
+                    for (int i = 0; i < digits.Length; i++)
+                    {
                         if (digits[i] != null)
-                            digits[i++].Source = GetBitmap(digit);
+                        {
+                            digits[i].Source = GetBitmap(digitString[i]);
+                        }
+                    }
 
                     ((PlayerViewModel)DataContext).PreEmphasis = player.HasPreEmphasis;
                 });
@@ -160,7 +169,9 @@ namespace RedBookPlayer
                     foreach (Image digit in digits)
                     {
                         if (digit != null)
+                        {
                             digit.Source = GetBitmap('-');
+                        }
                     }
                 });
             }
@@ -187,7 +198,7 @@ namespace RedBookPlayer
 
         public void Initialize()
         {
-            digits = new Image[10];
+            digits = new Image[14];
 
             digits[0] = this.FindControl<Image>("TrackDigit1");
             digits[1] = this.FindControl<Image>("TrackDigit2");
@@ -201,6 +212,12 @@ namespace RedBookPlayer
             digits[7] = this.FindControl<Image>("TimeDigit4");
             digits[8] = this.FindControl<Image>("TimeDigit5");
             digits[9] = this.FindControl<Image>("TimeDigit6");
+
+            digits[10] = this.FindControl<Image>("TotalTracksDigit1");
+            digits[11] = this.FindControl<Image>("TotalTracksDigit2");
+
+            digits[12] = this.FindControl<Image>("TotalIndexesDigit1");
+            digits[13] = this.FindControl<Image>("TotalIndexesDigit2");
 
             currentTrack = this.FindControl<TextBlock>("CurrentTrack");
         }

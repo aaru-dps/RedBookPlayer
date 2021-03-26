@@ -43,6 +43,7 @@ namespace RedBookPlayer
                     byte[] flagsData = Image.ReadSectorTag(Image.Tracks[CurrentTrack].TrackSequence, SectorTagType.CdTrackFlags);
                     HasPreEmphasis = ((CdFlags)flagsData[0]).HasFlag(CdFlags.PreEmphasis);
 
+                    TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Count;
                     CurrentIndex = Image.Tracks[CurrentTrack].Indexes.Keys.GetEnumerator().Current;
                 }
             }
@@ -91,6 +92,8 @@ namespace RedBookPlayer
             }
         }
         public bool HasPreEmphasis { get; private set; } = false;
+        public int TotalTracks { get; private set; } = 0;
+        public int TotalIndexes { get; private set; } = 0;
         public AaruFormat Image { get; private set; }
         FullTOC.CDFullTOC toc;
         PlayerSource source;
@@ -151,6 +154,7 @@ namespace RedBookPlayer
 
             LoadTrack(CurrentTrack);
 
+            TotalTracks = image.Tracks.Count;
             Initialized = true;
 
             source.Start();
