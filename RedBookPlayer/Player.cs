@@ -9,6 +9,7 @@ using CSCore.SoundOut;
 using CSCore;
 using NWaves.Audio;
 using NWaves.Filters.BiQuad;
+using static Aaru.Decoders.CD.FullTOC;
 
 namespace RedBookPlayer
 {
@@ -94,6 +95,7 @@ namespace RedBookPlayer
         public bool HasPreEmphasis { get; private set; } = false;
         public int TotalTracks { get; private set; } = 0;
         public int TotalIndexes { get; private set; } = 0;
+        public ulong TimeOffset { get; private set; } = 0;
         public AaruFormat Image { get; private set; }
         FullTOC.CDFullTOC toc;
         PlayerSource source;
@@ -155,6 +157,9 @@ namespace RedBookPlayer
             LoadTrack(CurrentTrack);
 
             TotalTracks = image.Tracks.Count;
+            TrackDataDescriptor firstTrack = toc.TrackDescriptors.First(d => d.ADR == 1 && d.POINT == 1);
+            TimeOffset = (ulong)(firstTrack.PMIN * 60 * 75 + firstTrack.PSEC * 75 + firstTrack.PFRAME);
+
             Initialized = true;
 
             source.Start();

@@ -140,9 +140,9 @@ namespace RedBookPlayer
                 int[] numbers = new int[]{
                     player.CurrentTrack + 1,
                     player.CurrentIndex,
-                    (int)((player.CurrentSector / (75 * 60)) % 60),
-                    (int)((player.CurrentSector / 75) % 60),
-                    (int)(player.CurrentSector % 75),
+                    (int)(((player.CurrentSector + player.TimeOffset) / (75 * 60)) % 60),
+                    (int)(((player.CurrentSector + player.TimeOffset) / 75) % 60),
+                    (int)((player.CurrentSector + player.TimeOffset) % 75),
                     player.TotalTracks,
                     player.TotalIndexes
                 };
