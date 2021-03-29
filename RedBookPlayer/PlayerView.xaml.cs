@@ -30,7 +30,7 @@ namespace RedBookPlayer
             InitializeComponent(xaml);
         }
 
-        public static Player player = new Player();
+        public static Player Player = new Player();
         TextBlock currentTrack;
         Image[] digits;
         Timer updateTimer;
@@ -51,9 +51,9 @@ namespace RedBookPlayer
                 filter.Open(path);
                 image.Open(filter);
 
-                player?.Shutdown();
-                player = new Player();
-                player.Init(image, App.Settings.AutoPlay);
+                Player?.Shutdown();
+                Player = new Player();
+                Player.Init(image, App.Settings.AutoPlay);
             });
 
             await Dispatcher.UIThread.InvokeAsync(() =>
@@ -80,71 +80,71 @@ namespace RedBookPlayer
 
         public void PlayButton_Click(object sender, RoutedEventArgs e)
         {
-            player.Play();
+            Player.Play();
         }
 
         public void PauseButton_Click(object sender, RoutedEventArgs e)
         {
-            player.Pause();
+            Player.Pause();
         }
 
         public void StopButton_Click(object sender, RoutedEventArgs e)
         {
-            player.Stop();
+            Player.Stop();
         }
 
         public void NextTrackButton_Click(object sender, RoutedEventArgs e)
         {
-            player.NextTrack();
+            Player.NextTrack();
         }
 
         public void PreviousTrackButton_Click(object sender, RoutedEventArgs e)
         {
-            player.PreviousTrack();
+            Player.PreviousTrack();
         }
 
         public void NextIndexButton_Click(object sender, RoutedEventArgs e)
         {
-            player.NextIndex(App.Settings.IndexButtonChangeTrack);
+            Player.NextIndex(App.Settings.IndexButtonChangeTrack);
         }
 
         public void PreviousIndexButton_Click(object sender, RoutedEventArgs e)
         {
-            player.PreviousIndex(App.Settings.IndexButtonChangeTrack);
+            Player.PreviousIndex(App.Settings.IndexButtonChangeTrack);
         }
 
         public void FastForwardButton_Click(object sender, RoutedEventArgs e)
         {
-            player.FastForward();
+            Player.FastForward();
         }
 
         public void RewindButton_Click(object sender, RoutedEventArgs e)
         {
-            player.Rewind();
+            Player.Rewind();
         }
 
         public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e)
         {
-            player.EnableDeEmphasis();
+            Player.EnableDeEmphasis();
         }
 
         public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e)
         {
-            player.DisableDeEmphasis();
+            Player.DisableDeEmphasis();
         }
 
         private void UpdateView(object sender, ElapsedEventArgs e)
         {
-            if (player.Initialized)
+            if (Player.Initialized)
             {
                 int[] numbers = new int[]{
-                    player.CurrentTrack + 1,
-                    player.CurrentIndex,
-                    (int)(((player.CurrentSector + player.TimeOffset) / (75 * 60)) % 60),
-                    (int)(((player.CurrentSector + player.TimeOffset) / 75) % 60),
-                    (int)((player.CurrentSector + player.TimeOffset) % 75),
-                    player.TotalTracks,
-                    player.TotalIndexes
+                    Player.CurrentTrack + 1,
+                    Player.CurrentIndex,
+                    (int)(((Player.CurrentSector + Player.TimeOffset) / (75 * 60)) % 60),
+                    (int)(((Player.CurrentSector + Player.TimeOffset) / 75) % 60),
+                    (int)((Player.CurrentSector + Player.TimeOffset) % 75),
+                    Player.TotalTracks,
+                    Player.TotalIndexes
                 };
 
                 string digitString = String.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
@@ -159,7 +159,7 @@ namespace RedBookPlayer
                         }
                     }
 
-                    ((PlayerViewModel)DataContext).PreEmphasis = player.HasPreEmphasis;
+                    ((PlayerViewModel)DataContext).PreEmphasis = Player.HasPreEmphasis;
                 });
             }
             else

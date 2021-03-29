@@ -39,7 +39,14 @@ namespace RedBookPlayer
                 MainWindow.ApplyTheme(selectedTheme);
             }
 
+            PlayerView.Player.Volume = settings.Volume;
+
             settings.Save();
+        }
+
+        public void UpdateView()
+        {
+            this.FindControl<TextBlock>("VolumeLabel").Text = settings.Volume.ToString();
         }
 
         private void InitializeComponent()
@@ -70,6 +77,7 @@ namespace RedBookPlayer
             themeList.Items = items;
 
             this.FindControl<Button>("ApplyButton").Click += ApplySettings;
+            this.FindControl<Slider>("VolumeSlider").PropertyChanged += (s, e) => UpdateView();
         }
     }
 }

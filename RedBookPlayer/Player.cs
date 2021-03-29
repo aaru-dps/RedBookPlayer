@@ -96,6 +96,23 @@ namespace RedBookPlayer
         public int TotalTracks { get; private set; } = 0;
         public int TotalIndexes { get; private set; } = 0;
         public ulong TimeOffset { get; private set; } = 0;
+        int volume = 100;
+        public int Volume
+        {
+            get
+            {
+                return volume;
+            }
+
+            set
+            {
+                if (volume >= 0 && volume <= 100)
+                {
+                    volume = value;
+                    soundOut.Volume = (float)volume / 100;
+                }
+            }
+        }
         public AaruFormat Image { get; private set; }
         FullTOC.CDFullTOC toc;
         PlayerSource source;
