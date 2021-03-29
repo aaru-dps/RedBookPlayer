@@ -104,7 +104,7 @@ namespace RedBookPlayer
         BiQuadFilter deEmphasisFilterRight;
         bool readingImage = false;
 
-        public async void Init(AaruFormat image)
+        public async void Init(AaruFormat image, bool autoPlay = false)
         {
             this.Image = image;
 
@@ -152,7 +152,10 @@ namespace RedBookPlayer
 
             soundOut = new ALSoundOut(50);
             soundOut.Initialize(source);
-            soundOut.Play();
+            if (autoPlay)
+            {
+                soundOut.Play();
+            }
 
             LoadTrack(CurrentTrack);
 

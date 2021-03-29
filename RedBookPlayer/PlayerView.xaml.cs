@@ -53,7 +53,7 @@ namespace RedBookPlayer
 
                 player?.Shutdown();
                 player = new Player();
-                player.Init(image);
+                player.Init(image, App.Settings.AutoPlay);
             });
 
             await Dispatcher.UIThread.InvokeAsync(() =>
