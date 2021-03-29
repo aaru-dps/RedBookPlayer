@@ -44,6 +44,16 @@ namespace RedBookPlayer
                     byte[] flagsData = Image.ReadSectorTag(Image.Tracks[CurrentTrack].TrackSequence, SectorTagType.CdTrackFlags);
                     HasPreEmphasis = ((CdFlags)flagsData[0]).HasFlag(CdFlags.PreEmphasis);
 
+                    if (!HasPreEmphasis)
+                    {
+                        byte[] subchannel = Image.ReadSectorTag(
+                            Image.Tracks[CurrentTrack].TrackStartSector,
+                            SectorTagType.CdSectorSubchannel
+                        );
+
+                        HasPreEmphasis = (subchannel[3] & 0b01000000) != 0;
+                    }
+
                     TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Count;
                     CurrentIndex = Image.Tracks[CurrentTrack].Indexes.Keys.GetEnumerator().Current;
                 }
@@ -72,12 +82,6 @@ namespace RedBookPlayer
                     else if (CurrentTrack > 0 && CurrentSector < Image.Tracks[CurrentTrack].TrackStartSector)
                     {
                         CurrentTrack--;
-                    }
-
-                    byte[] subchannel = Image.ReadSectorTag(0, SectorTagType.CdSectorSubchannel);
-                    if (!HasPreEmphasis)
-                    {
-                        HasPreEmphasis = (subchannel[3] & 0b01000000) != 0;
                     }
 
                     foreach (var item in Image.Tracks[CurrentTrack].Indexes.Reverse())
