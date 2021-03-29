@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -13,13 +12,12 @@ namespace RedBookPlayer
         Settings settings;
         ListBox themeList;
         string selectedTheme;
-        CheckBox autoPlay;
 
         public SettingsWindow() { }
 
         public SettingsWindow(Settings settings)
         {
-            this.settings = settings;
+            this.DataContext = this.settings = settings;
             InitializeComponent();
         }
 
@@ -33,11 +31,6 @@ namespace RedBookPlayer
             selectedTheme = (string)e.AddedItems[0];
         }
 
-        public void LoadSettings()
-        {
-            autoPlay.IsChecked = settings.AutoPlay;
-        }
-
         public void ApplySettings(object sender, RoutedEventArgs e)
         {
             if ((selectedTheme ?? "") != "")
@@ -46,7 +39,6 @@ namespace RedBookPlayer
                 MainWindow.ApplyTheme(selectedTheme);
             }
 
-            settings.AutoPlay = autoPlay.IsChecked ?? false;
             settings.Save();
         }
 
@@ -76,9 +68,6 @@ namespace RedBookPlayer
             }
 
             themeList.Items = items;
-
-            autoPlay = this.FindControl<CheckBox>("AutoPlay");
-            LoadSettings();
 
             this.FindControl<Button>("ApplyButton").Click += ApplySettings;
         }

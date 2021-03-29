@@ -331,7 +331,7 @@ namespace RedBookPlayer
             LoadTrack(CurrentTrack);
         }
 
-        public void NextIndex()
+        public void NextIndex(bool changeTrack)
         {
             if (Image == null)
             {
@@ -340,8 +340,15 @@ namespace RedBookPlayer
 
             if (++CurrentIndex > Image.Tracks[CurrentTrack].Indexes.Keys.Max())
             {
-                NextTrack();
-                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[1];
+                if (changeTrack)
+                {
+                    NextTrack();
+                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[1];
+                }
+                else
+                {
+                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[--CurrentIndex];
+                }
             }
             else
             {
@@ -349,7 +356,7 @@ namespace RedBookPlayer
             }
         }
 
-        public void PreviousIndex()
+        public void PreviousIndex(bool changeTrack)
         {
             if (Image == null)
             {
@@ -358,8 +365,15 @@ namespace RedBookPlayer
 
             if (CurrentIndex <= 1 || --CurrentIndex < Image.Tracks[CurrentTrack].Indexes.Keys.Min())
             {
-                PreviousTrack();
-                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes.Values.Max();
+                if (changeTrack)
+                {
+                    PreviousTrack();
+                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes.Values.Max();
+                }
+                else
+                {
+                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[1];
+                }
             }
             else
             {

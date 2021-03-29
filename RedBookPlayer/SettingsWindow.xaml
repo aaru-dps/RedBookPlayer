@@ -10,8 +10,12 @@
         <TextBlock DockPanel.Dock="Top" Margin="0,0,0,4">Themes</TextBlock>
         <StackPanel DockPanel.Dock="Bottom">
             <WrapPanel Margin="0,0,0,16">
-                <CheckBox Name="AutoPlay" Margin="0,0,8,0"/>
+                <CheckBox IsChecked="{Binding AutoPlay}" Margin="0,0,8,0"/>
                 <TextBlock VerticalAlignment="Center">Auto-play CD on load</TextBlock>
+            </WrapPanel>
+            <WrapPanel Margin="0,0,0,16">
+                <CheckBox IsChecked="{Binding IndexButtonChangeTrack}" Margin="0,0,8,0"/>
+                <TextBlock VerticalAlignment="Center">Index navigation can change track</TextBlock>
             </WrapPanel>
             <Button Name="ApplyButton">Apply</Button>
         </StackPanel>

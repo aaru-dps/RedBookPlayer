@@ -105,12 +105,12 @@ namespace RedBookPlayer
 
         public void NextIndexButton_Click(object sender, RoutedEventArgs e)
         {
-            player.NextIndex();
+            player.NextIndex(App.Settings.IndexButtonChangeTrack);
         }
 
         public void PreviousIndexButton_Click(object sender, RoutedEventArgs e)
         {
-            player.PreviousIndex();
+            player.PreviousIndex(App.Settings.IndexButtonChangeTrack);
         }
 
         public void FastForwardButton_Click(object sender, RoutedEventArgs e)

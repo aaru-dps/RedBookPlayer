@@ -7,6 +7,7 @@ namespace RedBookPlayer
     public class Settings
     {
         public bool AutoPlay { get; set; } = false;
+        public bool IndexButtonChangeTrack { get; set; } = false;
         public string SelectedTheme { get; set; } = "default";
         string filePath;
 
