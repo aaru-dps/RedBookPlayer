@@ -27,7 +27,6 @@ namespace RedBookPlayer
                 {
                     Settings settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(filePath));
                     settings.filePath = filePath;
-                    Console.WriteLine(settings.AutoPlay);
 
                     MainWindow.ApplyTheme(settings.SelectedTheme);
 
