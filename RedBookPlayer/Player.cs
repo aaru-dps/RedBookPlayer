@@ -113,7 +113,6 @@ namespace RedBookPlayer
                 if (volume >= 0 && volume <= 100)
                 {
                     volume = value;
-                    soundOut.Volume = (float)volume / 100;
                 }
             }
         }
@@ -191,6 +190,8 @@ namespace RedBookPlayer
 
         public int ProviderRead(byte[] buffer, int offset, int count)
         {
+            soundOut.Volume = (float)Volume / 100;
+
             ulong sectorsToRead;
             ulong zeroSectorsAmount;
 
