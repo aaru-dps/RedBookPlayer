@@ -433,12 +433,6 @@ namespace RedBookPlayer
         {
             HasPreEmphasis = false;
         }
-
-        public void Shutdown()
-        {
-            soundOut?.Stop();
-            source?.Stop();
-        }
     }
 
     public class PlayerSource : IWaveSource

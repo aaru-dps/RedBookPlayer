@@ -89,7 +89,7 @@ namespace RedBookPlayer
 
             this.Closing += (e, f) =>
             {
-                PlayerView.Player.Shutdown();
+                PlayerView.Player.Stop();
             };
         }
     }
