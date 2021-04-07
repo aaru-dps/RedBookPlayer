@@ -163,9 +163,6 @@ namespace RedBookPlayer
 
             Console.WriteLine(FullTOC.Prettify(toc));
 
-            CurrentTrack = 0;
-            CurrentSector = 0;
-
             deEmphasisFilterLeft = new DeEmphasisFilter();
             deEmphasisFilterRight = new DeEmphasisFilter();
             source = new PlayerSource(ProviderRead);
@@ -177,7 +174,8 @@ namespace RedBookPlayer
                 soundOut.Play();
             }
 
-            LoadTrack(CurrentTrack);
+            CurrentTrack = 0;
+            LoadTrack(0);
 
             TotalTracks = image.Tracks.Count;
             TrackDataDescriptor firstTrack = toc.TrackDescriptors.First(d => d.ADR == 1 && d.POINT == 1);
@@ -209,7 +207,7 @@ namespace RedBookPlayer
 
                 if (sectorsToRead <= 0)
                 {
-                    CurrentSector = 0;
+                    LoadTrack(0);
                     currentSectorReadPosition = 0;
                 }
             } while (sectorsToRead <= 0);
@@ -226,7 +224,7 @@ namespace RedBookPlayer
                 }
                 catch (System.ArgumentOutOfRangeException)
                 {
-                    CurrentSector = 0;
+                    LoadTrack(0);
                     return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
                 }
             });
@@ -287,7 +285,7 @@ namespace RedBookPlayer
             bool oldRun = source.Run;
             source.Stop();
 
-            CurrentSector = Image.Tracks[index].TrackStartSector;
+            CurrentSector = (ulong)Image.Tracks[index].Indexes[1];
 
             source.Run = oldRun;
         }
