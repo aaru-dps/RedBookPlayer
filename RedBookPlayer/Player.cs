@@ -343,9 +343,12 @@ namespace RedBookPlayer
                 return;
             }
 
-            if (--CurrentTrack < 0)
+            if (CurrentSector < (ulong)Image.Tracks[CurrentTrack].Indexes[1] + 75)
             {
-                CurrentTrack = Image.Tracks.Count - 1;
+                if (--CurrentTrack < 0)
+                {
+                    CurrentTrack = Image.Tracks.Count - 1;
+                }
             }
 
             LoadTrack(CurrentTrack);
