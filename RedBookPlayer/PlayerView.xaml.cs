@@ -51,8 +51,6 @@ namespace RedBookPlayer
                 filter.Open(path);
                 image.Open(filter);
 
-                Player?.Stop();
-                Player = new Player();
                 Player.Init(image, App.Settings.AutoPlay);
             });
 

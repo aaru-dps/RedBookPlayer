@@ -163,12 +163,29 @@ namespace RedBookPlayer
 
             Console.WriteLine(FullTOC.Prettify(toc));
 
-            deEmphasisFilterLeft = new DeEmphasisFilter();
-            deEmphasisFilterRight = new DeEmphasisFilter();
-            source = new PlayerSource(ProviderRead);
+            if (deEmphasisFilterLeft == null)
+            {
+                deEmphasisFilterLeft = new DeEmphasisFilter();
+                deEmphasisFilterRight = new DeEmphasisFilter();
+            }
+            else
+            {
+                deEmphasisFilterLeft.Reset();
+                deEmphasisFilterRight.Reset();
+            }
 
-            soundOut = new ALSoundOut(50);
-            soundOut.Initialize(source);
+            if (source == null)
+            {
+                source = new PlayerSource(ProviderRead);
+
+                soundOut = new ALSoundOut(100);
+                soundOut.Initialize(source);
+            }
+            else
+            {
+                soundOut.Stop();
+            }
+
             if (autoPlay)
             {
                 soundOut.Play();
