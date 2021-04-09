@@ -345,9 +345,16 @@ namespace RedBookPlayer
 
             if (CurrentSector < (ulong)Image.Tracks[CurrentTrack].Indexes[1] + 75)
             {
-                if (--CurrentTrack < 0)
+                if (App.Settings.AllowSkipHiddenTrack && CurrentTrack == 0 && CurrentSector >= 75)
                 {
-                    CurrentTrack = Image.Tracks.Count - 1;
+                    CurrentSector = 0;
+                }
+                else
+                {
+                    if (--CurrentTrack < 0)
+                    {
+                        CurrentTrack = Image.Tracks.Count - 1;
+                    }
                 }
             }
 

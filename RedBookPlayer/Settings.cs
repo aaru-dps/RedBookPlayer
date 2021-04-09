@@ -8,6 +8,7 @@ namespace RedBookPlayer
     {
         public bool AutoPlay { get; set; } = false;
         public bool IndexButtonChangeTrack { get; set; } = false;
+        public bool AllowSkipHiddenTrack { get; set; } = false;
         public int Volume { get; set; } = 100;
         public string SelectedTheme { get; set; } = "default";
         string filePath;
