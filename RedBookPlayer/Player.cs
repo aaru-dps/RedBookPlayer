@@ -42,17 +42,19 @@ namespace RedBookPlayer
                     }
 
                     byte[] flagsData = Image.ReadSectorTag(Image.Tracks[CurrentTrack].TrackSequence, SectorTagType.CdTrackFlags);
-                    HasPreEmphasis = ((CdFlags)flagsData[0]).HasFlag(CdFlags.PreEmphasis);
+                    ApplyDeEmphasis = ((CdFlags)flagsData[0]).HasFlag(CdFlags.PreEmphasis);
 
-                    if (!HasPreEmphasis)
+                    if (!ApplyDeEmphasis)
                     {
                         byte[] subchannel = Image.ReadSectorTag(
                             Image.Tracks[CurrentTrack].TrackStartSector,
                             SectorTagType.CdSectorSubchannel
                         );
 
-                        HasPreEmphasis = (subchannel[3] & 0b01000000) != 0;
+                        ApplyDeEmphasis = (subchannel[3] & 0b01000000) != 0;
                     }
+
+                    TrackHasEmphasis = ApplyDeEmphasis;
 
                     TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Count;
                     CurrentIndex = Image.Tracks[CurrentTrack].Indexes.Keys.GetEnumerator().Current;
@@ -96,7 +98,8 @@ namespace RedBookPlayer
                 }
             }
         }
-        public bool HasPreEmphasis { get; private set; } = false;
+        public bool TrackHasEmphasis { get; private set; } = false;
+        public bool ApplyDeEmphasis { get; private set; } = false;
         public int TotalTracks { get; private set; } = 0;
         public int TotalIndexes { get; private set; } = 0;
         public ulong TimeOffset { get; private set; } = 0;
@@ -269,7 +272,7 @@ namespace RedBookPlayer
             byte[] audioDataSegment = new byte[count];
             Array.Copy(audioData, currentSectorReadPosition, audioDataSegment, 0, count);
 
-            if (HasPreEmphasis)
+            if (ApplyDeEmphasis)
             {
                 float[][] floatAudioData = new float[2][];
                 floatAudioData[0] = new float[audioDataSegment.Length / 4];
@@ -451,12 +454,12 @@ namespace RedBookPlayer
 
         public void EnableDeEmphasis()
         {
-            HasPreEmphasis = true;
+            ApplyDeEmphasis = true;
         }
 
         public void DisableDeEmphasis()
         {
-            HasPreEmphasis = false;
+            ApplyDeEmphasis = false;
         }
     }
 

@@ -57,7 +57,8 @@ namespace RedBookPlayer
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
-            });
+            }
+            );
         }
 
         public async Task<string> GetPath()
@@ -157,7 +158,9 @@ namespace RedBookPlayer
                         }
                     }
 
-                    ((PlayerViewModel)DataContext).PreEmphasis = Player.HasPreEmphasis;
+                    ((PlayerViewModel)DataContext).HiddenTrack = Player.TimeOffset > 150;
+                    ((PlayerViewModel)DataContext).ApplyDeEmphasis = Player.ApplyDeEmphasis;
+                    ((PlayerViewModel)DataContext).TrackHasEmphasis = Player.TrackHasEmphasis;
                 });
             }
             else
@@ -254,11 +257,23 @@ namespace RedBookPlayer
 
     public class PlayerViewModel : ReactiveObject
     {
-        private bool preEmphasis;
-        public bool PreEmphasis
+        private bool applyDeEmphasis;
+        public bool ApplyDeEmphasis
         {
-            get => preEmphasis;
-            set => this.RaiseAndSetIfChanged(ref preEmphasis, value);
+            get => applyDeEmphasis;
+            set => this.RaiseAndSetIfChanged(ref applyDeEmphasis, value);
+        }
+        private bool trackHasEmphasis;
+        public bool TrackHasEmphasis
+        {
+            get => trackHasEmphasis;
+            set => this.RaiseAndSetIfChanged(ref trackHasEmphasis, value);
+        }
+        private bool hiddenTrack;
+        public bool HiddenTrack
+        {
+            get => hiddenTrack;
+            set => this.RaiseAndSetIfChanged(ref hiddenTrack, value);
         }
     }
 }

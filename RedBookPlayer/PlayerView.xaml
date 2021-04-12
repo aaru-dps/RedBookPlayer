@@ -65,9 +65,15 @@
                 </StackPanel>
             </StackPanel>
         </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <Button Click="EnableDeEmphasisButton_Click" IsVisible="{Binding !ApplyDeEmphasis}" Width="200" Margin="0,0,16,0">Enable De-Emphasis</Button>
+            <Button Click="DisableDeEmphasisButton_Click" IsVisible="{Binding ApplyDeEmphasis}" Width="200" Margin="0,0,16,0">Disable De-Emphasis</Button>
+        </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Click="EnableDeEmphasisButton_Click" IsVisible="{Binding !PreEmphasis}" Width="200" Margin="0,0,16,0">Enable De-Emphasis</Button>
-            <Button Click="DisableDeEmphasisButton_Click" IsVisible="{Binding PreEmphasis}" Width="200" Margin="0,0,16,0">Disable De-Emphasis</Button>
+            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !HiddenTrack}">HIDDEN</TextBlock>
+            <TextBlock Margin="0,0,16,0" IsVisible="{Binding HiddenTrack}">HIDDEN</TextBlock>
+            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !TrackHasEmphasis}">EMPHASIS</TextBlock>
+            <TextBlock Margin="0,0,16,0" IsVisible="{Binding TrackHasEmphasis}">EMPHASIS</TextBlock>
         </StackPanel>
     </StackPanel>
 </UserControl>
