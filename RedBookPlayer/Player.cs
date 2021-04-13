@@ -77,13 +77,17 @@ namespace RedBookPlayer
 
                 if (Image != null)
                 {
-                    if (CurrentTrack < Image.Tracks.Count - 1 && CurrentSector >= Image.Tracks[CurrentTrack + 1].TrackStartSector)
+                    if (CurrentTrack < Image.Tracks.Count - 1 && CurrentSector >= Image.Tracks[CurrentTrack + 1].TrackStartSector ||
+                        CurrentTrack > 0 && CurrentSector < Image.Tracks[CurrentTrack].TrackStartSector)
                     {
-                        CurrentTrack++;
-                    }
-                    else if (CurrentTrack > 0 && CurrentSector < Image.Tracks[CurrentTrack].TrackStartSector)
-                    {
-                        CurrentTrack--;
+                        foreach (Track track in Image.Tracks)
+                        {
+                            if (track.TrackStartSector >= CurrentSector)
+                            {
+                                CurrentTrack = (int)track.TrackSequence - 1;
+                                break;
+                            }
+                        }
                     }
 
                     foreach (var item in Image.Tracks[CurrentTrack].Indexes.Reverse())
