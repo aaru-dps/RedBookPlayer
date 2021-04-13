@@ -56,7 +56,7 @@ namespace RedBookPlayer
 
                     TrackHasEmphasis = ApplyDeEmphasis;
 
-                    TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Count;
+                    TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Keys.Max();
                     CurrentIndex = Image.Tracks[CurrentTrack].Indexes.Keys.GetEnumerator().Current;
                 }
             }
@@ -103,6 +103,7 @@ namespace RedBookPlayer
         public int TotalTracks { get; private set; } = 0;
         public int TotalIndexes { get; private set; } = 0;
         public ulong TimeOffset { get; private set; } = 0;
+        public ulong TotalTime { get; private set; } = 0;
         int volume = 100;
         public int Volume
         {
@@ -189,17 +190,22 @@ namespace RedBookPlayer
                 soundOut.Stop();
             }
 
+            CurrentTrack = 0;
+            LoadTrack(0);
+
             if (autoPlay)
             {
                 soundOut.Play();
             }
-
-            CurrentTrack = 0;
-            LoadTrack(0);
+            else
+            {
+                TotalIndexes = 0;
+            }
 
             TotalTracks = image.Tracks.Count;
             TrackDataDescriptor firstTrack = toc.TrackDescriptors.First(d => d.ADR == 1 && d.POINT == 1);
             TimeOffset = (ulong)(firstTrack.PMIN * 60 * 75 + firstTrack.PSEC * 75 + firstTrack.PFRAME);
+            TotalTime = TimeOffset + image.Tracks.Last().TrackEndSector;
 
             Initialized = true;
 
@@ -318,6 +324,7 @@ namespace RedBookPlayer
             }
 
             soundOut.Play();
+            TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Keys.Max();
         }
 
         public void Pause()

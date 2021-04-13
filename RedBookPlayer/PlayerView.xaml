@@ -57,11 +57,24 @@
                     <Image Name="TotalTracksDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
                 </StackPanel>
             </StackPanel>
-            <StackPanel>
+            <StackPanel Margin="0,0,32,0">
                 <TextBlock Margin="0,0,0,4">INDEXES</TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Image Name="TotalIndexesDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
                     <Image Name="TotalIndexesDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Margin="0,0,0,4">TOTAL</TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Name="TotalTimeDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TotalTimeDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Width="11" Height="51" Source="/Assets/:.png"></Image>
+                    <Image Name="TotalTimeDigit3" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TotalTimeDigit4" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Width="11" Height="51" Source="/Assets/:.png"></Image>
+                    <Image Name="TotalTimeDigit5" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TotalTimeDigit6" Width="42" Height="51" Source="/Assets/-.png"></Image>
                 </StackPanel>
             </StackPanel>
         </StackPanel>

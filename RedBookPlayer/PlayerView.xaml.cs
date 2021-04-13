@@ -139,11 +139,14 @@ namespace RedBookPlayer
                 int[] numbers = new int[]{
                     Player.CurrentTrack + 1,
                     Player.CurrentIndex,
-                    (int)(((Player.CurrentSector + Player.TimeOffset) / (75 * 60)) % 60),
+                    (int)((Player.CurrentSector + Player.TimeOffset) / (75 * 60)),
                     (int)(((Player.CurrentSector + Player.TimeOffset) / 75) % 60),
                     (int)((Player.CurrentSector + Player.TimeOffset) % 75),
                     Player.TotalTracks,
-                    Player.TotalIndexes
+                    Player.TotalIndexes,
+                    (int)(Player.TotalTime / (75 * 60)),
+                    (int)((Player.TotalTime / 75) % 60),
+                    (int)(Player.TotalTime % 75),
                 };
 
                 string digitString = String.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
@@ -199,7 +202,7 @@ namespace RedBookPlayer
 
         public void Initialize()
         {
-            digits = new Image[14];
+            digits = new Image[20];
 
             digits[0] = this.FindControl<Image>("TrackDigit1");
             digits[1] = this.FindControl<Image>("TrackDigit2");
@@ -219,6 +222,13 @@ namespace RedBookPlayer
 
             digits[12] = this.FindControl<Image>("TotalIndexesDigit1");
             digits[13] = this.FindControl<Image>("TotalIndexesDigit2");
+
+            digits[14] = this.FindControl<Image>("TotalTimeDigit1");
+            digits[15] = this.FindControl<Image>("TotalTimeDigit2");
+            digits[16] = this.FindControl<Image>("TotalTimeDigit3");
+            digits[17] = this.FindControl<Image>("TotalTimeDigit4");
+            digits[18] = this.FindControl<Image>("TotalTimeDigit5");
+            digits[19] = this.FindControl<Image>("TotalTimeDigit6");
 
             currentTrack = this.FindControl<TextBlock>("CurrentTrack");
         }
