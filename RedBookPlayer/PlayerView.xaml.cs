@@ -161,9 +161,13 @@ namespace RedBookPlayer
                         }
                     }
 
-                    ((PlayerViewModel)DataContext).HiddenTrack = Player.TimeOffset > 150;
-                    ((PlayerViewModel)DataContext).ApplyDeEmphasis = Player.ApplyDeEmphasis;
-                    ((PlayerViewModel)DataContext).TrackHasEmphasis = Player.TrackHasEmphasis;
+                    PlayerViewModel dataContext = (PlayerViewModel)DataContext;
+                    dataContext.HiddenTrack = Player.TimeOffset > 150;
+                    dataContext.ApplyDeEmphasis = Player.ApplyDeEmphasis;
+                    dataContext.TrackHasEmphasis = Player.TrackHasEmphasis;
+                    dataContext.CopyAllowed = Player.CopyAllowed;
+                    dataContext.IsAudioTrack = Player.TrackType_ == Player.TrackType.Audio;
+                    dataContext.IsDataTrack = Player.TrackType_ == Player.TrackType.Data;
                 });
             }
             else
@@ -284,6 +288,24 @@ namespace RedBookPlayer
         {
             get => hiddenTrack;
             set => this.RaiseAndSetIfChanged(ref hiddenTrack, value);
+        }
+        private bool copyAllowed;
+        public bool CopyAllowed
+        {
+            get => copyAllowed;
+            set => this.RaiseAndSetIfChanged(ref copyAllowed, value);
+        }
+        private bool isAudioTrack;
+        public bool IsAudioTrack
+        {
+            get => isAudioTrack;
+            set => this.RaiseAndSetIfChanged(ref isAudioTrack, value);
+        }
+        private bool isDataTrack;
+        public bool IsDataTrack
+        {
+            get => isDataTrack;
+            set => this.RaiseAndSetIfChanged(ref isDataTrack, value);
         }
     }
 }

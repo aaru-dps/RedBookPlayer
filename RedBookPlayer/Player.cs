@@ -10,11 +10,18 @@ using CSCore;
 using NWaves.Audio;
 using NWaves.Filters.BiQuad;
 using static Aaru.Decoders.CD.FullTOC;
+using Aaru.CommonTypes.Structs;
 
 namespace RedBookPlayer
 {
     public class Player
     {
+        public enum TrackType
+        {
+            Audio,
+            Data
+        }
+
         public bool Initialized = false;
         private int currentTrack = 0;
         public int CurrentTrack
@@ -44,15 +51,18 @@ namespace RedBookPlayer
                     byte[] flagsData = Image.ReadSectorTag(Image.Tracks[CurrentTrack].TrackSequence, SectorTagType.CdTrackFlags);
                     ApplyDeEmphasis = ((CdFlags)flagsData[0]).HasFlag(CdFlags.PreEmphasis);
 
+                    byte[] subchannel = Image.ReadSectorTag(
+                        Image.Tracks[CurrentTrack].TrackStartSector,
+                        SectorTagType.CdSectorSubchannel
+                    );
+
                     if (!ApplyDeEmphasis)
                     {
-                        byte[] subchannel = Image.ReadSectorTag(
-                            Image.Tracks[CurrentTrack].TrackStartSector,
-                            SectorTagType.CdSectorSubchannel
-                        );
-
                         ApplyDeEmphasis = (subchannel[3] & 0b01000000) != 0;
                     }
+
+                    CopyAllowed = (subchannel[2] & 0b01000000) != 0;
+                    TrackType_ = (subchannel[1] & 0b01000000) != 0 ? TrackType.Data : TrackType.Audio;
 
                     TrackHasEmphasis = ApplyDeEmphasis;
 
@@ -104,6 +114,8 @@ namespace RedBookPlayer
         }
         public bool TrackHasEmphasis { get; private set; } = false;
         public bool ApplyDeEmphasis { get; private set; } = false;
+        public bool CopyAllowed { get; private set; } = false;
+        public TrackType? TrackType_ { get; private set; }
         public int TotalTracks { get; private set; } = 0;
         public int TotalIndexes { get; private set; } = 0;
         public ulong TimeOffset { get; private set; } = 0;
