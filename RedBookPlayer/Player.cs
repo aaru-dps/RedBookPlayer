@@ -71,7 +71,22 @@ namespace RedBookPlayer
                 }
             }
         }
-        public ushort CurrentIndex { get; private set; } = 1;
+        ushort currentIndex = 1;
+        public ushort CurrentIndex
+        {
+            get
+            {
+                return currentIndex;
+            }
+
+            private set
+            {
+                currentIndex = value;
+
+                Console.WriteLine("thing set");
+                SectionStartSector = (ulong)Image.Tracks[CurrentTrack].Indexes[CurrentIndex];
+            }
+        }
         private ulong currentSector = 0;
         private int currentSectorReadPosition = 0;
         public ulong CurrentSector
@@ -116,6 +131,7 @@ namespace RedBookPlayer
         public bool ApplyDeEmphasis { get; private set; } = false;
         public bool CopyAllowed { get; private set; } = false;
         public TrackType? TrackType_ { get; private set; }
+        public ulong SectionStartSector { get; private set; }
         public int TotalTracks { get; private set; } = 0;
         public int TotalIndexes { get; private set; } = 0;
         public ulong TimeOffset { get; private set; } = 0;

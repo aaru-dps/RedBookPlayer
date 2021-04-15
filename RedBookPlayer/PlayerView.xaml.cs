@@ -136,12 +136,22 @@ namespace RedBookPlayer
         {
             if (Player.Initialized)
             {
+                ulong sectorTime = Player.CurrentSector;
+                if (Player.SectionStartSector != 0)
+                {
+                    sectorTime -= Player.SectionStartSector;
+                }
+                else
+                {
+                    sectorTime += Player.TimeOffset;
+                }
+
                 int[] numbers = new int[]{
                     Player.CurrentTrack + 1,
                     Player.CurrentIndex,
-                    (int)((Player.CurrentSector + Player.TimeOffset) / (75 * 60)),
-                    (int)(((Player.CurrentSector + Player.TimeOffset) / 75) % 60),
-                    (int)((Player.CurrentSector + Player.TimeOffset) % 75),
+                    (int)(sectorTime / (75 * 60)),
+                    (int)((sectorTime / 75) % 60),
+                    (int)(sectorTime % 75),
                     Player.TotalTracks,
                     Player.TotalIndexes,
                     (int)(Player.TotalTime / (75 * 60)),
