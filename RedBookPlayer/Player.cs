@@ -83,8 +83,8 @@ namespace RedBookPlayer
             {
                 currentIndex = value;
 
-                Console.WriteLine("thing set");
                 SectionStartSector = (ulong)Image.Tracks[CurrentTrack].Indexes[CurrentIndex];
+                TotalTime = Image.Tracks[CurrentTrack].TrackEndSector - Image.Tracks[CurrentTrack].TrackStartSector;
             }
         }
         private ulong currentSector = 0;
