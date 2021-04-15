@@ -223,6 +223,8 @@ namespace RedBookPlayer
             TimeOffset = (ulong)(firstTrack.PMIN * 60 * 75 + firstTrack.PSEC * 75 + firstTrack.PFRAME);
             TotalTime = TimeOffset + image.Tracks.Last().TrackEndSector;
 
+            Volume = App.Settings.Volume;
+
             Initialized = true;
 
             source.Start();
