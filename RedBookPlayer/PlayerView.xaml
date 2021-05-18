@@ -40,10 +40,10 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Image Name="TimeDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
                     <Image Name="TimeDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Width="11" Height="51" Source="/Assets/:.png"></Image>
+                    <Image Width="11" Height="51" Source="/Assets/colon.png"></Image>
                     <Image Name="TimeDigit3" Width="42" Height="51" Source="/Assets/-.png"></Image>
                     <Image Name="TimeDigit4" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Width="11" Height="51" Source="/Assets/:.png"></Image>
+                    <Image Width="11" Height="51" Source="/Assets/colon.png"></Image>
                     <Image Name="TimeDigit5" Width="42" Height="51" Source="/Assets/-.png"></Image>
                     <Image Name="TimeDigit6" Width="42" Height="51" Source="/Assets/-.png"></Image>
                 </StackPanel>
@@ -69,10 +69,10 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Image Name="TotalTimeDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
                     <Image Name="TotalTimeDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Width="11" Height="51" Source="/Assets/:.png"></Image>
+                    <Image Width="11" Height="51" Source="/Assets/colon.png"></Image>
                     <Image Name="TotalTimeDigit3" Width="42" Height="51" Source="/Assets/-.png"></Image>
                     <Image Name="TotalTimeDigit4" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Width="11" Height="51" Source="/Assets/:.png"></Image>
+                    <Image Width="11" Height="51" Source="/Assets/colon.png"></Image>
                     <Image Name="TotalTimeDigit5" Width="42" Height="51" Source="/Assets/-.png"></Image>
                     <Image Name="TotalTimeDigit6" Width="42" Height="51" Source="/Assets/-.png"></Image>
                 </StackPanel>
