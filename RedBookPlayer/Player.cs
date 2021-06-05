@@ -1,16 +1,17 @@
 using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Aaru.CommonTypes.Enums;
+using Aaru.CommonTypes.Structs;
 using Aaru.Decoders.CD;
+using static Aaru.Decoders.CD.FullTOC;
 using Aaru.DiscImages;
 using Aaru.Helpers;
-using System.Linq;
 using CSCore.SoundOut;
 using CSCore;
 using NWaves.Audio;
 using NWaves.Filters.BiQuad;
-using static Aaru.Decoders.CD.FullTOC;
-using Aaru.CommonTypes.Structs;
 
 namespace RedBookPlayer
 {
@@ -102,12 +103,12 @@ namespace RedBookPlayer
 
                 if (Image != null)
                 {
-                    if (CurrentTrack < Image.Tracks.Count - 1 && CurrentSector >= Image.Tracks[CurrentTrack + 1].TrackStartSector ||
-                        CurrentTrack > 0 && CurrentSector < Image.Tracks[CurrentTrack].TrackStartSector)
+                    if ((CurrentTrack < Image.Tracks.Count - 1 && CurrentSector >= Image.Tracks[CurrentTrack + 1].TrackStartSector)
+                        || (CurrentTrack > 0 && CurrentSector < Image.Tracks[CurrentTrack].TrackStartSector))
                     {
-                        foreach (Track track in Image.Tracks)
+                        foreach (Track track in Image.Tracks.ToArray().Reverse())
                         {
-                            if (track.TrackStartSector >= CurrentSector)
+                            if (CurrentSector >= track.TrackStartSector)
                             {
                                 CurrentTrack = (int)track.TrackSequence - 1;
                                 break;
@@ -284,7 +285,7 @@ namespace RedBookPlayer
                     {
                         return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
                     }
-                    catch (System.Exception)
+                    catch (System.ArgumentOutOfRangeException)
                     {
                         LoadTrack(0);
                         return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
@@ -390,9 +391,13 @@ namespace RedBookPlayer
                 return;
             }
 
-            if (++CurrentTrack >= Image.Tracks.Count)
+            if (CurrentTrack + 1 >= Image.Tracks.Count)
             {
                 CurrentTrack = 0;
+            }
+            else
+            {
+                CurrentTrack++;
             }
 
             LoadTrack(CurrentTrack);
@@ -413,9 +418,13 @@ namespace RedBookPlayer
                 }
                 else
                 {
-                    if (--CurrentTrack < 0)
+                    if (CurrentTrack - 1 < 0)
                     {
                         CurrentTrack = Image.Tracks.Count - 1;
+                    }
+                    else
+                    {
+                        CurrentTrack--;
                     }
                 }
             }
