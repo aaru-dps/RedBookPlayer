@@ -67,7 +67,7 @@ namespace RedBookPlayer
                     TrackHasEmphasis = ApplyDeEmphasis;
 
                     TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Keys.Max();
-                    CurrentIndex = Image.Tracks[CurrentTrack].Indexes.Keys.GetEnumerator().Current;
+                    CurrentIndex = Image.Tracks[CurrentTrack].Indexes.Keys.Min();
                 }
             }
         }
@@ -158,7 +158,7 @@ namespace RedBookPlayer
         ALSoundOut soundOut;
         BiQuadFilter deEmphasisFilterLeft;
         BiQuadFilter deEmphasisFilterRight;
-        bool readingImage = false;
+        object readingImage = new object();
 
         public async void Init(AaruFormat image, bool autoPlay = false)
         {
@@ -278,14 +278,17 @@ namespace RedBookPlayer
 
             Task<byte[]> task = Task.Run(() =>
             {
-                try
+                lock (readingImage)
                 {
-                    return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
-                }
-                catch (System.ArgumentOutOfRangeException)
-                {
-                    LoadTrack(0);
-                    return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                    try
+                    {
+                        return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                    }
+                    catch (System.Exception)
+                    {
+                        LoadTrack(0);
+                        return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                    }
                 }
             });
 
@@ -301,11 +304,9 @@ namespace RedBookPlayer
 
             Task.Run(() =>
             {
-                if (!readingImage)
+                lock (readingImage)
                 {
-                    readingImage = true;
                     Image.ReadSector(CurrentSector + 375);
-                    readingImage = false;
                 }
             });
 
