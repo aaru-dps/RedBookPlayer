@@ -430,21 +430,17 @@ namespace RedBookPlayer
                 return;
             }
 
-            if (++CurrentIndex > Image.Tracks[CurrentTrack].Indexes.Keys.Max())
+            if (CurrentIndex + 1 > Image.Tracks[CurrentTrack].Indexes.Keys.Max())
             {
                 if (changeTrack)
                 {
                     NextTrack();
-                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[1];
-                }
-                else
-                {
-                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[--CurrentIndex];
+                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes.Values.Min();
                 }
             }
             else
             {
-                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[CurrentIndex];
+                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[++CurrentIndex];
             }
         }
 
@@ -455,21 +451,17 @@ namespace RedBookPlayer
                 return;
             }
 
-            if (CurrentIndex <= 1 || --CurrentIndex < Image.Tracks[CurrentTrack].Indexes.Keys.Min())
+            if (CurrentIndex - 1 < Image.Tracks[CurrentTrack].Indexes.Keys.Min())
             {
                 if (changeTrack)
                 {
                     PreviousTrack();
                     CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes.Values.Max();
                 }
-                else
-                {
-                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[1];
-                }
             }
             else
             {
-                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[CurrentIndex];
+                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[--CurrentIndex];
             }
         }
 
