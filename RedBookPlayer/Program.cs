@@ -1,28 +1,24 @@
-﻿using System.Runtime.InteropServices;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Logging.Serilog;
 
 namespace RedBookPlayer
 {
-    class Program
+    internal class Program
     {
         public static void Main(string[] args)
         {
-#if Windows
+        #if Windows
             AllocConsole();
-#endif
+        #endif
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 
-#if Windows
+    #if Windows
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
-#endif
+    #endif
 
-        public static AppBuilder BuildAvaloniaApp()
-            => AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .LogToDebug();
+        public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UsePlatformDetect().LogToDebug();
     }
 }

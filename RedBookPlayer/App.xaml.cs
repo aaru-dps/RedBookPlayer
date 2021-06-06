@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls;
@@ -11,10 +12,8 @@ namespace RedBookPlayer
     {
         public static Settings Settings;
 
-        static App()
-        {
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName));
-        }
+        static App() =>
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
 
         public override void Initialize()
         {
@@ -28,9 +27,9 @@ namespace RedBookPlayer
 
         public override void OnFrameworkInitializationCompleted()
         {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            if(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow();
+                desktop.MainWindow   = new MainWindow();
                 desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
                 Settings = Settings.Load("settings.json");

@@ -20,33 +20,27 @@ namespace RedBookPlayer
 {
     public class PlayerView : UserControl
     {
-        public PlayerView()
-        {
-            InitializeComponent(null);
-        }
-
-        public PlayerView(string xaml)
-        {
-            InitializeComponent(xaml);
-        }
-
         public static Player Player = new Player();
-        TextBlock currentTrack;
-        Image[] digits;
-        Timer updateTimer;
+        TextBlock            currentTrack;
+        Image[]              digits;
+        Timer                updateTimer;
+
+        public PlayerView() => InitializeComponent(null);
+
+        public PlayerView(string xaml) => InitializeComponent(xaml);
 
         public async void LoadButton_Click(object sender, RoutedEventArgs e)
         {
             string path = await GetPath();
 
-            if (path == null)
+            if(path == null)
             {
                 return;
             }
 
             await Task.Run(() =>
             {
-                AaruFormat image = new AaruFormat();
+                var     image  = new AaruFormat();
                 IFilter filter = new ZZZNoFilter();
                 filter.Open(path);
                 image.Open(filter);
@@ -57,87 +51,56 @@ namespace RedBookPlayer
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
-            }
-            );
+            });
         }
 
         public async Task<string> GetPath()
         {
-            OpenFileDialog dialog = new OpenFileDialog();
+            var dialog = new OpenFileDialog();
             dialog.AllowMultiple = false;
 
-            List<string> knownExtensions = (new Aaru.DiscImages.AaruFormat()).KnownExtensions.ToList();
-            dialog.Filters.Add(new FileDialogFilter()
+            List<string> knownExtensions = new AaruFormat().KnownExtensions.ToList();
+
+            dialog.Filters.Add(new FileDialogFilter
             {
-                Name = "Aaru Image Format (*" + string.Join(", *", knownExtensions) + ")",
+                Name       = "Aaru Image Format (*" + string.Join(", *", knownExtensions) + ")",
                 Extensions = knownExtensions.ConvertAll(e => e.Substring(1))
-            }
-            );
+            });
 
-            return (await dialog.ShowAsync((Window)this.Parent.Parent))?.FirstOrDefault();
+            return (await dialog.ShowAsync((Window)Parent.Parent))?.FirstOrDefault();
         }
 
-        public void PlayButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.Play();
-        }
+        public void PlayButton_Click(object sender, RoutedEventArgs e) => Player.Play();
 
-        public void PauseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.Pause();
-        }
+        public void PauseButton_Click(object sender, RoutedEventArgs e) => Player.Pause();
 
-        public void StopButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.Stop();
-        }
+        public void StopButton_Click(object sender, RoutedEventArgs e) => Player.Stop();
 
-        public void NextTrackButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.NextTrack();
-        }
+        public void NextTrackButton_Click(object sender, RoutedEventArgs e) => Player.NextTrack();
 
-        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.PreviousTrack();
-        }
+        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => Player.PreviousTrack();
 
-        public void NextIndexButton_Click(object sender, RoutedEventArgs e)
-        {
+        public void NextIndexButton_Click(object sender, RoutedEventArgs e) =>
             Player.NextIndex(App.Settings.IndexButtonChangeTrack);
-        }
 
-        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e)
-        {
+        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) =>
             Player.PreviousIndex(App.Settings.IndexButtonChangeTrack);
-        }
 
-        public void FastForwardButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.FastForward();
-        }
+        public void FastForwardButton_Click(object sender, RoutedEventArgs e) => Player.FastForward();
 
-        public void RewindButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.Rewind();
-        }
+        public void RewindButton_Click(object sender, RoutedEventArgs e) => Player.Rewind();
 
-        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.EnableDeEmphasis();
-        }
+        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.EnableDeEmphasis();
 
-        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.DisableDeEmphasis();
-        }
+        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.DisableDeEmphasis();
 
-        private void UpdateView(object sender, ElapsedEventArgs e)
+        void UpdateView(object sender, ElapsedEventArgs e)
         {
-            if (Player.Initialized)
+            if(Player.Initialized)
             {
                 ulong sectorTime = Player.CurrentSector;
-                if (Player.SectionStartSector != 0)
+
+                if(Player.SectionStartSector != 0)
                 {
                     sectorTime -= Player.SectionStartSector;
                 }
@@ -146,47 +109,41 @@ namespace RedBookPlayer
                     sectorTime += Player.TimeOffset;
                 }
 
-                int[] numbers = new int[]{
-                    Player.CurrentTrack + 1,
-                    Player.CurrentIndex,
-                    (int)(sectorTime / (75 * 60)),
-                    (int)((sectorTime / 75) % 60),
-                    (int)(sectorTime % 75),
-                    Player.TotalTracks,
-                    Player.TotalIndexes,
-                    (int)(Player.TotalTime / (75 * 60)),
-                    (int)((Player.TotalTime / 75) % 60),
-                    (int)(Player.TotalTime % 75),
+                int[] numbers =
+                {
+                    Player.CurrentTrack + 1, Player.CurrentIndex, (int)(sectorTime / (75 * 60)),
+                    (int)(sectorTime / 75 % 60), (int)(sectorTime % 75), Player.TotalTracks, Player.TotalIndexes,
+                    (int)(Player.TotalTime / (75 * 60)), (int)(Player.TotalTime / 75 % 60), (int)(Player.TotalTime % 75)
                 };
 
-                string digitString = String.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
+                string digitString = string.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
 
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    for (int i = 0; i < digits.Length; i++)
+                    for(int i = 0; i < digits.Length; i++)
                     {
-                        if (digits[i] != null)
+                        if(digits[i] != null)
                         {
                             digits[i].Source = GetBitmap(digitString[i]);
                         }
                     }
 
-                    PlayerViewModel dataContext = (PlayerViewModel)DataContext;
-                    dataContext.HiddenTrack = Player.TimeOffset > 150;
-                    dataContext.ApplyDeEmphasis = Player.ApplyDeEmphasis;
+                    var dataContext = (PlayerViewModel)DataContext;
+                    dataContext.HiddenTrack      = Player.TimeOffset > 150;
+                    dataContext.ApplyDeEmphasis  = Player.ApplyDeEmphasis;
                     dataContext.TrackHasEmphasis = Player.TrackHasEmphasis;
-                    dataContext.CopyAllowed = Player.CopyAllowed;
-                    dataContext.IsAudioTrack = Player.TrackType_ == Player.TrackType.Audio;
-                    dataContext.IsDataTrack = Player.TrackType_ == Player.TrackType.Data;
+                    dataContext.CopyAllowed      = Player.CopyAllowed;
+                    dataContext.IsAudioTrack     = Player.TrackType_ == Player.TrackType.Audio;
+                    dataContext.IsDataTrack      = Player.TrackType_ == Player.TrackType.Data;
                 });
             }
             else
             {
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    foreach (Image digit in digits)
+                    foreach(Image digit in digits)
                     {
-                        if (digit != null)
+                        if(digit != null)
                         {
                             digit.Source = GetBitmap('-');
                         }
@@ -195,23 +152,24 @@ namespace RedBookPlayer
             }
         }
 
-        private Bitmap GetBitmap(char character)
+        Bitmap GetBitmap(char character)
         {
-            if (App.Settings.SelectedTheme == "default")
+            if(App.Settings.SelectedTheme == "default")
             {
                 IAssetLoader assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+
                 return new Bitmap(assets.Open(new Uri($"avares://RedBookPlayer/Assets/{character}.png")));
             }
-            else
+
+            string themeDirectory = Directory.GetCurrentDirectory() + "/themes/" + App.Settings.SelectedTheme;
+            Bitmap bitmap;
+
+            using(FileStream stream = File.Open(themeDirectory + $"/{character}.png", FileMode.Open))
             {
-                string themeDirectory = Directory.GetCurrentDirectory() + "/themes/" + App.Settings.SelectedTheme;
-                Bitmap bitmap;
-                using (FileStream stream = File.Open(themeDirectory + $"/{character}.png", FileMode.Open))
-                {
-                    bitmap = new Bitmap(stream);
-                }
-                return bitmap;
+                bitmap = new Bitmap(stream);
             }
+
+            return bitmap;
         }
 
         public void Initialize()
@@ -247,11 +205,11 @@ namespace RedBookPlayer
             currentTrack = this.FindControl<TextBlock>("CurrentTrack");
         }
 
-        private void InitializeComponent(string xaml)
+        void InitializeComponent(string xaml)
         {
             DataContext = new PlayerViewModel();
 
-            if (xaml != null)
+            if(xaml != null)
             {
                 new AvaloniaXamlLoader().Load(xaml, null, this);
             }
@@ -263,17 +221,19 @@ namespace RedBookPlayer
             Initialize();
 
             updateTimer = new Timer(1000 / 60);
+
             updateTimer.Elapsed += (sender, e) =>
             {
                 try
                 {
                     UpdateView(sender, e);
                 }
-                catch (Exception ex)
+                catch(Exception ex)
                 {
                     Console.WriteLine(ex);
                 }
             };
+
             updateTimer.AutoReset = true;
             updateTimer.Start();
         }
@@ -281,37 +241,43 @@ namespace RedBookPlayer
 
     public class PlayerViewModel : ReactiveObject
     {
-        private bool applyDeEmphasis;
+        bool applyDeEmphasis;
+        bool copyAllowed;
+        bool hiddenTrack;
+        bool isAudioTrack;
+        bool isDataTrack;
+        bool trackHasEmphasis;
+
         public bool ApplyDeEmphasis
         {
             get => applyDeEmphasis;
             set => this.RaiseAndSetIfChanged(ref applyDeEmphasis, value);
         }
-        private bool trackHasEmphasis;
+
         public bool TrackHasEmphasis
         {
             get => trackHasEmphasis;
             set => this.RaiseAndSetIfChanged(ref trackHasEmphasis, value);
         }
-        private bool hiddenTrack;
+
         public bool HiddenTrack
         {
             get => hiddenTrack;
             set => this.RaiseAndSetIfChanged(ref hiddenTrack, value);
         }
-        private bool copyAllowed;
+
         public bool CopyAllowed
         {
             get => copyAllowed;
             set => this.RaiseAndSetIfChanged(ref copyAllowed, value);
         }
-        private bool isAudioTrack;
+
         public bool IsAudioTrack
         {
             get => isAudioTrack;
             set => this.RaiseAndSetIfChanged(ref isAudioTrack, value);
         }
-        private bool isDataTrack;
+
         public bool IsDataTrack
         {
             get => isDataTrack;

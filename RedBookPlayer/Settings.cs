@@ -6,23 +6,21 @@ namespace RedBookPlayer
 {
     public class Settings
     {
-        public bool AutoPlay { get; set; } = false;
-        public bool IndexButtonChangeTrack { get; set; } = false;
-        public bool AllowSkipHiddenTrack { get; set; } = false;
-        public int Volume { get; set; } = 100;
-        public string SelectedTheme { get; set; } = "default";
         string filePath;
 
-        public Settings() { }
+        public Settings() {}
 
-        public Settings(string filePath)
-        {
-            this.filePath = filePath;
-        }
+        public Settings(string filePath) => this.filePath = filePath;
+
+        public bool   AutoPlay               { get; set; }
+        public bool   IndexButtonChangeTrack { get; set; }
+        public bool   AllowSkipHiddenTrack   { get; set; }
+        public int    Volume                 { get; set; } = 100;
+        public string SelectedTheme          { get; set; } = "default";
 
         public static Settings Load(string filePath)
         {
-            if (File.Exists(filePath))
+            if(File.Exists(filePath))
             {
                 try
                 {
@@ -33,21 +31,20 @@ namespace RedBookPlayer
 
                     return settings;
                 }
-                catch (JsonException)
+                catch(JsonException)
                 {
                     Console.WriteLine("Couldn't parse settings, reverting to default");
+
                     return new Settings(filePath);
                 }
             }
-            else
-            {
-                return new Settings(filePath);
-            }
+
+            return new Settings(filePath);
         }
 
         public void Save()
         {
-            JsonSerializerOptions options = new JsonSerializerOptions()
+            var options = new JsonSerializerOptions
             {
                 WriteIndented = true
             };

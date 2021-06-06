@@ -1,10 +1,7 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
-             x:Class="RedBookPlayer.PlayerView"
-             Width="900" Height="400">
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+             x:Class="RedBookPlayer.PlayerView" Width="900" Height="400">
     <StackPanel Margin="16" VerticalAlignment="Center">
         <Button Click="LoadButton_Click" Margin="32,0,32,16">Load</Button>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
@@ -24,28 +21,28 @@
             <StackPanel Margin="0,0,32,0">
                 <TextBlock Margin="0,0,0,4">TRACK</TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Image Name="TrackDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Name="TrackDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TrackDigit1" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Name="TrackDigit2" Width="42" Height="51" Source="/Assets/-.png" />
                 </StackPanel>
             </StackPanel>
             <StackPanel Margin="0,0,32,0">
                 <TextBlock Margin="0,0,0,4">INDEX</TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Image Name="IndexDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Name="IndexDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="IndexDigit1" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Name="IndexDigit2" Width="42" Height="51" Source="/Assets/-.png" />
                 </StackPanel>
             </StackPanel>
             <StackPanel>
                 <TextBlock Margin="0,0,0,4">TIME</TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Image Name="TimeDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Name="TimeDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Width="11" Height="51" Source="/Assets/colon.png"></Image>
-                    <Image Name="TimeDigit3" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Name="TimeDigit4" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Width="11" Height="51" Source="/Assets/colon.png"></Image>
-                    <Image Name="TimeDigit5" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Name="TimeDigit6" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TimeDigit1" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Name="TimeDigit2" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Width="11" Height="51" Source="/Assets/colon.png" />
+                    <Image Name="TimeDigit3" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Name="TimeDigit4" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Width="11" Height="51" Source="/Assets/colon.png" />
+                    <Image Name="TimeDigit5" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Name="TimeDigit6" Width="42" Height="51" Source="/Assets/-.png" />
                 </StackPanel>
             </StackPanel>
         </StackPanel>
@@ -53,34 +50,40 @@
             <StackPanel Margin="0,0,32,0">
                 <TextBlock Margin="0,0,0,4">TRACKS</TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Image Name="TotalTracksDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Name="TotalTracksDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TotalTracksDigit1" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Name="TotalTracksDigit2" Width="42" Height="51" Source="/Assets/-.png" />
                 </StackPanel>
             </StackPanel>
             <StackPanel Margin="0,0,32,0">
                 <TextBlock Margin="0,0,0,4">INDEXES</TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Image Name="TotalIndexesDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Name="TotalIndexesDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TotalIndexesDigit1" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Name="TotalIndexesDigit2" Width="42" Height="51" Source="/Assets/-.png" />
                 </StackPanel>
             </StackPanel>
             <StackPanel>
                 <TextBlock Margin="0,0,0,4">TOTAL</TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Image Name="TotalTimeDigit1" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Name="TotalTimeDigit2" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Width="11" Height="51" Source="/Assets/colon.png"></Image>
-                    <Image Name="TotalTimeDigit3" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Name="TotalTimeDigit4" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Width="11" Height="51" Source="/Assets/colon.png"></Image>
-                    <Image Name="TotalTimeDigit5" Width="42" Height="51" Source="/Assets/-.png"></Image>
-                    <Image Name="TotalTimeDigit6" Width="42" Height="51" Source="/Assets/-.png"></Image>
+                    <Image Name="TotalTimeDigit1" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Name="TotalTimeDigit2" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Width="11" Height="51" Source="/Assets/colon.png" />
+                    <Image Name="TotalTimeDigit3" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Name="TotalTimeDigit4" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Width="11" Height="51" Source="/Assets/colon.png" />
+                    <Image Name="TotalTimeDigit5" Width="42" Height="51" Source="/Assets/-.png" />
+                    <Image Name="TotalTimeDigit6" Width="42" Height="51" Source="/Assets/-.png" />
                 </StackPanel>
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-            <Button Click="EnableDeEmphasisButton_Click" IsVisible="{Binding !ApplyDeEmphasis}" Width="200" Margin="0,0,16,0">Enable De-Emphasis</Button>
-            <Button Click="DisableDeEmphasisButton_Click" IsVisible="{Binding ApplyDeEmphasis}" Width="200" Margin="0,0,16,0">Disable De-Emphasis</Button>
+            <Button Click="EnableDeEmphasisButton_Click" IsVisible="{Binding !ApplyDeEmphasis}" Width="200"
+                    Margin="0,0,16,0">
+                Enable De-Emphasis
+            </Button>
+            <Button Click="DisableDeEmphasisButton_Click" IsVisible="{Binding ApplyDeEmphasis}" Width="200"
+                    Margin="0,0,16,0">
+                Disable De-Emphasis
+            </Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !IsAudioTrack}">AUDIO</TextBlock>

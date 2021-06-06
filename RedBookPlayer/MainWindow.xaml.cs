@@ -1,16 +1,17 @@
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Avalonia.Input;
 using System;
 using System.IO;
+using System.Xml;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Markup.Xaml;
 
 namespace RedBookPlayer
 {
     public class MainWindow : Window
     {
-        public static MainWindow Instance;
-        public ContentControl ContentControl;
-        public Window settingsWindow;
+        public static MainWindow     Instance;
+        public        ContentControl ContentControl;
+        public        Window         settingsWindow;
 
         public MainWindow()
         {
@@ -20,74 +21,76 @@ namespace RedBookPlayer
 
         public static void ApplyTheme(string theme)
         {
-            if ((theme ?? "") == "")
+            if((theme ?? "") == "")
             {
                 return;
             }
 
-            if (theme == "default")
+            if(theme == "default")
             {
-                MainWindow.Instance.ContentControl.Content = new PlayerView();
+                Instance.ContentControl.Content = new PlayerView();
             }
             else
             {
                 string themeDirectory = Directory.GetCurrentDirectory() + "/themes/" + theme;
-                string xamlPath = themeDirectory + "/view.xaml";
+                string xamlPath       = themeDirectory                  + "/view.xaml";
 
-                if (!File.Exists(xamlPath))
+                if(!File.Exists(xamlPath))
                 {
-                    Console.WriteLine($"Warning: specified theme doesn't exist, reverting to default");
+                    Console.WriteLine("Warning: specified theme doesn't exist, reverting to default");
+
                     return;
                 }
 
                 try
                 {
-                    MainWindow.Instance.ContentControl.Content = new PlayerView(
-                        File.ReadAllText(xamlPath).Replace("Source=\"", $"Source=\"file://{themeDirectory}/")
-                    );
+                    Instance.ContentControl.Content =
+                        new PlayerView(File.ReadAllText(xamlPath).
+                                            Replace("Source=\"", $"Source=\"file://{themeDirectory}/"));
                 }
-                catch (System.Xml.XmlException ex)
+                catch(XmlException ex)
                 {
                     Console.WriteLine($"Error: invalid theme XAML ({ex.Message}), reverting to default");
-                    MainWindow.Instance.ContentControl.Content = new PlayerView();
+                    Instance.ContentControl.Content = new PlayerView();
                 }
             }
 
-            MainWindow.Instance.Width = ((PlayerView)MainWindow.Instance.ContentControl.Content).Width;
-            MainWindow.Instance.Height = ((PlayerView)MainWindow.Instance.ContentControl.Content).Height;
+            Instance.Width  = ((PlayerView)Instance.ContentControl.Content).Width;
+            Instance.Height = ((PlayerView)Instance.ContentControl.Content).Height;
         }
 
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.F1)
+            if(e.Key == Key.F1)
             {
                 settingsWindow = new SettingsWindow(App.Settings);
                 settingsWindow.Show();
             }
         }
 
-        private void InitializeComponent()
+        void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
 
-            ContentControl = this.FindControl<ContentControl>("Content");
+            ContentControl         = this.FindControl<ContentControl>("Content");
             ContentControl.Content = new PlayerView();
 
-            MainWindow.Instance.MaxWidth = ((PlayerView)MainWindow.Instance.ContentControl.Content).Width;
-            MainWindow.Instance.MaxHeight = ((PlayerView)MainWindow.Instance.ContentControl.Content).Height;
+            Instance.MaxWidth  = ((PlayerView)Instance.ContentControl.Content).Width;
+            Instance.MaxHeight = ((PlayerView)Instance.ContentControl.Content).Height;
 
             ContentControl.Content = new PlayerView();
 
-            this.CanResize = false;
+            CanResize = false;
 
-            this.KeyDown += OnKeyDown;
-            this.Closing += (s, e) =>
+            KeyDown += OnKeyDown;
+
+            Closing += (s, e) =>
             {
                 settingsWindow?.Close();
                 settingsWindow = null;
             };
 
-            this.Closing += (e, f) =>
+            Closing += (e, f) =>
             {
                 PlayerView.Player.Stop();
             };

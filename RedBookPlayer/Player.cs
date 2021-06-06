@@ -1,17 +1,16 @@
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Aaru.CommonTypes.Enums;
 using Aaru.CommonTypes.Structs;
-using Aaru.Decoders.CD;
-using static Aaru.Decoders.CD.FullTOC;
 using Aaru.DiscImages;
 using Aaru.Helpers;
-using CSCore.SoundOut;
 using CSCore;
+using CSCore.SoundOut;
 using NWaves.Audio;
 using NWaves.Filters.BiQuad;
+using static Aaru.Decoders.CD.FullTOC;
+using WaveFormat = CSCore.WaveFormat;
 
 namespace RedBookPlayer
 {
@@ -19,66 +18,63 @@ namespace RedBookPlayer
     {
         public enum TrackType
         {
-            Audio,
-            Data
+            Audio, Data
         }
 
-        public bool Initialized = false;
-        private int currentTrack = 0;
+        readonly object readingImage = new object();
+
+        ushort       currentIndex = 1;
+        ulong        currentSector;
+        int          currentSectorReadPosition;
+        int          currentTrack;
+        BiQuadFilter deEmphasisFilterLeft;
+        BiQuadFilter deEmphasisFilterRight;
+        public bool  Initialized;
+        ALSoundOut   soundOut;
+        PlayerSource source;
+        CDFullTOC    toc;
+        int          volume = 100;
+
         public int CurrentTrack
         {
-            get
-            {
-                return currentTrack;
-            }
+            get => currentTrack;
 
             private set
             {
-                if (Image != null)
-                {
-                    if (value >= Image.Tracks.Count)
-                    {
-                        currentTrack = 0;
-                    }
-                    else if (value < 0)
-                    {
-                        currentTrack = Image.Tracks.Count - 1;
-                    }
-                    else
-                    {
-                        currentTrack = value;
-                    }
+                if(Image == null)
+                    return;
 
-                    byte[] flagsData = Image.ReadSectorTag(Image.Tracks[CurrentTrack].TrackSequence, SectorTagType.CdTrackFlags);
-                    ApplyDeEmphasis = ((CdFlags)flagsData[0]).HasFlag(CdFlags.PreEmphasis);
+                if(value >= Image.Tracks.Count)
+                    currentTrack = 0;
+                else if(value < 0)
+                    currentTrack = Image.Tracks.Count - 1;
+                else
+                    currentTrack = value;
 
-                    byte[] subchannel = Image.ReadSectorTag(
-                        Image.Tracks[CurrentTrack].TrackStartSector,
-                        SectorTagType.CdSectorSubchannel
-                    );
+                byte[] flagsData =
+                    Image.ReadSectorTag(Image.Tracks[CurrentTrack].TrackSequence, SectorTagType.CdTrackFlags);
 
-                    if (!ApplyDeEmphasis)
-                    {
-                        ApplyDeEmphasis = (subchannel[3] & 0b01000000) != 0;
-                    }
+                ApplyDeEmphasis = ((CdFlags)flagsData[0]).HasFlag(CdFlags.PreEmphasis);
 
-                    CopyAllowed = (subchannel[2] & 0b01000000) != 0;
-                    TrackType_ = (subchannel[1] & 0b01000000) != 0 ? TrackType.Data : TrackType.Audio;
+                byte[] subchannel = Image.ReadSectorTag(Image.Tracks[CurrentTrack].TrackStartSector,
+                                                        SectorTagType.CdSectorSubchannel);
 
-                    TrackHasEmphasis = ApplyDeEmphasis;
+                if(!ApplyDeEmphasis)
+                    ApplyDeEmphasis = (subchannel[3] & 0b01000000) != 0;
 
-                    TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Keys.Max();
-                    CurrentIndex = Image.Tracks[CurrentTrack].Indexes.Keys.Min();
-                }
+                CopyAllowed = (subchannel[2] & 0b01000000) != 0;
+                TrackType_  = (subchannel[1] & 0b01000000) != 0 ? TrackType.Data : TrackType.Audio;
+
+                TrackHasEmphasis = ApplyDeEmphasis;
+
+                TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Keys.Max();
+                CurrentIndex = Image.Tracks[CurrentTrack].Indexes.Keys.Min();
             }
         }
-        ushort currentIndex = 1;
+
         public ushort CurrentIndex
         {
-            get
-            {
-                return currentIndex;
-            }
+            get => currentIndex;
 
             private set
             {
@@ -88,121 +84,116 @@ namespace RedBookPlayer
                 TotalTime = Image.Tracks[CurrentTrack].TrackEndSector - Image.Tracks[CurrentTrack].TrackStartSector;
             }
         }
-        private ulong currentSector = 0;
-        private int currentSectorReadPosition = 0;
+
         public ulong CurrentSector
         {
-            get
-            {
-                return currentSector;
-            }
+            get => currentSector;
 
             private set
             {
                 currentSector = value;
 
-                if (Image != null)
-                {
-                    if ((CurrentTrack < Image.Tracks.Count - 1 && CurrentSector >= Image.Tracks[CurrentTrack + 1].TrackStartSector)
-                        || (CurrentTrack > 0 && CurrentSector < Image.Tracks[CurrentTrack].TrackStartSector))
-                    {
-                        foreach (Track track in Image.Tracks.ToArray().Reverse())
-                        {
-                            if (CurrentSector >= track.TrackStartSector)
-                            {
-                                CurrentTrack = (int)track.TrackSequence - 1;
-                                break;
-                            }
-                        }
-                    }
+                if(Image == null)
+                    return;
 
-                    foreach (var item in Image.Tracks[CurrentTrack].Indexes.Reverse())
+                if((CurrentTrack  < Image.Tracks.Count - 1 &&
+                    CurrentSector >= Image.Tracks[CurrentTrack + 1].TrackStartSector) ||
+                   (CurrentTrack > 0 && CurrentSector < Image.Tracks[CurrentTrack].TrackStartSector))
+                {
+                    foreach(Track track in Image.Tracks.ToArray().Reverse())
                     {
-                        if ((int)CurrentSector >= item.Value)
-                        {
-                            CurrentIndex = item.Key;
-                            return;
-                        }
+                        if(CurrentSector < track.TrackStartSector)
+                            continue;
+
+                        CurrentTrack = (int)track.TrackSequence - 1;
+
+                        break;
                     }
-                    CurrentIndex = 0;
                 }
+
+                foreach((ushort key, int i) in Image.Tracks[CurrentTrack].Indexes.Reverse())
+                {
+                    if((int)CurrentSector < i)
+                        continue;
+
+                    CurrentIndex = key;
+
+                    return;
+                }
+
+                CurrentIndex = 0;
             }
         }
-        public bool TrackHasEmphasis { get; private set; } = false;
-        public bool ApplyDeEmphasis { get; private set; } = false;
-        public bool CopyAllowed { get; private set; } = false;
-        public TrackType? TrackType_ { get; private set; }
-        public ulong SectionStartSector { get; private set; }
-        public int TotalTracks { get; private set; } = 0;
-        public int TotalIndexes { get; private set; } = 0;
-        public ulong TimeOffset { get; private set; } = 0;
-        public ulong TotalTime { get; private set; } = 0;
-        int volume = 100;
+
+        public bool       TrackHasEmphasis   { get; private set; }
+        public bool       ApplyDeEmphasis    { get; private set; }
+        public bool       CopyAllowed        { get; private set; }
+        public TrackType? TrackType_         { get; private set; }
+        public ulong      SectionStartSector { get; private set; }
+        public int        TotalTracks        { get; private set; }
+        public int        TotalIndexes       { get; private set; }
+        public ulong      TimeOffset         { get; private set; }
+        public ulong      TotalTime          { get; private set; }
+
         public int Volume
         {
-            get
-            {
-                return volume;
-            }
+            get => volume;
 
             set
             {
-                if (volume >= 0 && volume <= 100)
-                {
+                if(volume >= 0 &&
+                   volume <= 100)
                     volume = value;
-                }
             }
         }
+
         public AaruFormat Image { get; private set; }
-        FullTOC.CDFullTOC toc;
-        PlayerSource source;
-        ALSoundOut soundOut;
-        BiQuadFilter deEmphasisFilterLeft;
-        BiQuadFilter deEmphasisFilterRight;
-        object readingImage = new object();
 
         public async void Init(AaruFormat image, bool autoPlay = false)
         {
-            this.Image = image;
+            Image = image;
 
-            if (await Task.Run(() => image.Info.ReadableMediaTags?.Contains(MediaTagType.CD_FullTOC)) != true)
+            if(await Task.Run(() => image.Info.ReadableMediaTags?.Contains(MediaTagType.CD_FullTOC)) != true)
             {
                 Console.WriteLine("Full TOC not found");
+
                 return;
             }
 
             byte[] tocBytes = await Task.Run(() => image.ReadDiskTag(MediaTagType.CD_FullTOC));
 
-            if ((tocBytes?.Length ?? 0) == 0)
+            if((tocBytes?.Length ?? 0) == 0)
             {
                 Console.WriteLine("Error reading TOC from disc image");
+
                 return;
             }
 
-            if (Swapping.Swap(BitConverter.ToUInt16(tocBytes, 0)) + 2 != tocBytes.Length)
+            if(Swapping.Swap(BitConverter.ToUInt16(tocBytes, 0)) + 2 != tocBytes.Length)
             {
                 byte[] tmp = new byte[tocBytes.Length + 2];
                 Array.Copy(tocBytes, 0, tmp, 2, tocBytes.Length);
-                tmp[0] = (byte)((tocBytes.Length & 0xFF00) >> 8);
-                tmp[1] = (byte)(tocBytes.Length & 0xFF);
+                tmp[0]   = (byte)((tocBytes.Length & 0xFF00) >> 8);
+                tmp[1]   = (byte)(tocBytes.Length & 0xFF);
                 tocBytes = tmp;
             }
 
-            FullTOC.CDFullTOC? nullableToc = await Task.Run(() => FullTOC.Decode(tocBytes));
+            CDFullTOC? nullableToc = await Task.Run(() => Decode(tocBytes));
 
-            if (nullableToc == null)
+            if(nullableToc == null)
             {
                 Console.WriteLine("Error decoding TOC");
+
                 return;
             }
 
             toc = nullableToc.Value;
 
-            Console.WriteLine(FullTOC.Prettify(toc));
+            Console.WriteLine(Prettify(toc));
 
-            if (deEmphasisFilterLeft == null)
+            if(deEmphasisFilterLeft == null)
             {
-                deEmphasisFilterLeft = new DeEmphasisFilter();
+                deEmphasisFilterLeft  = new DeEmphasisFilter();
                 deEmphasisFilterRight = new DeEmphasisFilter();
             }
             else
@@ -211,7 +202,7 @@ namespace RedBookPlayer
                 deEmphasisFilterRight.Reset();
             }
 
-            if (source == null)
+            if(source == null)
             {
                 source = new PlayerSource(ProviderRead);
 
@@ -219,26 +210,20 @@ namespace RedBookPlayer
                 soundOut.Initialize(source);
             }
             else
-            {
                 soundOut.Stop();
-            }
 
             CurrentTrack = 0;
             LoadTrack(0);
 
-            if (autoPlay)
-            {
+            if(autoPlay)
                 soundOut.Play();
-            }
             else
-            {
                 TotalIndexes = 0;
-            }
 
             TotalTracks = image.Tracks.Count;
             TrackDataDescriptor firstTrack = toc.TrackDescriptors.First(d => d.ADR == 1 && d.POINT == 1);
-            TimeOffset = (ulong)(firstTrack.PMIN * 60 * 75 + firstTrack.PSEC * 75 + firstTrack.PFRAME);
-            TotalTime = TimeOffset + image.Tracks.Last().TrackEndSector;
+            TimeOffset = (ulong)((firstTrack.PMIN * 60 * 75) + (firstTrack.PSEC * 75) + firstTrack.PFRAME);
+            TotalTime  = TimeOffset + image.Tracks.Last().TrackEndSector;
 
             Volume = App.Settings.Volume;
 
@@ -256,56 +241,58 @@ namespace RedBookPlayer
 
             do
             {
-                sectorsToRead = (ulong)count / 2352 + 2;
+                sectorsToRead     = ((ulong)count / 2352) + 2;
                 zeroSectorsAmount = 0;
 
-                if (CurrentSector + sectorsToRead > Image.Info.Sectors)
+                if(CurrentSector + sectorsToRead > Image.Info.Sectors)
                 {
                     ulong oldSectorsToRead = sectorsToRead;
-                    sectorsToRead = Image.Info.Sectors - CurrentSector;
-                    zeroSectorsAmount = oldSectorsToRead - sectorsToRead;
+                    sectorsToRead     = Image.Info.Sectors - CurrentSector;
+                    zeroSectorsAmount = oldSectorsToRead   - sectorsToRead;
                 }
 
-                if (sectorsToRead <= 0)
-                {
-                    LoadTrack(0);
-                    currentSectorReadPosition = 0;
-                }
-            } while (sectorsToRead <= 0);
+                if(sectorsToRead > 0)
+                    continue;
 
-            byte[] zeroSectors = new Byte[zeroSectorsAmount * 2352];
+                LoadTrack(0);
+                currentSectorReadPosition = 0;
+            } while(sectorsToRead <= 0);
+
+            byte[] zeroSectors = new byte[zeroSectorsAmount * 2352];
             Array.Clear(zeroSectors, 0, zeroSectors.Length);
             byte[] audioData;
 
             Task<byte[]> task = Task.Run(() =>
             {
-                lock (readingImage)
+                lock(readingImage)
                 {
                     try
                     {
                         return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
                     }
-                    catch (System.ArgumentOutOfRangeException)
+                    catch(ArgumentOutOfRangeException)
                     {
                         LoadTrack(0);
+
                         return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
                     }
                 }
             });
 
-            if (task.Wait(TimeSpan.FromMilliseconds(100)))
+            if(task.Wait(TimeSpan.FromMilliseconds(100)))
             {
                 audioData = task.Result;
             }
             else
             {
                 Array.Clear(buffer, offset, count);
+
                 return count;
             }
 
             Task.Run(() =>
             {
-                lock (readingImage)
+                lock(readingImage)
                 {
                     Image.ReadSector(CurrentSector + 375);
                 }
@@ -314,14 +301,14 @@ namespace RedBookPlayer
             byte[] audioDataSegment = new byte[count];
             Array.Copy(audioData, currentSectorReadPosition, audioDataSegment, 0, count);
 
-            if (ApplyDeEmphasis)
+            if(ApplyDeEmphasis)
             {
                 float[][] floatAudioData = new float[2][];
                 floatAudioData[0] = new float[audioDataSegment.Length / 4];
                 floatAudioData[1] = new float[audioDataSegment.Length / 4];
                 ByteConverter.ToFloats16Bit(audioDataSegment, floatAudioData);
 
-                for (int i = 0; i < floatAudioData[0].Length; i++)
+                for(int i = 0; i < floatAudioData[0].Length; i++)
                 {
                     floatAudioData[0][i] = deEmphasisFilterLeft.Process(floatAudioData[0][i]);
                     floatAudioData[1][i] = deEmphasisFilterRight.Process(floatAudioData[1][i]);
@@ -333,11 +320,12 @@ namespace RedBookPlayer
             Array.Copy(audioDataSegment, 0, buffer, offset, count);
 
             currentSectorReadPosition += count;
-            if (currentSectorReadPosition >= 2352)
-            {
-                CurrentSector += (ulong)currentSectorReadPosition / 2352;
-                currentSectorReadPosition %= 2352;
-            }
+
+            if(currentSectorReadPosition < 2352)
+                return count;
+
+            CurrentSector             += (ulong)currentSectorReadPosition / 2352;
+            currentSectorReadPosition %= 2352;
 
             return count;
         }
@@ -354,10 +342,8 @@ namespace RedBookPlayer
 
         public void Play()
         {
-            if (Image == null)
-            {
+            if(Image == null)
                 return;
-            }
 
             soundOut.Play();
             TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Keys.Max();
@@ -365,20 +351,16 @@ namespace RedBookPlayer
 
         public void Pause()
         {
-            if (Image == null)
-            {
+            if(Image == null)
                 return;
-            }
 
             soundOut.Stop();
         }
 
         public void Stop()
         {
-            if (Image == null)
-            {
+            if(Image == null)
                 return;
-            }
 
             soundOut.Stop();
             LoadTrack(CurrentTrack);
@@ -386,46 +368,34 @@ namespace RedBookPlayer
 
         public void NextTrack()
         {
-            if (Image == null)
-            {
+            if(Image == null)
                 return;
-            }
 
-            if (CurrentTrack + 1 >= Image.Tracks.Count)
-            {
+            if(CurrentTrack + 1 >= Image.Tracks.Count)
                 CurrentTrack = 0;
-            }
             else
-            {
                 CurrentTrack++;
-            }
 
             LoadTrack(CurrentTrack);
         }
 
         public void PreviousTrack()
         {
-            if (Image == null)
-            {
+            if(Image == null)
                 return;
-            }
 
-            if (CurrentSector < (ulong)Image.Tracks[CurrentTrack].Indexes[1] + 75)
+            if(CurrentSector < (ulong)Image.Tracks[CurrentTrack].Indexes[1] + 75)
             {
-                if (App.Settings.AllowSkipHiddenTrack && CurrentTrack == 0 && CurrentSector >= 75)
-                {
+                if(App.Settings.AllowSkipHiddenTrack &&
+                   CurrentTrack  == 0                &&
+                   CurrentSector >= 75)
                     CurrentSector = 0;
-                }
                 else
                 {
-                    if (CurrentTrack - 1 < 0)
-                    {
+                    if(CurrentTrack - 1 < 0)
                         CurrentTrack = Image.Tracks.Count - 1;
-                    }
                     else
-                    {
                         CurrentTrack--;
-                    }
                 }
             }
 
@@ -434,120 +404,95 @@ namespace RedBookPlayer
 
         public void NextIndex(bool changeTrack)
         {
-            if (Image == null)
-            {
+            if(Image == null)
                 return;
-            }
 
-            if (CurrentIndex + 1 > Image.Tracks[CurrentTrack].Indexes.Keys.Max())
+            if(CurrentIndex + 1 > Image.Tracks[CurrentTrack].Indexes.Keys.Max())
             {
-                if (changeTrack)
-                {
-                    NextTrack();
-                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes.Values.Min();
-                }
+                if(!changeTrack)
+                    return;
+
+                NextTrack();
+                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes.Values.Min();
             }
             else
-            {
                 CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[++CurrentIndex];
-            }
         }
 
         public void PreviousIndex(bool changeTrack)
         {
-            if (Image == null)
-            {
+            if(Image == null)
                 return;
-            }
 
-            if (CurrentIndex - 1 < Image.Tracks[CurrentTrack].Indexes.Keys.Min())
+            if(CurrentIndex - 1 < Image.Tracks[CurrentTrack].Indexes.Keys.Min())
             {
-                if (changeTrack)
-                {
-                    PreviousTrack();
-                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes.Values.Max();
-                }
+                if(!changeTrack)
+                    return;
+
+                PreviousTrack();
+                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes.Values.Max();
             }
             else
-            {
                 CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[--CurrentIndex];
-            }
         }
 
         public void FastForward()
         {
-            if (Image == null)
-            {
+            if(Image == null)
                 return;
-            }
 
             CurrentSector = Math.Min(Image.Info.Sectors - 1, CurrentSector + 75);
         }
 
         public void Rewind()
         {
-            if (Image == null)
-            {
+            if(Image == null)
                 return;
-            }
 
-            if (CurrentSector >= 75)
+            if(CurrentSector >= 75)
                 CurrentSector -= 75;
         }
 
-        public void EnableDeEmphasis()
-        {
-            ApplyDeEmphasis = true;
-        }
+        public void EnableDeEmphasis() => ApplyDeEmphasis = true;
 
-        public void DisableDeEmphasis()
-        {
-            ApplyDeEmphasis = false;
-        }
+        public void DisableDeEmphasis() => ApplyDeEmphasis = false;
     }
 
     public class PlayerSource : IWaveSource
     {
-        public CSCore.WaveFormat WaveFormat => new CSCore.WaveFormat();
-        bool IAudioSource.CanSeek => throw new NotImplementedException();
-        public long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public long Length => throw new NotImplementedException();
-
-        public bool Run = true;
-        private ReadFunction read;
-
         public delegate int ReadFunction(byte[] buffer, int offset, int count);
 
-        public PlayerSource(ReadFunction read)
+        readonly ReadFunction read;
+
+        public bool Run = true;
+
+        public PlayerSource(ReadFunction read) => this.read = read;
+
+        public WaveFormat WaveFormat => new WaveFormat();
+        bool IAudioSource.CanSeek    => throw new NotImplementedException();
+
+        public long Position
         {
-            this.read = read;
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
+
+        public long Length => throw new NotImplementedException();
 
         public int Read(byte[] buffer, int offset, int count)
         {
-            if (!Run)
-            {
-                Array.Clear(buffer, offset, count);
-                return count;
-            }
-            else
-            {
+            if(Run)
                 return read(buffer, offset, count);
-            }
+
+            Array.Clear(buffer, offset, count);
+
+            return count;
         }
 
-        public void Start()
-        {
-            Run = true;
-        }
+        public void Dispose() {}
 
-        public void Stop()
-        {
-            Run = false;
-        }
+        public void Start() => Run = true;
 
-        public void Dispose()
-        {
-        }
+        public void Stop() => Run = false;
     }
 }
