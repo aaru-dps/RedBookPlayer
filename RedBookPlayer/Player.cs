@@ -1,16 +1,17 @@
 using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Aaru.CommonTypes.Enums;
+using Aaru.CommonTypes.Structs;
 using Aaru.Decoders.CD;
+using static Aaru.Decoders.CD.FullTOC;
 using Aaru.DiscImages;
 using Aaru.Helpers;
-using System.Linq;
 using CSCore.SoundOut;
 using CSCore;
 using NWaves.Audio;
 using NWaves.Filters.BiQuad;
-using static Aaru.Decoders.CD.FullTOC;
-using Aaru.CommonTypes.Structs;
 
 namespace RedBookPlayer
 {
@@ -67,7 +68,7 @@ namespace RedBookPlayer
                     TrackHasEmphasis = ApplyDeEmphasis;
 
                     TotalIndexes = Image.Tracks[CurrentTrack].Indexes.Keys.Max();
-                    CurrentIndex = Image.Tracks[CurrentTrack].Indexes.Keys.GetEnumerator().Current;
+                    CurrentIndex = Image.Tracks[CurrentTrack].Indexes.Keys.Min();
                 }
             }
         }
@@ -102,12 +103,12 @@ namespace RedBookPlayer
 
                 if (Image != null)
                 {
-                    if (CurrentTrack < Image.Tracks.Count - 1 && CurrentSector >= Image.Tracks[CurrentTrack + 1].TrackStartSector ||
-                        CurrentTrack > 0 && CurrentSector < Image.Tracks[CurrentTrack].TrackStartSector)
+                    if ((CurrentTrack < Image.Tracks.Count - 1 && CurrentSector >= Image.Tracks[CurrentTrack + 1].TrackStartSector)
+                        || (CurrentTrack > 0 && CurrentSector < Image.Tracks[CurrentTrack].TrackStartSector))
                     {
-                        foreach (Track track in Image.Tracks)
+                        foreach (Track track in Image.Tracks.ToArray().Reverse())
                         {
-                            if (track.TrackStartSector >= CurrentSector)
+                            if (CurrentSector >= track.TrackStartSector)
                             {
                                 CurrentTrack = (int)track.TrackSequence - 1;
                                 break;
@@ -158,7 +159,7 @@ namespace RedBookPlayer
         ALSoundOut soundOut;
         BiQuadFilter deEmphasisFilterLeft;
         BiQuadFilter deEmphasisFilterRight;
-        bool readingImage = false;
+        object readingImage = new object();
 
         public async void Init(AaruFormat image, bool autoPlay = false)
         {
@@ -278,14 +279,17 @@ namespace RedBookPlayer
 
             Task<byte[]> task = Task.Run(() =>
             {
-                try
+                lock (readingImage)
                 {
-                    return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
-                }
-                catch (System.ArgumentOutOfRangeException)
-                {
-                    LoadTrack(0);
-                    return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                    try
+                    {
+                        return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                    }
+                    catch (System.ArgumentOutOfRangeException)
+                    {
+                        LoadTrack(0);
+                        return Image.ReadSectors(CurrentSector, (uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                    }
                 }
             });
 
@@ -301,11 +305,9 @@ namespace RedBookPlayer
 
             Task.Run(() =>
             {
-                if (!readingImage)
+                lock (readingImage)
                 {
-                    readingImage = true;
                     Image.ReadSector(CurrentSector + 375);
-                    readingImage = false;
                 }
             });
 
@@ -389,9 +391,13 @@ namespace RedBookPlayer
                 return;
             }
 
-            if (++CurrentTrack >= Image.Tracks.Count)
+            if (CurrentTrack + 1 >= Image.Tracks.Count)
             {
                 CurrentTrack = 0;
+            }
+            else
+            {
+                CurrentTrack++;
             }
 
             LoadTrack(CurrentTrack);
@@ -412,9 +418,13 @@ namespace RedBookPlayer
                 }
                 else
                 {
-                    if (--CurrentTrack < 0)
+                    if (CurrentTrack - 1 < 0)
                     {
                         CurrentTrack = Image.Tracks.Count - 1;
+                    }
+                    else
+                    {
+                        CurrentTrack--;
                     }
                 }
             }
@@ -429,21 +439,17 @@ namespace RedBookPlayer
                 return;
             }
 
-            if (++CurrentIndex > Image.Tracks[CurrentTrack].Indexes.Keys.Max())
+            if (CurrentIndex + 1 > Image.Tracks[CurrentTrack].Indexes.Keys.Max())
             {
                 if (changeTrack)
                 {
                     NextTrack();
-                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[1];
-                }
-                else
-                {
-                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[--CurrentIndex];
+                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes.Values.Min();
                 }
             }
             else
             {
-                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[CurrentIndex];
+                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[++CurrentIndex];
             }
         }
 
@@ -454,21 +460,17 @@ namespace RedBookPlayer
                 return;
             }
 
-            if (CurrentIndex <= 1 || --CurrentIndex < Image.Tracks[CurrentTrack].Indexes.Keys.Min())
+            if (CurrentIndex - 1 < Image.Tracks[CurrentTrack].Indexes.Keys.Min())
             {
                 if (changeTrack)
                 {
                     PreviousTrack();
                     CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes.Values.Max();
                 }
-                else
-                {
-                    CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[1];
-                }
             }
             else
             {
-                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[CurrentIndex];
+                CurrentSector = (ulong)Image.Tracks[CurrentTrack].Indexes[--CurrentIndex];
             }
         }
 
