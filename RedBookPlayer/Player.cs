@@ -39,6 +39,13 @@ namespace RedBookPlayer
                 if(Image == null)
                     return;
 
+                // If the value is the same, don't do anything
+                if(value == _currentTrack)
+                    return;
+
+                // Check if we're incrementing or decrementing the track
+                bool increment = value > _currentTrack;
+
                 // Ensure that the value is valid, wrapping around if necessary
                 if(value >= Image.Tracks.Count)
                     _currentTrack = 0;
@@ -76,7 +83,12 @@ namespace RedBookPlayer
 
                 // If we're not playing data tracks, skip
                 if(!App.Settings.PlayDataTracks && TrackType == TrackTypeValue.Data)
-                    NextTrack();
+                {
+                    if(increment)
+                        NextTrack();
+                    else
+                        PreviousTrack();
+                }
             }
         }
 
@@ -90,6 +102,10 @@ namespace RedBookPlayer
             {
                 // Unset image means we can't do anything
                 if(Image == null)
+                    return;
+
+                // If the value is the same, don't do anything
+                if(value == _currentIndex)
                     return;
 
                 // Cache the current track for easy access
@@ -119,6 +135,10 @@ namespace RedBookPlayer
             {
                 // Unset image means we can't do anything
                 if(Image == null)
+                    return;
+
+                // If the value is the same, don't do anything
+                if(value == _currentSector)
                     return;
 
                 // Cache the current track for easy access
