@@ -3,14 +3,17 @@ using NWaves.Filters.BiQuad;
 
 namespace RedBookPlayer
 {
+    /// <summary>
+    /// Filter for applying de-emphasis to audio
+    /// </summary>
     public class DeEmphasisFilter : BiQuadFilter
     {
-        static readonly double B0;
-        static readonly double B1;
-        static readonly double B2;
-        static readonly double A0;
-        static readonly double A1;
-        static readonly double A2;
+        private static readonly double B0;
+        private static readonly double B1;
+        private static readonly double B2;
+        private static readonly double A0;
+        private static readonly double A1;
+        private static readonly double A2;
 
         static DeEmphasisFilter()
         {
