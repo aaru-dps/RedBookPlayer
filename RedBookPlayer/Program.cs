@@ -1,4 +1,7 @@
-﻿using Avalonia;
+#if Windows
+using System.Runtime.InteropServices;
+#endif
+using Avalonia;
 using Avalonia.Logging.Serilog;
 
 namespace RedBookPlayer
