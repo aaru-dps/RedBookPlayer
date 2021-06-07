@@ -17,6 +17,14 @@
                 <CheckBox IsChecked="{Binding AllowSkipHiddenTrack}" Margin="0,0,8,0" />
                 <TextBlock VerticalAlignment="Center">Treat index 0 of track 1 as track 0 (hidden track)</TextBlock>
             </WrapPanel>
+            <WrapPanel Margin="0,0,0,16">
+                <CheckBox IsChecked="{Binding PlayDataTracks}" Margin="0,0,8,0"/>
+                <TextBlock VerticalAlignment="Center">Play data tracks like old, non-compliant players</TextBlock>
+            </WrapPanel>
+            <WrapPanel Margin="0,0,0,16">
+                <CheckBox IsChecked="{Binding GenerateMissingTOC}" Margin="0,0,8,0"/>
+                <TextBlock VerticalAlignment="Center">Generate a TOC if the disc is missing one</TextBlock>
+            </WrapPanel>
             <DockPanel Margin="0,0,0,16">
                 <TextBlock VerticalAlignment="Center" Margin="0,0,8,0" DockPanel.Dock="Left">Volume</TextBlock>
                 <TextBlock VerticalAlignment="Center" DockPanel.Dock="Right" Text="%" />
