@@ -159,11 +159,11 @@ namespace RedBookPlayer
                     }
                 }
 
-                foreach(KeyValuePair<ushort, int> item in track.Indexes.Reverse())
+                foreach((ushort key, int i) in track.Indexes.Reverse())
                 {
-                    if((int)CurrentSector >= item.Value)
+                    if((int)CurrentSector >= i)
                     {
-                        CurrentIndex = item.Key;
+                        CurrentIndex = key;
                         return;
                     }
                 }
@@ -676,16 +676,16 @@ namespace RedBookPlayer
 
                     // This seems to be constant? It should not exist on CD-ROM but CloneCD creates them anyway
                     // Format seems like ATIP, but ATIP should not be as 0xC0 in TOC...
-                    trackDescriptors.Add(new TrackDataDescriptor
-                    {
-                        SessionNumber = currentSession,
-                        POINT = 0xC0,
-                        ADR = 5,
-                        CONTROL = 0,
-                        Min = 128,
-                        PMIN = 97,
-                        PSEC = 25
-                    });
+                    //trackDescriptors.Add(new TrackDataDescriptor
+                    //{
+                    //    SessionNumber = currentSession,
+                    //    POINT = 0xC0,
+                    //    ADR = 5,
+                    //    CONTROL = 0,
+                    //    Min = 128,
+                    //    PMIN = 97,
+                    //    PSEC = 25
+                    //});
                 }
 
                 // Lead-in

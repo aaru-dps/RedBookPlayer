@@ -30,7 +30,7 @@ namespace RedBookPlayer
                 return;
 
             // If the theme name is "default", we assume the internal theme is used
-            if(theme.Equals("default", StringComparison.OrdinalIgnoreCase))
+            if(theme.Equals("default", StringComparison.CurrentCultureIgnoreCase))
             {
                 Instance.ContentControl.Content = new PlayerView();
             }
