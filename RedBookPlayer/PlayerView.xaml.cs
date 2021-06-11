@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Aaru.CommonTypes.Enums;
 using Aaru.DiscImages;
 using Aaru.Filters;
 using Avalonia;
@@ -235,8 +236,8 @@ namespace RedBookPlayer
                     dataContext.ApplyDeEmphasis = Player.ApplyDeEmphasis;
                     dataContext.TrackHasEmphasis = Player.TrackHasEmphasis;
                     dataContext.CopyAllowed = Player.CopyAllowed;
-                    dataContext.IsAudioTrack = Player.TrackType == TrackTypeValue.Audio;
-                    dataContext.IsDataTrack = Player.TrackType == TrackTypeValue.Data;
+                    dataContext.IsAudioTrack = Player.TrackType == TrackType.Audio;
+                    dataContext.IsDataTrack = Player.TrackType != TrackType.Audio;
                 }
             });
         }

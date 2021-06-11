@@ -69,11 +69,11 @@ namespace RedBookPlayer
                         ApplyDeEmphasis = (subchannel[3] & 0b01000000) != 0;
 
                     CopyAllowed = (subchannel[2] & 0b01000000) != 0;
-                    TrackType = (subchannel[1] & 0b01000000) != 0 ? TrackTypeValue.Data : TrackTypeValue.Audio;
+                    TrackType = (subchannel[1] & 0b01000000) != 0 ? Aaru.CommonTypes.Enums.TrackType.Data : Aaru.CommonTypes.Enums.TrackType.Audio;
                 }
                 catch(ArgumentException)
                 {
-                    // Ignore subchannel read issues
+                    TrackType = track.TrackType;
                 }
 
                 TrackHasEmphasis = ApplyDeEmphasis;
@@ -82,7 +82,7 @@ namespace RedBookPlayer
                 CurrentIndex = track.Indexes.Keys.Min();
 
                 // If we're not playing data tracks, skip
-                if(!App.Settings.PlayDataTracks && TrackType == TrackTypeValue.Data)
+                if(!App.Settings.PlayDataTracks && TrackType != Aaru.CommonTypes.Enums.TrackType.Audio)
                 {
                     if(increment)
                         NextTrack();
@@ -190,7 +190,7 @@ namespace RedBookPlayer
         /// <summary>
         /// Represents the track type
         /// </summary>
-        public TrackTypeValue? TrackType { get; private set; }
+        public TrackType? TrackType { get; private set; }
 
         /// <summary>
         /// Represents the sector starting the section
