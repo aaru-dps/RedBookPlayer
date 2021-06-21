@@ -4,12 +4,15 @@ using System.Threading;
 
 namespace RedBookPlayer
 {
+    /// <summary>
+    /// Recurring timer wrapper with a high degree of accuracy
+    /// </summary>
     public class HiResTimer
     {
         static readonly float tickFrequency = 1000f / Stopwatch.Frequency;
 
-        volatile float interval;
-        volatile bool  isRunning;
+        volatile float _interval;
+        volatile bool  _isRunning;
 
         public HiResTimer() : this(1f) {}
 
@@ -19,24 +22,25 @@ namespace RedBookPlayer
                float.IsNaN(interval))
                 throw new ArgumentOutOfRangeException(nameof(interval));
 
-            this.interval = interval;
+            _interval = interval;
         }
 
         public float Interval
         {
-            get => interval;
+            get => _interval;
             set
             {
                 if(value < 0f ||
                    float.IsNaN(value))
                     throw new ArgumentOutOfRangeException(nameof(value));
 
-                interval = value;
+                _interval = value;
             }
         }
 
         public bool Enabled
         {
+            get => _isRunning;
             set
             {
                 if(value)
@@ -44,23 +48,22 @@ namespace RedBookPlayer
                 else
                     Stop();
             }
-            get => isRunning;
         }
 
         public event EventHandler<HiResTimerElapsedEventArgs> Elapsed;
 
         public void Start()
         {
-            if(isRunning)
+            if(_isRunning)
                 return;
 
-            isRunning = true;
+            _isRunning = true;
             var thread = new Thread(ExecuteTimer);
             thread.Priority = ThreadPriority.Highest;
             thread.Start();
         }
 
-        public void Stop() => isRunning = false;
+        public void Stop() => _isRunning = false;
 
         void ExecuteTimer()
         {
@@ -69,9 +72,9 @@ namespace RedBookPlayer
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            while(isRunning)
+            while(_isRunning)
             {
-                nextTrigger += interval;
+                nextTrigger += _interval;
                 float elapsed;
 
                 while(true)
@@ -91,7 +94,7 @@ namespace RedBookPlayer
                     else
                         Thread.Sleep(10);
 
-                    if(!isRunning)
+                    if(!_isRunning)
                         return;
                 }
 
@@ -109,12 +112,5 @@ namespace RedBookPlayer
         }
 
         static float ElapsedHiRes(Stopwatch stopwatch) => stopwatch.ElapsedTicks * tickFrequency;
-    }
-
-    public class HiResTimerElapsedEventArgs : EventArgs
-    {
-        internal HiResTimerElapsedEventArgs(float delay) => Delay = delay;
-
-        public float Delay { get; }
     }
 }

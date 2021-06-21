@@ -8,49 +8,47 @@ namespace RedBookPlayer
 {
     public class SettingsWindow : Window
     {
-        readonly Settings settings;
-        string            selectedTheme;
-        ListBox           themeList;
+        private readonly Settings _settings;
+        private          string _selectedTheme;
+        private          ListBox _themeList;
 
         public SettingsWindow() {}
 
         public SettingsWindow(Settings settings)
         {
-            DataContext = this.settings = settings;
+            DataContext = _settings = settings;
             InitializeComponent();
         }
 
         public void ThemeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(e.AddedItems.Count == 0)
-            {
+            if (e.AddedItems.Count == 0)
                 return;
-            }
 
-            selectedTheme = (string)e.AddedItems[0];
+            _selectedTheme = (string)e.AddedItems[0];
         }
 
         public void ApplySettings(object sender, RoutedEventArgs e)
         {
-            if((selectedTheme ?? "") != "")
+            if (!string.IsNullOrWhiteSpace(_selectedTheme))
             {
-                settings.SelectedTheme = selectedTheme;
-                MainWindow.ApplyTheme(selectedTheme);
+                _settings.SelectedTheme = _selectedTheme;
+                MainWindow.ApplyTheme(_selectedTheme);
             }
 
-            PlayerView.Player.Volume = settings.Volume;
+            PlayerView.Player.Volume = _settings.Volume;
 
-            settings.Save();
+            _settings.Save();
         }
 
-        public void UpdateView() => this.FindControl<TextBlock>("VolumeLabel").Text = settings.Volume.ToString();
+        public void UpdateView() => this.FindControl<TextBlock>("VolumeLabel").Text = _settings.Volume.ToString();
 
         void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
 
-            themeList                  =  this.FindControl<ListBox>("ThemeList");
-            themeList.SelectionChanged += ThemeList_SelectionChanged;
+            _themeList                  =  this.FindControl<ListBox>("ThemeList");
+            _themeList.SelectionChanged += ThemeList_SelectionChanged;
 
             List<string> items = new List<string>();
             items.Add("default");
@@ -61,16 +59,14 @@ namespace RedBookPlayer
                 {
                     string themeName = dir.Split('/')[1];
 
-                    if(!File.Exists($"themes/{themeName}/view.xaml"))
-                    {
+                    if (!File.Exists($"themes/{themeName}/view.xaml"))
                         continue;
-                    }
 
                     items.Add(themeName);
                 }
             }
 
-            themeList.Items = items;
+            _themeList.Items = items;
 
             this.FindControl<Button>("ApplyButton").Click            += ApplySettings;
             this.FindControl<Slider>("VolumeSlider").PropertyChanged += (s, e) => UpdateView();

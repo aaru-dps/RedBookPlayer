@@ -19,34 +19,37 @@ namespace RedBookPlayer
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Apply a custom theme to the player
+        /// </summary>
+        /// <param name="theme">Path to the theme under the themes directory</param>
         public static void ApplyTheme(string theme)
         {
-            if((theme ?? "") == "")
-            {
+            // If no theme path is provided, we can ignore
+            if(string.IsNullOrWhiteSpace(theme))
                 return;
-            }
 
-            if(theme == "default")
+            // If the theme name is "default", we assume the internal theme is used
+            if(theme.Equals("default", StringComparison.CurrentCultureIgnoreCase))
             {
                 Instance.ContentControl.Content = new PlayerView();
             }
             else
             {
-                string themeDirectory = Directory.GetCurrentDirectory() + "/themes/" + theme;
-                string xamlPath       = themeDirectory                  + "/view.xaml";
+                string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{theme}";
+                string xamlPath       = $"{themeDirectory}/view.xaml";
 
                 if(!File.Exists(xamlPath))
                 {
                     Console.WriteLine("Warning: specified theme doesn't exist, reverting to default");
-
                     return;
                 }
 
                 try
                 {
-                    Instance.ContentControl.Content =
-                        new PlayerView(File.ReadAllText(xamlPath).
-                                            Replace("Source=\"", $"Source=\"file://{themeDirectory}/"));
+                    string xaml = File.ReadAllText(xamlPath);
+                    xaml = xaml.Replace("Source=\"", $"Source=\"file://{themeDirectory}/");
+                    Instance.ContentControl.Content = new PlayerView(xaml);
                 }
                 catch(XmlException ex)
                 {
