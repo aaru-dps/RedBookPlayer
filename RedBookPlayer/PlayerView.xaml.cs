@@ -221,6 +221,43 @@ namespace RedBookPlayer
         }
 
         /// <summary>
+        /// Load an image from the path
+        /// </summary>
+        /// <param name="path">Path to the image to load</param>
+        private async void LoadImage(string path)
+        {
+            bool result = await Task.Run(() =>
+            {
+                var image = new AaruFormat();
+                var filter = new ZZZNoFilter();
+                filter.Open(path);
+                image.Open(filter);
+
+                if(IsPlayableImage(image))
+                {
+                    PlayableDisc.Init(image, App.Settings.AutoPlay);
+                    if(PlayableDisc.Initialized)
+                    {
+                        Player.Init(PlayableDisc, App.Settings.AutoPlay);
+                        return true;
+                    }
+
+                    return false;
+                }
+                else
+                    return false;
+            });
+
+            if(result)
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
+                });
+            }
+        }
+
+        /// <summary>
         /// Update the UI with the most recent information from the Player
         /// </summary>
         private void UpdateView(object sender, ElapsedEventArgs e)
@@ -257,35 +294,7 @@ namespace RedBookPlayer
             if (path == null)
                 return;
 
-            bool result = await Task.Run(() =>
-            {
-                var image = new AaruFormat();
-                var filter = new ZZZNoFilter();
-                filter.Open(path);
-                image.Open(filter);
-
-                if (IsPlayableImage(image))
-                {
-                    PlayableDisc.Init(image, App.Settings.AutoPlay);
-                    if (PlayableDisc.Initialized)
-                    {
-                        Player.Init(PlayableDisc, App.Settings.AutoPlay);
-                        return true;
-                    }
-                    
-                    return false;
-                }
-                else
-                    return false;
-            });
-
-            if (result)
-            {
-                await Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
-                });
-            }
+            LoadImage(path);
         }
 
         public void PlayButton_Click(object sender, RoutedEventArgs e) => Player.Play();
