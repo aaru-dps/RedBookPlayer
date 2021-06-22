@@ -72,7 +72,7 @@ namespace RedBookPlayer
         private string GenerateDigitString()
         {
             // If the disc or player aren't initialized, return all '-' characters
-            if (!PlayableDisc.Initialized || !Player.Initialized)
+            if (!PlayableDisc.Initialized)
                 return string.Empty.PadLeft(20, '-');
 
             // Otherwise, take the current time into account
