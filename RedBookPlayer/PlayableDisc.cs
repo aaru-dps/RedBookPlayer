@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Aaru.CommonTypes.Enums;
 using Aaru.CommonTypes.Structs;
 using Aaru.DiscImages;
@@ -238,7 +237,7 @@ namespace RedBookPlayer
         /// </summary>
         /// <param name="image">Aaruformat image to load</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public async void Init(AaruFormat image, bool autoPlay = false)
+        public void Init(AaruFormat image, bool autoPlay = false)
         {
             // If the image is null, we can't do anything
             if(image == null)
@@ -248,7 +247,7 @@ namespace RedBookPlayer
             _image = image;
 
             // Attempt to load the TOC
-            if(!await LoadTOC())
+            if(!LoadTOC())
                 return;
 
             // Load the first track
@@ -587,9 +586,9 @@ namespace RedBookPlayer
         /// Load TOC for the current disc image
         /// </summary>
         /// <returns>True if the TOC could be loaded, false otherwise</returns>
-        private async Task<bool> LoadTOC()
+        private bool LoadTOC()
         {
-            if(await Task.Run(() => _image.Info.ReadableMediaTags?.Contains(MediaTagType.CD_FullTOC)) != true)
+            if(_image.Info.ReadableMediaTags?.Contains(MediaTagType.CD_FullTOC) != true)
             {
                 // Only generate the TOC if we have it set
                 if(!App.Settings.GenerateMissingTOC)
@@ -611,7 +610,7 @@ namespace RedBookPlayer
                 }
             }
 
-            byte[] tocBytes = await Task.Run(() => _image.ReadDiskTag(MediaTagType.CD_FullTOC));
+            byte[] tocBytes = _image.ReadDiskTag(MediaTagType.CD_FullTOC);
             if(tocBytes == null || tocBytes.Length == 0)
             {
                 Console.WriteLine("Error reading TOC from disc image");
@@ -627,7 +626,7 @@ namespace RedBookPlayer
                 tocBytes = tmp;
             }
 
-            var nullableToc = await Task.Run(() => Decode(tocBytes));
+            var nullableToc = Decode(tocBytes);
             if(nullableToc == null)
             {
                 Console.WriteLine("Error decoding TOC");
