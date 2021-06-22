@@ -296,6 +296,8 @@ namespace RedBookPlayer
                 else
                     CurrentTrackNumber--;
             }
+            else
+                CurrentTrackNumber--;
 
             LoadTrack(CurrentTrackNumber);
         }
