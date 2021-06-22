@@ -20,9 +20,14 @@ namespace RedBookPlayer
     public class PlayerView : UserControl
     {
         /// <summary>
-        /// Player representing the internal state and loaded image
+        /// Player representing the internal state
         /// </summary>
         public static Player Player = new Player();
+
+        /// <summary>
+        /// Disc representing the loaded image
+        /// </summary>
+        public static PlayableDisc PlayableDisc = new PlayableDisc();
 
         /// <summary>
         /// Set of images representing the digits for the UI
@@ -66,32 +71,32 @@ namespace RedBookPlayer
         /// <returns>String representing the digits for the player</returns>
         private string GenerateDigitString()
         {
-            // If the player isn't initialized, return all '-' characters
-            if (!Player.Initialized)
+            // If the disc or player aren't initialized, return all '-' characters
+            if (!PlayableDisc.Initialized || !Player.Initialized)
                 return string.Empty.PadLeft(20, '-');
 
             // Otherwise, take the current time into account
-            ulong sectorTime = Player.CurrentSector;
-            if (Player.SectionStartSector != 0)
-                sectorTime -= Player.SectionStartSector;
+            ulong sectorTime = PlayableDisc.CurrentSector;
+            if (PlayableDisc.SectionStartSector != 0)
+                sectorTime -= PlayableDisc.SectionStartSector;
             else
-                sectorTime += Player.TimeOffset;
+                sectorTime += PlayableDisc.TimeOffset;
 
             int[] numbers = new int[]
             {
-                Player.CurrentTrack + 1,
-                Player.CurrentIndex,
+                PlayableDisc.CurrentTrackNumber + 1,
+                PlayableDisc.CurrentTrackIndex,
 
                 (int)(sectorTime / (75 * 60)),
                 (int)(sectorTime / 75 % 60),
                 (int)(sectorTime % 75),
 
-                Player.TotalTracks,
-                Player.TotalIndexes,
+                PlayableDisc.TotalTracks,
+                PlayableDisc.TotalIndexes,
 
-                (int)(Player.TotalTime / (75 * 60)),
-                (int)(Player.TotalTime / 75 % 60),
-                (int)(Player.TotalTime % 75),
+                (int)(PlayableDisc.TotalTime / (75 * 60)),
+                (int)(PlayableDisc.TotalTime / 75 % 60),
+                (int)(PlayableDisc.TotalTime % 75),
             };
 
             return string.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
@@ -232,12 +237,12 @@ namespace RedBookPlayer
                 if (Player.Initialized)
                 {
                     PlayerViewModel dataContext = (PlayerViewModel)DataContext;
-                    dataContext.HiddenTrack = Player.TimeOffset > 150;
-                    dataContext.ApplyDeEmphasis = Player.ApplyDeEmphasis;
-                    dataContext.TrackHasEmphasis = Player.TrackHasEmphasis;
-                    dataContext.CopyAllowed = Player.CopyAllowed;
-                    dataContext.IsAudioTrack = Player.TrackType == TrackType.Audio;
-                    dataContext.IsDataTrack = Player.TrackType != TrackType.Audio;
+                    dataContext.HiddenTrack = PlayableDisc.TimeOffset > 150;
+                    dataContext.ApplyDeEmphasis = PlayableDisc.ApplyDeEmphasis;
+                    dataContext.TrackHasEmphasis = PlayableDisc.TrackHasEmphasis;
+                    dataContext.CopyAllowed = PlayableDisc.CopyAllowed;
+                    dataContext.IsAudioTrack = PlayableDisc.TrackType == TrackType.Audio;
+                    dataContext.IsDataTrack = PlayableDisc.TrackType != TrackType.Audio;
                 }
             });
         }
@@ -261,8 +266,14 @@ namespace RedBookPlayer
 
                 if (IsPlayableImage(image))
                 {
-                    Player.Init(image, App.Settings.AutoPlay);
-                    return true;
+                    PlayableDisc.Init(image, App.Settings.AutoPlay);
+                    if (PlayableDisc.Initialized)
+                    {
+                        Player.Init(PlayableDisc, App.Settings.AutoPlay);
+                        return true;
+                    }
+                    
+                    return false;
                 }
                 else
                     return false;
@@ -283,21 +294,21 @@ namespace RedBookPlayer
 
         public void StopButton_Click(object sender, RoutedEventArgs e) => Player.Stop();
 
-        public void NextTrackButton_Click(object sender, RoutedEventArgs e) => Player.NextTrack();
+        public void NextTrackButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.NextTrack();
 
-        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => Player.PreviousTrack();
+        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.PreviousTrack();
 
-        public void NextIndexButton_Click(object sender, RoutedEventArgs e) => Player.NextIndex(App.Settings.IndexButtonChangeTrack);
+        public void NextIndexButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.NextIndex(App.Settings.IndexButtonChangeTrack);
 
-        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => Player.PreviousIndex(App.Settings.IndexButtonChangeTrack);
+        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.PreviousIndex(App.Settings.IndexButtonChangeTrack);
 
-        public void FastForwardButton_Click(object sender, RoutedEventArgs e) => Player.FastForward();
+        public void FastForwardButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.FastForward();
 
-        public void RewindButton_Click(object sender, RoutedEventArgs e) => Player.Rewind();
+        public void RewindButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.Rewind();
 
-        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.ToggleDeEmphasis(true);
+        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.ToggleDeEmphasis(true);
 
-        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.ToggleDeEmphasis(false);
+        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.ToggleDeEmphasis(false);
 
         #endregion
     }

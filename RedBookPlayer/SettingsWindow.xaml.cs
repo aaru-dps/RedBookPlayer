@@ -36,8 +36,6 @@ namespace RedBookPlayer
                 MainWindow.ApplyTheme(_selectedTheme);
             }
 
-            PlayerView.Player.Volume = _settings.Volume;
-
             _settings.Save();
         }
 
