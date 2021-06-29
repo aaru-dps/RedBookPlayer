@@ -33,6 +33,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CUETools.Codecs", "Aaru\cue
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CUETools.Codecs.Flake", "Aaru\cuetools.net\CUETools.Codecs.Flake\CUETools.Codecs.Flake.csproj", "{ED8E11B7-786F-4EFF-9E4C-B937B7A2DE89}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0531C157-8111-4BC9-8C65-A2FDDB0C96FD}"
+	ProjectSection(SolutionItems) = preProject
+		build.bat = build.bat
+		build.sh = build.sh
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
