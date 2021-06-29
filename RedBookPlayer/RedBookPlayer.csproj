@@ -1,17 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
-    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <DebugType>embedded</DebugType>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-    <DefineConstants>Windows</DefineConstants>
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64' AND '$(Configuration)' == 'Debug'">
+    <DefineConstants>WindowsDebug</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="**\*.xaml.cs">
