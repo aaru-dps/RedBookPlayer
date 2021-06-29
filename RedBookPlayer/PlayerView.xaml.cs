@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using Aaru.CommonTypes.Enums;
+using Aaru.CommonTypes.Interfaces;
 using Aaru.DiscImages;
 using Aaru.Filters;
 using Avalonia;
@@ -199,14 +200,10 @@ namespace RedBookPlayer
         /// </summary>
         /// <param name="image">Aaruformat image file</param>
         /// <returns>True if the image is playble, false otherwise</returns>
-        private bool IsPlayableImage(AaruFormat image)
+        private bool IsPlayableImage(IOpticalMediaImage image)
         {
             // Invalid images can't be played
             if (image == null)
-                return false;
-
-            // Tape images are not supported
-            if (image.IsTape)
                 return false;
 
             // Determine based on media type
@@ -278,6 +275,7 @@ namespace RedBookPlayer
                     dataContext.ApplyDeEmphasis = PlayableDisc.ApplyDeEmphasis;
                     dataContext.TrackHasEmphasis = PlayableDisc.TrackHasEmphasis;
                     dataContext.CopyAllowed = PlayableDisc.CopyAllowed;
+                    dataContext.QuadChannel = PlayableDisc.QuadChannel;
                     dataContext.IsAudioTrack = PlayableDisc.TrackType == TrackType.Audio;
                     dataContext.IsDataTrack = PlayableDisc.TrackType != TrackType.Audio;
                 }

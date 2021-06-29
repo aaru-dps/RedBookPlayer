@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Aaru.CommonTypes.Enums;
+using Aaru.CommonTypes.Interfaces;
 using Aaru.CommonTypes.Structs;
-using Aaru.DiscImages;
 using Aaru.Helpers;
 using static Aaru.Decoders.CD.FullTOC;
 
@@ -44,32 +44,16 @@ namespace RedBookPlayer
                 // Cache the current track for easy access
                 Track track = _image.Tracks[CurrentTrackNumber];
 
-                // Set new track-specific data
-                byte[] flagsData = _image.ReadSectorTag(track.TrackSequence, SectorTagType.CdTrackFlags);
-                ApplyDeEmphasis = ((CdFlags)flagsData[0]).HasFlag(CdFlags.PreEmphasis);
+                // Set track flags from subchannel data, if possible
+                SetTrackFlags(track);
 
-                try
-                {
-                    byte[] subchannel = _image.ReadSectorTag(track.TrackStartSector, SectorTagType.CdSectorSubchannel);
-
-                    if(!ApplyDeEmphasis)
-                        ApplyDeEmphasis = (subchannel[3] & 0b01000000) != 0;
-
-                    CopyAllowed = (subchannel[2] & 0b01000000) != 0;
-                    TrackType = (subchannel[1] & 0b01000000) != 0 ? Aaru.CommonTypes.Enums.TrackType.Data : Aaru.CommonTypes.Enums.TrackType.Audio;
-                }
-                catch(ArgumentException)
-                {
-                    TrackType = track.TrackType;
-                }
-
-                TrackHasEmphasis = ApplyDeEmphasis;
+                ApplyDeEmphasis = TrackHasEmphasis;
 
                 TotalIndexes = track.Indexes.Keys.Max();
                 CurrentTrackIndex = track.Indexes.Keys.Min();
 
                 // If we're not playing data tracks, skip
-                if(!App.Settings.PlayDataTracks && TrackType != Aaru.CommonTypes.Enums.TrackType.Audio)
+                if(!App.Settings.PlayDataTracks && TrackType != TrackType.Audio)
                 {
                     if(increment)
                         NextTrack();
@@ -157,19 +141,24 @@ namespace RedBookPlayer
         public bool TrackHasEmphasis { get; private set; } = false;
 
         /// <summary>
-        /// Indicates if de-emphasis should be applied
+        /// Represents the PRE flag
         /// </summary>
         public bool ApplyDeEmphasis { get; private set; } = false;
 
         /// <summary>
-        /// Represents the copy allowed flag
+        /// Represents the DCP flag
         /// </summary>
         public bool CopyAllowed { get; private set; } = false;
 
         /// <summary>
         /// Represents the track type
         /// </summary>
-        public TrackType? TrackType { get; private set; }
+        public TrackType TrackType { get; private set; }
+
+        /// <summary>
+        /// Represents the 4CH flag
+        /// </summary>
+        public bool QuadChannel { get; private set; } = false;
 
         /// <summary>
         /// Represents the sector starting the section
@@ -208,7 +197,7 @@ namespace RedBookPlayer
         /// <summary>
         /// Currently loaded disc image
         /// </summary>
-        private AaruFormat _image;
+        private IOpticalMediaImage _image;
 
         /// <summary>
         /// Current track number
@@ -237,7 +226,7 @@ namespace RedBookPlayer
         /// </summary>
         /// <param name="image">Aaruformat image to load</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(AaruFormat image, bool autoPlay = false)
+        public void Init(IOpticalMediaImage image, bool autoPlay = false)
         {
             // If the image is null, we can't do anything
             if(image == null)
@@ -655,6 +644,89 @@ namespace RedBookPlayer
             ushort firstIndex = _image.Tracks[track].Indexes.Keys.Min();
             int firstSector = _image.Tracks[track].Indexes[firstIndex];
             CurrentSector = (ulong)(firstSector >= 0 ? firstSector : _image.Tracks[track].Indexes[1]);
+        }
+
+        /// <summary>
+        /// Set default track flags for the current track
+        /// </summary>
+        /// <param name="track">Track object to read from</param>
+        private void SetDefaultTrackFlags(Track track)
+        {
+            QuadChannel = false;
+            TrackType = track.TrackType;
+            CopyAllowed = false;
+            TrackHasEmphasis = false;
+        }
+
+        /// <summary>
+        /// Set track flags from the current track
+        /// </summary>
+        /// <param name="track">Track object to read from</param>
+        private void SetTrackFlags(Track track)
+        {
+            try
+            {
+                ulong currentSector = track.TrackStartSector;
+                for (int i = 0; i < 16; i++)
+                {
+                    // Try to read the subchannel
+                    byte[] subBuf = _image.ReadSectorTag(track.TrackStartSector, SectorTagType.CdSectorSubchannel);
+                    if(subBuf == null || subBuf.Length < 4)
+                        return;
+
+                    // Check the expected track, if possible
+                    int adr = subBuf[0] & 0x0F;
+                    if(adr == 1)
+                    {
+                        if(subBuf[1] > track.TrackSequence)
+                        {
+                            currentSector--;
+                            continue;
+                        }
+                        else if(subBuf[1] < track.TrackSequence)
+                        {
+                            currentSector++;
+                            continue;
+                        }
+                    }
+
+                    // Set the track flags from subchannel data
+                    int control = (subBuf[0] & 0xF0) / 16;
+                    switch((control & 0xC) / 4)
+                    {
+                        case 0:
+                            QuadChannel = false;
+                            TrackType = TrackType.Audio;
+                            TrackHasEmphasis = (control & 0x01) == 1;
+                            break;
+                        case 1:
+                            QuadChannel = false;
+                            TrackType = TrackType.Data;
+                            TrackHasEmphasis = false;
+                            break;
+                        case 2:
+                            QuadChannel = true;
+                            TrackType = TrackType.Audio;
+                            TrackHasEmphasis = (control & 0x01) == 1;
+                            break;
+                        default:
+                            QuadChannel = false;
+                            TrackType = track.TrackType;
+                            TrackHasEmphasis = false;
+                            break;
+                    }
+
+                    CopyAllowed = (control & 0x02) > 0;
+                    return;
+                }
+
+                // If we didn't find subchannel data, assume defaults
+                SetDefaultTrackFlags(track);
+            }
+            catch(Exception)
+            {
+                SetDefaultTrackFlags(track);
+            }
         }
 
         #endregion
