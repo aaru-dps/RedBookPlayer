@@ -292,179 +292,15 @@ namespace RedBookPlayer.Discs
         }
 
         /// <summary>
-        /// Generate a CDFullTOC object from the current image
-        /// </summary>
-        /// <returns>CDFullTOC object, if possible</returns>
-        /// <remarks>Copied from <see cref="Aaru.DiscImages.CloneCd"/></remarks>
-        private bool GenerateTOC()
-        {
-            // Invalid image means we can't generate anything
-            if(_image == null)
-                return false;
-
-            _toc = new CDFullTOC();
-            Dictionary<byte, byte> _trackFlags = new Dictionary<byte, byte>();
-            Dictionary<byte, byte> sessionEndingTrack = new Dictionary<byte, byte>();
-            _toc.FirstCompleteSession = byte.MaxValue;
-            _toc.LastCompleteSession = byte.MinValue;
-            List<TrackDataDescriptor> trackDescriptors = new List<TrackDataDescriptor>();
-            byte currentTrack = 0;
-
-            foreach(Track track in _image.Tracks.OrderBy(t => t.TrackSession).ThenBy(t => t.TrackSequence))
-            {
-                byte[] trackFlags = _image.ReadSectorTag(track.TrackStartSector + 1, SectorTagType.CdTrackFlags);
-                if(trackFlags != null)
-                    _trackFlags.Add((byte)track.TrackStartSector, trackFlags[0]);
-            }
-
-            foreach(Track track in _image.Tracks.OrderBy(t => t.TrackSession).ThenBy(t => t.TrackSequence))
-            {
-                if(track.TrackSession < _toc.FirstCompleteSession)
-                    _toc.FirstCompleteSession = (byte)track.TrackSession;
-
-                if(track.TrackSession <= _toc.LastCompleteSession)
-                {
-                    currentTrack = (byte)track.TrackSequence;
-
-                    continue;
-                }
-
-                if(_toc.LastCompleteSession > 0)
-                    sessionEndingTrack.Add(_toc.LastCompleteSession, currentTrack);
-
-                _toc.LastCompleteSession = (byte)track.TrackSession;
-            }
-
-            byte currentSession = 0;
-
-            foreach(Track track in _image.Tracks.OrderBy(t => t.TrackSession).ThenBy(t => t.TrackSequence))
-            {
-                _trackFlags.TryGetValue((byte)track.TrackSequence, out byte trackControl);
-
-                if(trackControl == 0 &&
-                   track.TrackType != Aaru.CommonTypes.Enums.TrackType.Audio)
-                    trackControl = (byte)CdFlags.DataTrack;
-
-                // Lead-Out
-                if(track.TrackSession > currentSession &&
-                   currentSession != 0)
-                {
-                    (byte minute, byte second, byte frame) leadoutAmsf = LbaToMsf(track.TrackStartSector - 150);
-
-                    (byte minute, byte second, byte frame) leadoutPmsf =
-                        LbaToMsf(_image.Tracks.OrderBy(t => t.TrackSession).ThenBy(t => t.TrackSequence).Last().
-                                        TrackStartSector);
-
-                    // Lead-out
-                    trackDescriptors.Add(new TrackDataDescriptor
-                    {
-                        SessionNumber = currentSession,
-                        POINT = 0xB0,
-                        ADR = 5,
-                        CONTROL = 0,
-                        HOUR = 0,
-                        Min = leadoutAmsf.minute,
-                        Sec = leadoutAmsf.second,
-                        Frame = leadoutAmsf.frame,
-                        PHOUR = 2,
-                        PMIN = leadoutPmsf.minute,
-                        PSEC = leadoutPmsf.second,
-                        PFRAME = leadoutPmsf.frame
-                    });
-
-                    // This seems to be constant? It should not exist on CD-ROM but CloneCD creates them anyway
-                    // Format seems like ATIP, but ATIP should not be as 0xC0 in TOC...
-                    //trackDescriptors.Add(new TrackDataDescriptor
-                    //{
-                    //    SessionNumber = currentSession,
-                    //    POINT = 0xC0,
-                    //    ADR = 5,
-                    //    CONTROL = 0,
-                    //    Min = 128,
-                    //    PMIN = 97,
-                    //    PSEC = 25
-                    //});
-                }
-
-                // Lead-in
-                if(track.TrackSession > currentSession)
-                {
-                    currentSession = (byte)track.TrackSession;
-                    sessionEndingTrack.TryGetValue(currentSession, out byte endingTrackNumber);
-
-                    (byte minute, byte second, byte frame) leadinPmsf =
-                        LbaToMsf(_image.Tracks.FirstOrDefault(t => t.TrackSequence == endingTrackNumber)?.TrackEndSector ??
-                                 0 + 1);
-
-                    // Starting track
-                    trackDescriptors.Add(new TrackDataDescriptor
-                    {
-                        SessionNumber = currentSession,
-                        POINT = 0xA0,
-                        ADR = 1,
-                        CONTROL = trackControl,
-                        PMIN = (byte)track.TrackSequence
-                    });
-
-                    // Ending track
-                    trackDescriptors.Add(new TrackDataDescriptor
-                    {
-                        SessionNumber = currentSession,
-                        POINT = 0xA1,
-                        ADR = 1,
-                        CONTROL = trackControl,
-                        PMIN = endingTrackNumber
-                    });
-
-                    // Lead-out start
-                    trackDescriptors.Add(new TrackDataDescriptor
-                    {
-                        SessionNumber = currentSession,
-                        POINT = 0xA2,
-                        ADR = 1,
-                        CONTROL = trackControl,
-                        PHOUR = 0,
-                        PMIN = leadinPmsf.minute,
-                        PSEC = leadinPmsf.second,
-                        PFRAME = leadinPmsf.frame
-                    });
-                }
-
-                (byte minute, byte second, byte frame) pmsf = LbaToMsf(track.TrackStartSector);
-
-                // Track
-                trackDescriptors.Add(new TrackDataDescriptor
-                {
-                    SessionNumber = (byte)track.TrackSession,
-                    POINT = (byte)track.TrackSequence,
-                    ADR = 1,
-                    CONTROL = trackControl,
-                    PHOUR = 0,
-                    PMIN = pmsf.minute,
-                    PSEC = pmsf.second,
-                    PFRAME = pmsf.frame
-                });
-            }
-
-            _toc.TrackDescriptors = trackDescriptors.ToArray();
-            return true;
-        }
-
-        /// <summary>
-        /// Convert the sector to LBA values
-        /// </summary>
-        /// <param name="sector">Sector to convert</param>
-        /// <returns>LBA values for the sector number</returns>
-        /// <remarks>Copied from <see cref="Aaru.DiscImages.CloneCd"/></remarks>
-        private (byte minute, byte second, byte frame) LbaToMsf(ulong sector) =>
-            ((byte)((sector + 150) / 75 / 60), (byte)((sector + 150) / 75 % 60), (byte)((sector + 150) % 75));
-
-        /// <summary>
         /// Load TOC for the current disc image
         /// </summary>
         /// <returns>True if the TOC could be loaded, false otherwise</returns>
         private bool LoadTOC()
         {
+            // If the image is invalide, we can't load or generate a TOC
+            if(_image == null)
+                return false;
+
             if(_image.Info.ReadableMediaTags?.Contains(MediaTagType.CD_FullTOC) != true)
             {
                 // Only generate the TOC if we have it set
@@ -475,12 +311,24 @@ namespace RedBookPlayer.Discs
                 }
 
                 Console.WriteLine("Attempting to generate TOC");
-                if(GenerateTOC())
+
+                // Get the list of tracks and flags to create the TOC with
+                List<Track> tracks = _image.Tracks.OrderBy(t => t.TrackSession).ThenBy(t => t.TrackSequence).ToList();
+                Dictionary<byte, byte> trackFlags = new Dictionary<byte, byte>();
+                foreach(Track track in tracks)
                 {
+                    byte[] singleTrackFlags = _image.ReadSectorTag(track.TrackStartSector + 1, SectorTagType.CdTrackFlags);
+                    if(singleTrackFlags != null)
+                        trackFlags.Add((byte)track.TrackStartSector, singleTrackFlags[0]);
+                }
+
+                try
+                {
+                    _toc = Create(tracks, trackFlags);
                     Console.WriteLine(Prettify(_toc));
                     return true;
                 }
-                else
+                catch
                 {
                     Console.WriteLine("Full TOC not found or generated");
                     return false;
