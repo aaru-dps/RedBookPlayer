@@ -4,10 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using Aaru.CommonTypes.Enums;
-using Aaru.CommonTypes.Interfaces;
-using Aaru.DiscImages;
-using Aaru.Filters;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -24,11 +20,6 @@ namespace RedBookPlayer
         /// Player representing the internal state
         /// </summary>
         public static Player Player = new Player();
-
-        /// <summary>
-        /// Disc representing the loaded image
-        /// </summary>
-        public static PlayableDisc PlayableDisc = new PlayableDisc();
 
         /// <summary>
         /// Set of images representing the digits for the UI
@@ -56,7 +47,7 @@ namespace RedBookPlayer
         public async Task<string> GetPath()
         {
             var dialog = new OpenFileDialog { AllowMultiple = false };
-            List<string> knownExtensions = new AaruFormat().KnownExtensions.ToList();
+            List<string> knownExtensions = new Aaru.DiscImages.AaruFormat().KnownExtensions.ToList();
             dialog.Filters.Add(new FileDialogFilter()
             {
                 Name       = "Aaru Image Format (*" + string.Join(", *", knownExtensions) + ")",
@@ -64,43 +55,6 @@ namespace RedBookPlayer
             });
 
             return (await dialog.ShowAsync((Window)Parent.Parent))?.FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Generate the digit string to be interpreted by the UI
-        /// </summary>
-        /// <returns>String representing the digits for the player</returns>
-        private string GenerateDigitString()
-        {
-            // If the disc or player aren't initialized, return all '-' characters
-            if (!PlayableDisc.Initialized)
-                return string.Empty.PadLeft(20, '-');
-
-            // Otherwise, take the current time into account
-            ulong sectorTime = PlayableDisc.CurrentSector;
-            if (PlayableDisc.SectionStartSector != 0)
-                sectorTime -= PlayableDisc.SectionStartSector;
-            else
-                sectorTime += PlayableDisc.TimeOffset;
-
-            int[] numbers = new int[]
-            {
-                PlayableDisc.CurrentTrackNumber + 1,
-                PlayableDisc.CurrentTrackIndex,
-
-                (int)(sectorTime / (75 * 60)),
-                (int)(sectorTime / 75 % 60),
-                (int)(sectorTime % 75),
-
-                PlayableDisc.TotalTracks,
-                PlayableDisc.TotalIndexes,
-
-                (int)(PlayableDisc.TotalTime / (75 * 60)),
-                (int)(PlayableDisc.TotalTime / 75 % 60),
-                (int)(PlayableDisc.TotalTime % 75),
-            };
-
-            return string.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
         }
 
         /// <summary>
@@ -196,28 +150,6 @@ namespace RedBookPlayer
         }
 
         /// <summary>
-        /// Indicates if the image is considered "playable" or not
-        /// </summary>
-        /// <param name="image">Aaruformat image file</param>
-        /// <returns>True if the image is playble, false otherwise</returns>
-        private bool IsPlayableImage(IOpticalMediaImage image)
-        {
-            // Invalid images can't be played
-            if (image == null)
-                return false;
-
-            // Determine based on media type
-            // TODO: Can we be more granular with sub types?
-            (string type, string _) = Aaru.CommonTypes.Metadata.MediaType.MediaTypeToString(image.Info.MediaType);
-            return type switch
-            {
-                "Compact Disc" => true,
-                "GD" => true, // Requires TOC generation
-                _ => false,
-            };
-        }
-
-        /// <summary>
         /// Load an image from the path
         /// </summary>
         /// <param name="path">Path to the image to load</param>
@@ -225,24 +157,8 @@ namespace RedBookPlayer
         {
             bool result = await Task.Run(() =>
             {
-                var image = new AaruFormat();
-                var filter = new ZZZNoFilter();
-                filter.Open(path);
-                image.Open(filter);
-
-                if(IsPlayableImage(image))
-                {
-                    PlayableDisc.Init(image, App.Settings.AutoPlay);
-                    if(PlayableDisc.Initialized)
-                    {
-                        Player.Init(PlayableDisc, App.Settings.AutoPlay);
-                        return true;
-                    }
-
-                    return false;
-                }
-                else
-                    return false;
+                Player.Init(path, App.Settings.AutoPlay);
+                return Player.Initialized;
             });
 
             if(result)
@@ -261,24 +177,14 @@ namespace RedBookPlayer
         {
             Dispatcher.UIThread.InvokeAsync(() =>
             {
-                string digitString = GenerateDigitString();
+                string digitString = Player.GenerateDigitString();
                 for (int i = 0; i < _digits.Length; i++)
                 {
                     if (_digits[i] != null)
                         _digits[i].Source = GetBitmap(digitString[i]);
                 }
 
-                if (Player.Initialized)
-                {
-                    PlayerViewModel dataContext = (PlayerViewModel)DataContext;
-                    dataContext.HiddenTrack = PlayableDisc.TimeOffset > 150;
-                    dataContext.ApplyDeEmphasis = PlayableDisc.ApplyDeEmphasis;
-                    dataContext.TrackHasEmphasis = PlayableDisc.TrackHasEmphasis;
-                    dataContext.CopyAllowed = PlayableDisc.CopyAllowed;
-                    dataContext.QuadChannel = PlayableDisc.QuadChannel;
-                    dataContext.IsAudioTrack = PlayableDisc.TrackType == TrackType.Audio;
-                    dataContext.IsDataTrack = PlayableDisc.TrackType != TrackType.Audio;
-                }
+                Player.UpdateDataContext(DataContext as PlayerViewModel);
             });
         }
 
@@ -295,51 +201,27 @@ namespace RedBookPlayer
             LoadImage(path);
         }
 
-        public void PlayButton_Click(object sender, RoutedEventArgs e) => Player.Play();
+        public void PlayButton_Click(object sender, RoutedEventArgs e) => Player.TogglePlayPause(true);
 
-        public void PauseButton_Click(object sender, RoutedEventArgs e) => Player.Pause();
+        public void PauseButton_Click(object sender, RoutedEventArgs e) => Player.TogglePlayPause(false);
 
         public void StopButton_Click(object sender, RoutedEventArgs e) => Player.Stop();
 
-        public void NextTrackButton_Click(object sender, RoutedEventArgs e)
-        {
-            bool wasPlaying = Player.Playing;
-            if(wasPlaying) Player.Pause();
-            PlayableDisc.NextTrack();
-            if(wasPlaying) Player.Play();
-        }
+        public void NextTrackButton_Click(object sender, RoutedEventArgs e) => Player.NextTrack();
 
-        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e)
-        {
-            bool wasPlaying = Player.Playing;
-            if(wasPlaying) Player.Pause();
-            PlayableDisc.PreviousTrack();
-            if(wasPlaying) Player.Play();
-        }
+        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => Player.PreviousTrack();
 
-        public void NextIndexButton_Click(object sender, RoutedEventArgs e)
-        {
-            bool wasPlaying = Player.Playing;
-            if(wasPlaying) Player.Pause();
-            PlayableDisc.NextIndex(App.Settings.IndexButtonChangeTrack);
-            if(wasPlaying) Player.Play();
-        }
+        public void NextIndexButton_Click(object sender, RoutedEventArgs e) => Player.NextIndex(App.Settings.IndexButtonChangeTrack);
 
-        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e)
-        {
-            bool wasPlaying = Player.Playing;
-            if(wasPlaying) Player.Pause();
-            PlayableDisc.PreviousIndex(App.Settings.IndexButtonChangeTrack);
-            if(wasPlaying) Player.Play();
-        }
+        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => Player.PreviousIndex(App.Settings.IndexButtonChangeTrack);
 
-        public void FastForwardButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.FastForward();
+        public void FastForwardButton_Click(object sender, RoutedEventArgs e) => Player.FastForward();
 
-        public void RewindButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.Rewind();
+        public void RewindButton_Click(object sender, RoutedEventArgs e) => Player.Rewind();
 
-        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.ToggleDeEmphasis(true);
+        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.ToggleDeEmphasis(true);
 
-        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.ToggleDeEmphasis(false);
+        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.ToggleDeEmphasis(false);
 
         #endregion
     }

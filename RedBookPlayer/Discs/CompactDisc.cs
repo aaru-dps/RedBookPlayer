@@ -8,24 +8,17 @@ using Aaru.Decoders.CD;
 using Aaru.Helpers;
 using static Aaru.Decoders.CD.FullTOC;
 
-namespace RedBookPlayer
+namespace RedBookPlayer.Discs
 {
-    public class PlayableDisc
+    public class CompactDisc : OpticalDisc
     {
         #region Public Fields
 
-        /// <summary>
-        /// Indicate if the disc is ready to be used
-        /// </summary>
-        public bool Initialized { get; private set; } = false;
-
-        /// <summary>
-        /// Current track number
-        /// </summary>
-        public int CurrentTrackNumber
+        /// <inheritdoc/>
+        public override int CurrentTrackNumber
         {
             get => _currentTrackNumber;
-            set
+            protected set
             {
                 // Unset image means we can't do anything
                 if(_image == null)
@@ -54,8 +47,6 @@ namespace RedBookPlayer
                     // Set track flags from subchannel data, if possible
                     SetTrackFlags(track);
 
-                    ApplyDeEmphasis = TrackHasEmphasis;
-
                     TotalIndexes = track.Indexes.Keys.Max();
                     CurrentTrackIndex = track.Indexes.Keys.Min();
 
@@ -73,13 +64,11 @@ namespace RedBookPlayer
             }
         }
 
-        /// <summary>
-        /// Current track index
-        /// </summary>
-        public ushort CurrentTrackIndex
+        /// <inheritdoc/>
+        public override ushort CurrentTrackIndex
         {
             get => _currentTrackIndex;
-            set
+            protected set
             {
                 // Unset image means we can't do anything
                 if(_image == null)
@@ -102,10 +91,8 @@ namespace RedBookPlayer
             }
         }
 
-        /// <summary>
-        /// Current sector number
-        /// </summary>
-        public ulong CurrentSector
+        /// <inheritdoc/>
+        public override ulong CurrentSector
         {
             get => _currentSector;
             set
@@ -146,14 +133,14 @@ namespace RedBookPlayer
         }
 
         /// <summary>
-        /// Represents the PRE flag
+        /// Represents the 4CH flag
         /// </summary>
-        public bool TrackHasEmphasis { get; private set; } = false;
+        public bool QuadChannel { get; private set; } = false;
 
         /// <summary>
-        /// Indicates if de-emphasis should be applied
+        /// Represents the DATA flag
         /// </summary>
-        public bool ApplyDeEmphasis { get; private set; } = false;
+        public bool IsDataTrack => TrackType != TrackType.Audio;
 
         /// <summary>
         /// Represents the DCP flag
@@ -161,53 +148,13 @@ namespace RedBookPlayer
         public bool CopyAllowed { get; private set; } = false;
 
         /// <summary>
-        /// Represents the track type
+        /// Represents the PRE flag
         /// </summary>
-        public TrackType TrackType { get; private set; }
-
-        /// <summary>
-        /// Represents the 4CH flag
-        /// </summary>
-        public bool QuadChannel { get; private set; } = false;
-
-        /// <summary>
-        /// Represents the sector starting the section
-        /// </summary>
-        public ulong SectionStartSector { get; private set; }
-
-        /// <summary>
-        /// Represents the total tracks on the disc
-        /// </summary>
-        public int TotalTracks { get; private set; } = 0;
-
-        /// <summary>
-        /// Represents the total indices on the disc
-        /// </summary>
-        public int TotalIndexes { get; private set; } = 0;
-
-        /// <summary>
-        /// Total sectors in the image
-        /// </summary>
-        public ulong TotalSectors => _image.Info.Sectors;
-
-        /// <summary>
-        /// Represents the time adjustment offset for the disc
-        /// </summary>
-        public ulong TimeOffset { get; private set; } = 0;
-
-        /// <summary>
-        /// Represents the total playing time for the disc
-        /// </summary>
-        public ulong TotalTime { get; private set; } = 0;
+        public bool TrackHasEmphasis { get; private set; } = false;
 
         #endregion
 
         #region Private State Variables
-
-        /// <summary>
-        /// Currently loaded disc image
-        /// </summary>
-        private IOpticalMediaImage _image;
 
         /// <summary>
         /// Current track number
@@ -231,12 +178,8 @@ namespace RedBookPlayer
 
         #endregion
 
-        /// <summary>
-        /// Initialize the disc with a given image
-        /// </summary>
-        /// <param name="image">Aaruformat image to load</param>
-        /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(IOpticalMediaImage image, bool autoPlay = false)
+        /// <inheritdoc/>
+        public override void Init(IOpticalMediaImage image, bool autoPlay = false)
         {
             // If the image is null, we can't do anything
             if(image == null)
@@ -268,45 +211,8 @@ namespace RedBookPlayer
 
         #region Seeking
 
-        /// <summary>
-        /// Try to move to the next track, wrapping around if necessary
-        /// </summary>
-        public void NextTrack()
-        {
-            if(_image == null)
-                return;
-
-            CurrentTrackNumber++;
-            LoadTrack(CurrentTrackNumber);
-        }
-
-        /// <summary>
-        /// Try to move to the previous track, wrapping around if necessary
-        /// </summary>
-        public void PreviousTrack()
-        {
-            if(_image == null)
-                return;
-
-            if(CurrentSector < (ulong)_image.Tracks[CurrentTrackNumber].Indexes[1] + 75)
-            {
-                if(App.Settings.AllowSkipHiddenTrack && CurrentTrackNumber == 0 && CurrentSector >= 75)
-                    CurrentSector = 0;
-                else
-                    CurrentTrackNumber--;
-            }
-            else
-                CurrentTrackNumber--;
-
-            LoadTrack(CurrentTrackNumber);
-        }
-
-        /// <summary>
-        /// Try to move to the next track index
-        /// </summary>
-        /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
-        /// <returns>True if the track was changed, false otherwise</returns>
-        public bool NextIndex(bool changeTrack)
+        /// <inheritdoc/>
+        public override bool NextIndex(bool changeTrack)
         {
             if(_image == null)
                 return false;
@@ -328,12 +234,8 @@ namespace RedBookPlayer
             return false;
         }
 
-        /// <summary>
-        /// Try to move to the previous track index
-        /// </summary>
-        /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
-        /// <returns>True if the track was changed, false otherwise</returns>
-        public bool PreviousIndex(bool changeTrack)
+        /// <inheritdoc/>
+        public override bool PreviousIndex(bool changeTrack)
         {
             if(_image == null)
                 return false;
@@ -355,64 +257,38 @@ namespace RedBookPlayer
             return false;
         }
 
-        /// <summary>
-        /// Fast-forward playback by 75 sectors, if possible
-        /// </summary>
-        public void FastForward()
-        {
-            if(_image == null)
-                return;
-
-            CurrentSector = Math.Min(_image.Info.Sectors - 1, CurrentSector + 75);
-        }
-
-        /// <summary>
-        /// Rewind playback by 75 sectors, if possible
-        /// </summary>
-        public void Rewind()
-        {
-            if(_image == null)
-                return;
-
-            if(CurrentSector >= 75)
-                CurrentSector -= 75;
-        }
-
-        /// <summary>
-        /// Toggle de-emphasis processing
-        /// </summary>
-        /// <param name="enable">True to apply de-emphasis, false otherwise</param>
-        public void ToggleDeEmphasis(bool enable) => ApplyDeEmphasis = enable;
-
         #endregion
 
         #region Helpers
 
-        /// <summary>
-        /// Load the first valid track in the image
-        /// </summary>
-        public void LoadFirstTrack()
+        /// <inheritdoc/>
+        public override void LoadFirstTrack()
         {
             CurrentTrackNumber = 0;
             LoadTrack(CurrentTrackNumber);
         }
 
-        /// <summary>
-        /// Read sector data from the base image starting from the current sector
-        /// </summary>
-        /// <param name="sectorsToRead">Current number of sectors to read</param>
-        /// <returns>Byte array representing the read sectors, if possible</returns>
-        public byte[] ReadSectors(uint sectorsToRead) => _image.ReadSectors(CurrentSector, sectorsToRead);
-
-        /// <summary>
-        /// Set the total indexes from the current track
-        /// </summary>
-        public void SetTotalIndexes()
+        /// <inheritdoc/>
+        public override void SetTotalIndexes()
         {
             if(_image == null)
                 return;
 
             TotalIndexes = _image.Tracks[CurrentTrackNumber].Indexes.Keys.Max();
+        }
+
+        /// <inheritdoc/>
+        protected override void LoadTrack(int track)
+        {
+            if(_image == null)
+                return;
+
+            if(track < 0 || track >= _image.Tracks.Count)
+                return;
+
+            ushort firstIndex = _image.Tracks[track].Indexes.Keys.Min();
+            int firstSector = _image.Tracks[track].Indexes[firstIndex];
+            CurrentSector = (ulong)(firstSector >= 0 ? firstSector : _image.Tracks[track].Indexes[1]);
         }
 
         /// <summary>
@@ -637,23 +513,6 @@ namespace RedBookPlayer
             _toc = nullableToc.Value;
             Console.WriteLine(Prettify(_toc));
             return true;
-        }
-
-        /// <summary>
-        /// Load the desired track, if possible
-        /// </summary>
-        /// <param name="track">Track number to load</param>
-        private void LoadTrack(int track)
-        {
-            if(_image == null)
-                return;
-
-            if(track < 0 || track >= _image.Tracks.Count)
-                return;
-
-            ushort firstIndex = _image.Tracks[track].Indexes.Keys.Min();
-            int firstSector = _image.Tracks[track].Indexes[firstIndex];
-            CurrentSector = (ulong)(firstSector >= 0 ? firstSector : _image.Tracks[track].Indexes[1]);
         }
 
         /// <summary>

@@ -86,8 +86,8 @@
             </Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !IsAudioTrack}">AUDIO</TextBlock>
-            <TextBlock Margin="0,0,16,0" IsVisible="{Binding IsAudioTrack}">AUDIO</TextBlock>
+            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding IsDataTrack}">AUDIO</TextBlock>
+            <TextBlock Margin="0,0,16,0" IsVisible="{Binding !IsDataTrack}">AUDIO</TextBlock>
             <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !IsDataTrack}">DATA</TextBlock>
             <TextBlock Margin="0,0,16,0" IsVisible="{Binding IsDataTrack}">DATA</TextBlock>
             <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !TrackHasEmphasis}">EMPHASIS</TextBlock>
