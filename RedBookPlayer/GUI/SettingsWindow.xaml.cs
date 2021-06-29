@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 
-namespace RedBookPlayer
+namespace RedBookPlayer.GUI
 {
     public class SettingsWindow : Window
     {

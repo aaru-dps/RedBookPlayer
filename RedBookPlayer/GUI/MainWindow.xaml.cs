@@ -5,7 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 
-namespace RedBookPlayer
+namespace RedBookPlayer.GUI
 {
     public class MainWindow : Window
     {

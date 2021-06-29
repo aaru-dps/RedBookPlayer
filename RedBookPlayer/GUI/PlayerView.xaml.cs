@@ -12,7 +12,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 
-namespace RedBookPlayer
+namespace RedBookPlayer.GUI
 {
     public class PlayerView : UserControl
     {

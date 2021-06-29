@@ -9,6 +9,7 @@ using CSCore.SoundOut;
 using NWaves.Audio;
 using NWaves.Filters.BiQuad;
 using RedBookPlayer.Discs;
+using RedBookPlayer.GUI;
 
 namespace RedBookPlayer
 {

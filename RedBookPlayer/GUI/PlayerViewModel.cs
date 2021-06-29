@@ -1,6 +1,6 @@
 using ReactiveUI;
 
-namespace RedBookPlayer
+namespace RedBookPlayer.GUI
 {
     public class PlayerViewModel : ReactiveObject
     {
