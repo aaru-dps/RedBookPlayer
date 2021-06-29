@@ -6,7 +6,7 @@
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64' AND '$(Configuration)' == 'Debug'">
+  <PropertyGroup Condition="'$(RuntimeIdentifier)|$(Configuration)' == 'win-x64|Debug'">
     <DefineConstants>WindowsDebug</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
