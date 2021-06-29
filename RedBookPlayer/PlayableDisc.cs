@@ -136,12 +136,12 @@ namespace RedBookPlayer
         }
 
         /// <summary>
-        /// Represents the pre-emphasis flag
+        /// Represents the PRE flag
         /// </summary>
         public bool TrackHasEmphasis { get; private set; } = false;
 
         /// <summary>
-        /// Represents the PRE flag
+        /// Indicates if de-emphasis should be applied
         /// </summary>
         public bool ApplyDeEmphasis { get; private set; } = false;
 
