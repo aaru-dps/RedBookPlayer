@@ -83,9 +83,42 @@ namespace RedBookPlayer.GUI
         }
 
         /// <summary>
+        /// Initialize the UI based on the currently selected theme
+        /// </summary>
+        /// <param name="xaml">XAML data representing the theme, null for default</param>
+        private void InitializeComponent(string xaml)
+        {
+            DataContext = new PlayerViewModel();
+
+            if (xaml != null)
+                new AvaloniaXamlLoader().Load(xaml, null, this);
+            else
+                AvaloniaXamlLoader.Load(this);
+
+            InitializeDigits();
+
+            _updateTimer = new Timer(1000 / 60);
+
+            _updateTimer.Elapsed += (sender, e) =>
+            {
+                try
+                {
+                    UpdateView(sender, e);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            };
+
+            _updateTimer.AutoReset = true;
+            _updateTimer.Start();
+        }
+
+        /// <summary>
         /// Initialize the displayed digits array
         /// </summary>
-        private void Initialize()
+        private void InitializeDigits()
         {
             _digits = new Image[]
             {
@@ -115,39 +148,6 @@ namespace RedBookPlayer.GUI
                 this.FindControl<Image>("TotalTimeDigit5"),
                 this.FindControl<Image>("TotalTimeDigit6"),
             };
-        }
-
-        /// <summary>
-        /// Initialize the UI based on the currently selected theme
-        /// </summary>
-        /// <param name="xaml">XAML data representing the theme, null for default</param>
-        private void InitializeComponent(string xaml)
-        {
-            DataContext = new PlayerViewModel();
-
-            if (xaml != null)
-                new AvaloniaXamlLoader().Load(xaml, null, this);
-            else
-                AvaloniaXamlLoader.Load(this);
-
-            Initialize();
-
-            _updateTimer = new Timer(1000 / 60);
-
-            _updateTimer.Elapsed += (sender, e) =>
-            {
-                try
-                {
-                    UpdateView(sender, e);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-            };
-
-            _updateTimer.AutoReset = true;
-            _updateTimer.Start();
         }
 
         /// <summary>
