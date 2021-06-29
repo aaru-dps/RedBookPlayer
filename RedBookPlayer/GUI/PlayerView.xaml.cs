@@ -11,6 +11,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using RedBookPlayer.Hardware;
 
 namespace RedBookPlayer.GUI
 {
