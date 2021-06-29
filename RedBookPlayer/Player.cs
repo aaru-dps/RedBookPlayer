@@ -148,7 +148,7 @@ namespace RedBookPlayer
             do
             {
                 // Attempt to read 2 more sectors than requested
-                sectorsToRead = ((ulong)(count / _opticalDisc.BytesPerSector)) + 2;
+                sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 2;
                 zeroSectorsAmount = 0;
 
                 // Avoid overreads by padding with 0-byte data at the end
@@ -156,7 +156,9 @@ namespace RedBookPlayer
                 {
                     ulong oldSectorsToRead = sectorsToRead;
                     sectorsToRead = _opticalDisc.TotalSectors - _opticalDisc.CurrentSector;
-                    zeroSectorsAmount = oldSectorsToRead - sectorsToRead;
+
+                    int tempZeroSectorCount = (int)(oldSectorsToRead - sectorsToRead);
+                    zeroSectorsAmount = (ulong)(tempZeroSectorCount < 0 ? 0 : tempZeroSectorCount);
                 }
 
                 // TODO: Figure out when this value could be negative
@@ -176,15 +178,19 @@ namespace RedBookPlayer
             {
                 lock(_readingImage)
                 {
-                    try
+                    for (int i = 0; i < 4; i++)
                     {
-                        return _opticalDisc.ReadSectors((uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                        try
+                        {
+                            return _opticalDisc.ReadSectors((uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                        }
+                        catch(ArgumentOutOfRangeException)
+                        {
+                            _opticalDisc.LoadFirstTrack();
+                        }
                     }
-                    catch(ArgumentOutOfRangeException)
-                    {
-                        _opticalDisc.LoadFirstTrack();
-                        return _opticalDisc.ReadSectors((uint)sectorsToRead).Concat(zeroSectors).ToArray();
-                    }
+
+                    return zeroSectors;
                 }
             });
 
@@ -201,7 +207,14 @@ namespace RedBookPlayer
 
             // Load only the requested audio segment
             byte[] audioDataSegment = new byte[count];
-            Array.Copy(audioData, _currentSectorReadPosition, audioDataSegment, 0, Math.Min(count, audioData.Length - _currentSectorReadPosition));
+            int copyAmount = Math.Min(count, audioData.Length - _currentSectorReadPosition);
+            if(Math.Max(0, copyAmount) == 0)
+            {
+                Array.Clear(buffer, offset, count);
+                return count;
+            }
+
+            Array.Copy(audioData, _currentSectorReadPosition, audioDataSegment, 0, copyAmount);
 
             // Apply de-emphasis filtering, only if enabled
             if(ApplyDeEmphasis)
