@@ -16,6 +16,11 @@ namespace RedBookPlayer
         /// </summary>
         public bool Initialized { get; private set; } = false;
 
+        /// <summary>
+        /// Indicate if the disc is playing
+        /// </summary>
+        public bool Playing => _soundOut.PlaybackState == PlaybackState.Playing;
+
         #endregion
 
         #region Private State Variables

@@ -4,6 +4,7 @@ using System.Linq;
 using Aaru.CommonTypes.Enums;
 using Aaru.CommonTypes.Interfaces;
 using Aaru.CommonTypes.Structs;
+using Aaru.Decoders.CD;
 using Aaru.Helpers;
 using static Aaru.Decoders.CD.FullTOC;
 
@@ -30,36 +31,45 @@ namespace RedBookPlayer
                 if(_image == null)
                     return;
 
+                // Cache the value and the current track number
+                int cachedValue = value;
+                int cachedTrackNumber = _currentTrackNumber;
+
                 // Check if we're incrementing or decrementing the track
-                bool increment = value >= _currentTrackNumber;
+                bool increment = cachedValue >= _currentTrackNumber;
 
-                // Ensure that the value is valid, wrapping around if necessary
-                if(value >= _image.Tracks.Count)
-                    _currentTrackNumber = 0;
-                else if(value < 0)
-                    _currentTrackNumber = _image.Tracks.Count - 1;
-                else
-                    _currentTrackNumber = value;
-
-                // Cache the current track for easy access
-                Track track = _image.Tracks[CurrentTrackNumber];
-
-                // Set track flags from subchannel data, if possible
-                SetTrackFlags(track);
-
-                ApplyDeEmphasis = TrackHasEmphasis;
-
-                TotalIndexes = track.Indexes.Keys.Max();
-                CurrentTrackIndex = track.Indexes.Keys.Min();
-
-                // If we're not playing data tracks, skip
-                if(!App.Settings.PlayDataTracks && TrackType != TrackType.Audio)
+                do
                 {
+                    // Ensure that the value is valid, wrapping around if necessary
+                    if(cachedValue >= _image.Tracks.Count)
+                        cachedValue = 0;
+                    else if(cachedValue < 0)
+                        cachedValue = _image.Tracks.Count - 1;
+
+                    _currentTrackNumber = cachedValue;
+
+                    // Cache the current track for easy access
+                    Track track = _image.Tracks[_currentTrackNumber];
+
+                    // Set track flags from subchannel data, if possible
+                    SetTrackFlags(track);
+
+                    ApplyDeEmphasis = TrackHasEmphasis;
+
+                    TotalIndexes = track.Indexes.Keys.Max();
+                    CurrentTrackIndex = track.Indexes.Keys.Min();
+
+                    // If the track is playable, just return
+                    if(TrackType == TrackType.Audio || App.Settings.PlayDataTracks)
+                        return;
+
+                    // If we're not playing the track, skip
                     if(increment)
-                        NextTrack();
+                        cachedValue++;
                     else
-                        PreviousTrack();
+                        cachedValue--;
                 }
+                while(cachedValue != cachedTrackNumber);
             }
         }
 
@@ -110,7 +120,7 @@ namespace RedBookPlayer
                 _currentSector = value;
 
                 if((CurrentTrackNumber < _image.Tracks.Count - 1 && CurrentSector >= _image.Tracks[CurrentTrackNumber + 1].TrackStartSector)
-                        || (CurrentTrackNumber > 0 && CurrentSector < track.TrackStartSector))
+                    || (CurrentTrackNumber > 0 && CurrentSector < track.TrackStartSector))
                 {
                     foreach(Track trackData in _image.Tracks.ToArray().Reverse())
                     {
@@ -666,62 +676,17 @@ namespace RedBookPlayer
         {
             try
             {
-                ulong currentSector = track.TrackStartSector;
-                for (int i = 0; i < 16; i++)
-                {
-                    // Try to read the subchannel
-                    byte[] subBuf = _image.ReadSectorTag(track.TrackStartSector, SectorTagType.CdSectorSubchannel);
-                    if(subBuf == null || subBuf.Length < 4)
-                        return;
+                // Get the track descriptor from the TOC
+                TrackDataDescriptor descriptor = _toc.TrackDescriptors.First(d => d.POINT == track.TrackSequence);
 
-                    // Check the expected track, if possible
-                    int adr = subBuf[0] & 0x0F;
-                    if(adr == 1)
-                    {
-                        if(subBuf[1] > track.TrackSequence)
-                        {
-                            currentSector--;
-                            continue;
-                        }
-                        else if(subBuf[1] < track.TrackSequence)
-                        {
-                            currentSector++;
-                            continue;
-                        }
-                    }
+                // Set the track flags from TOC data
+                byte flags = (byte)(descriptor.CONTROL & 0x0D);
+                TrackHasEmphasis = (flags & (byte)TocControl.TwoChanPreEmph) == (byte)TocControl.TwoChanPreEmph;
+                CopyAllowed = (flags & (byte)TocControl.CopyPermissionMask) == (byte)TocControl.CopyPermissionMask;
+                TrackType = (flags & (byte)TocControl.DataTrack) == (byte)TocControl.DataTrack ? TrackType.Data : TrackType.Audio;
+                QuadChannel = (flags & (byte)TocControl.FourChanNoPreEmph) == (byte)TocControl.FourChanNoPreEmph;
 
-                    // Set the track flags from subchannel data
-                    int control = (subBuf[0] & 0xF0) / 16;
-                    switch((control & 0xC) / 4)
-                    {
-                        case 0:
-                            QuadChannel = false;
-                            TrackType = TrackType.Audio;
-                            TrackHasEmphasis = (control & 0x01) == 1;
-                            break;
-                        case 1:
-                            QuadChannel = false;
-                            TrackType = TrackType.Data;
-                            TrackHasEmphasis = false;
-                            break;
-                        case 2:
-                            QuadChannel = true;
-                            TrackType = TrackType.Audio;
-                            TrackHasEmphasis = (control & 0x01) == 1;
-                            break;
-                        default:
-                            QuadChannel = false;
-                            TrackType = track.TrackType;
-                            TrackHasEmphasis = false;
-                            break;
-                    }
-
-                    CopyAllowed = (control & 0x02) > 0;
-                    return;
-                }
-
-                // If we didn't find subchannel data, assume defaults
-                SetDefaultTrackFlags(track);
+                return;
             }
             catch(Exception)
             {

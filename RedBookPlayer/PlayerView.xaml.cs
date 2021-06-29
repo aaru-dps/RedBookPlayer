@@ -301,13 +301,37 @@ namespace RedBookPlayer
 
         public void StopButton_Click(object sender, RoutedEventArgs e) => Player.Stop();
 
-        public void NextTrackButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.NextTrack();
+        public void NextTrackButton_Click(object sender, RoutedEventArgs e)
+        {
+            bool wasPlaying = Player.Playing;
+            if(wasPlaying) Player.Pause();
+            PlayableDisc.NextTrack();
+            if(wasPlaying) Player.Play();
+        }
 
-        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.PreviousTrack();
+        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e)
+        {
+            bool wasPlaying = Player.Playing;
+            if(wasPlaying) Player.Pause();
+            PlayableDisc.PreviousTrack();
+            if(wasPlaying) Player.Play();
+        }
 
-        public void NextIndexButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.NextIndex(App.Settings.IndexButtonChangeTrack);
+        public void NextIndexButton_Click(object sender, RoutedEventArgs e)
+        {
+            bool wasPlaying = Player.Playing;
+            if(wasPlaying) Player.Pause();
+            PlayableDisc.NextIndex(App.Settings.IndexButtonChangeTrack);
+            if(wasPlaying) Player.Play();
+        }
 
-        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.PreviousIndex(App.Settings.IndexButtonChangeTrack);
+        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e)
+        {
+            bool wasPlaying = Player.Playing;
+            if(wasPlaying) Player.Pause();
+            PlayableDisc.PreviousIndex(App.Settings.IndexButtonChangeTrack);
+            if(wasPlaying) Player.Play();
+        }
 
         public void FastForwardButton_Click(object sender, RoutedEventArgs e) => PlayableDisc.FastForward();
 
