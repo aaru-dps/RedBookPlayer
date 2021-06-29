@@ -39,6 +39,9 @@ namespace RedBookPlayer.Hardware
         /// <summary>
         /// OpticalDisc from the parent player for easy access
         /// </summary>
+        /// <remarks>
+        /// TODO: Can we remove the need for a local reference to OpticalDisc?
+        /// </remarks>
         private OpticalDisc _opticalDisc;
 
         /// <summary>
@@ -110,9 +113,6 @@ namespace RedBookPlayer.Hardware
         /// <param name="offset">Offset in the buffer to load at</param>
         /// <param name="count">Number of bytes to load</param>
         /// <returns>Number of bytes read</returns>
-        /// <remarks>
-        /// TODO: Can we remove the need for a local reference to OpticalDisc?
-        /// </remarks>
         public int ProviderRead(byte[] buffer, int offset, int count)
         {
             // Set the current volume
