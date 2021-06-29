@@ -32,6 +32,13 @@ namespace RedBookPlayer
             set => this.RaiseAndSetIfChanged(ref _copyAllowed, value);
         }
 
+        private bool _quadChannel;
+        public bool QuadChannel
+        {
+            get => _quadChannel;
+            set => this.RaiseAndSetIfChanged(ref _quadChannel, value);
+        }
+
         private bool _isAudioTrack;
         public bool IsAudioTrack
         {
