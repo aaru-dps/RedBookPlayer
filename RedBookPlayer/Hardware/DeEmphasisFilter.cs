@@ -1,7 +1,7 @@
 using System;
 using NWaves.Filters.BiQuad;
 
-namespace RedBookPlayer
+namespace RedBookPlayer.Hardware
 {
     /// <summary>
     /// Filter for applying de-emphasis to audio

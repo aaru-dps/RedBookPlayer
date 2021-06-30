@@ -1,0 +1,2 @@
+dotnet publish -f netcoreapp3.1 -r win-x64 -c Debug -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
+dotnet publish -f netcoreapp3.1 -r win-x64 -c Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true

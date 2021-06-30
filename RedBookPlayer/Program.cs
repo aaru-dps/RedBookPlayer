@@ -1,4 +1,5 @@
-#if Windows
+using System;
+#if WindowsDebug
 using System.Runtime.InteropServices;
 #endif
 using Avalonia;
@@ -8,19 +9,20 @@ namespace RedBookPlayer
 {
     internal class Program
     {
+        [STAThread]
         public static void Main(string[] args)
         {
-        #if Windows
+#if WindowsDebug
             AllocConsole();
-        #endif
+#endif
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 
-    #if Windows
+#if WindowsDebug
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
-    #endif
+#endif
 
         public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UsePlatformDetect().LogToDebug();
     }

@@ -1,7 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
-             x:Class="RedBookPlayer.PlayerView" Width="900" Height="400">
+             x:Class="RedBookPlayer.GUI.PlayerView" Width="900" Height="400">
     <StackPanel Margin="16" VerticalAlignment="Center">
         <Button Click="LoadButton_Click" Margin="32,0,32,16">Load</Button>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
@@ -86,8 +86,8 @@
             </Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !IsAudioTrack}">AUDIO</TextBlock>
-            <TextBlock Margin="0,0,16,0" IsVisible="{Binding IsAudioTrack}">AUDIO</TextBlock>
+            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding IsDataTrack}">AUDIO</TextBlock>
+            <TextBlock Margin="0,0,16,0" IsVisible="{Binding !IsDataTrack}">AUDIO</TextBlock>
             <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !IsDataTrack}">DATA</TextBlock>
             <TextBlock Margin="0,0,16,0" IsVisible="{Binding IsDataTrack}">DATA</TextBlock>
             <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !TrackHasEmphasis}">EMPHASIS</TextBlock>

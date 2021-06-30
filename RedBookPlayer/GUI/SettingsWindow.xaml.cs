@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 
-namespace RedBookPlayer
+namespace RedBookPlayer.GUI
 {
     public class SettingsWindow : Window
     {
@@ -44,30 +44,42 @@ namespace RedBookPlayer
         void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
-
-            _themeList                  =  this.FindControl<ListBox>("ThemeList");
-            _themeList.SelectionChanged += ThemeList_SelectionChanged;
-
-            List<string> items = new List<string>();
-            items.Add("default");
-
-            if(Directory.Exists("themes/"))
-            {
-                foreach(string dir in Directory.EnumerateDirectories("themes/"))
-                {
-                    string themeName = dir.Split('/')[1];
-
-                    if (!File.Exists($"themes/{themeName}/view.xaml"))
-                        continue;
-
-                    items.Add(themeName);
-                }
-            }
-
-            _themeList.Items = items;
+            
+            PopulateThemes();
 
             this.FindControl<Button>("ApplyButton").Click            += ApplySettings;
             this.FindControl<Slider>("VolumeSlider").PropertyChanged += (s, e) => UpdateView();
+        }
+
+        /// <summary>
+        /// Populate the list of themes
+        /// </summary>
+        private void PopulateThemes()
+        {
+            // Get a reference to the theme list
+            _themeList = this.FindControl<ListBox>("ThemeList");
+            _themeList.SelectionChanged += ThemeList_SelectionChanged;
+
+            // Create a list of all found themes
+            List<string> items = new List<string>();
+            items.Add("default");
+
+            // Ensure the theme directory exists
+            if(!Directory.Exists("themes/"))
+                Directory.CreateDirectory("themes/");
+
+            // Add all theme directories if they're valid
+            foreach(string dir in Directory.EnumerateDirectories("themes/"))
+            {
+                string themeName = dir.Split('/')[1];
+
+                if(!File.Exists($"themes/{themeName}/view.xaml"))
+                    continue;
+
+                items.Add(themeName);
+            }
+
+            _themeList.Items = items;
         }
     }
 }
