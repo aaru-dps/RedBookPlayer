@@ -13,7 +13,7 @@ namespace RedBookPlayer.Hardware
         #region Public Fields
 
         /// <summary>
-        /// Indicate if the disc is ready to be used
+        /// Indicate if the output is ready to be used
         /// </summary>
         public bool Initialized { get; private set; } = false;
 
@@ -23,7 +23,7 @@ namespace RedBookPlayer.Hardware
         public bool ApplyDeEmphasis { get; set; } = false;
 
         /// <summary>
-        /// Indicate if the disc is playing
+        /// Indicate if the output is playing
         /// </summary>
         public bool Playing => _soundOut.PlaybackState == PlaybackState.Playing;
 
