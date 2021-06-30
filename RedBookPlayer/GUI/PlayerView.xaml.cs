@@ -59,6 +59,29 @@ namespace RedBookPlayer.GUI
         }
 
         /// <summary>
+        /// Load an image from the path
+        /// </summary>
+        /// <param name="path">Path to the image to load</param>
+        public async Task<bool> LoadImage(string path)
+        {
+            bool result = await Task.Run(() =>
+            {
+                Player.Init(path, App.Settings.AutoPlay);
+                return Player.Initialized;
+            });
+
+            if(result)
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
+                });
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Load the png image for a given character based on the theme
         /// </summary>
         /// <param name="character">Character to load the image for</param>
@@ -90,6 +113,7 @@ namespace RedBookPlayer.GUI
         {
             DataContext = new PlayerViewModel();
 
+            // Load the theme
             if (xaml != null)
                 new AvaloniaXamlLoader().Load(xaml, null, this);
             else
@@ -148,27 +172,6 @@ namespace RedBookPlayer.GUI
                 this.FindControl<Image>("TotalTimeDigit5"),
                 this.FindControl<Image>("TotalTimeDigit6"),
             };
-        }
-
-        /// <summary>
-        /// Load an image from the path
-        /// </summary>
-        /// <param name="path">Path to the image to load</param>
-        private async void LoadImage(string path)
-        {
-            bool result = await Task.Run(() =>
-            {
-                Player.Init(path, App.Settings.AutoPlay);
-                return Player.Initialized;
-            });
-
-            if(result)
-            {
-                await Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
-                });
-            }
         }
 
         /// <summary>

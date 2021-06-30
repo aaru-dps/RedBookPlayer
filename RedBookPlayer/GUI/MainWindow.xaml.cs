@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Avalonia.Controls;
@@ -62,15 +63,9 @@ namespace RedBookPlayer.GUI
             Instance.Height = ((PlayerView)Instance.ContentControl.Content).Height;
         }
 
-        public void OnKeyDown(object sender, KeyEventArgs e)
-        {
-            if(e.Key == Key.F1)
-            {
-                settingsWindow = new SettingsWindow(App.Settings);
-                settingsWindow.Show();
-            }
-        }
-
+        /// <summary>
+        /// Initialize the main window
+        /// </summary>
         void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
@@ -97,6 +92,36 @@ namespace RedBookPlayer.GUI
             {
                 PlayerView.Player.Stop();
             };
+
+            AddHandler(DragDrop.DropEvent, MainWindow_Drop);
         }
+
+        #region Event Handlers
+
+        public async void MainWindow_Drop(object sender, DragEventArgs e)
+        {
+            PlayerView playerView = ContentControl.Content as PlayerView;
+            if(playerView == null)
+                return;
+
+            IEnumerable<string> fileNames = e.Data.GetFileNames();
+            foreach(string filename in fileNames)
+            {
+                bool loaded = await playerView.LoadImage(filename);
+                if(loaded)
+                    break;
+            }
+        }
+
+        public void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.F1)
+            {
+                settingsWindow = new SettingsWindow(App.Settings);
+                settingsWindow.Show();
+            }
+        }
+
+        #endregion
     }
 }

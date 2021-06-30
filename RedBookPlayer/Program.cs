@@ -1,3 +1,4 @@
+using System;
 #if WindowsDebug
 using System.Runtime.InteropServices;
 #endif
@@ -8,6 +9,7 @@ namespace RedBookPlayer
 {
     internal class Program
     {
+        [STAThread]
         public static void Main(string[] args)
         {
 #if WindowsDebug
