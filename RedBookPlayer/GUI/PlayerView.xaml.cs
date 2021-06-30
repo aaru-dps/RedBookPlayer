@@ -64,6 +64,9 @@ namespace RedBookPlayer.GUI
         /// <param name="path">Path to the image to load</param>
         public async Task<bool> LoadImage(string path)
         {
+            // If the player is currently running, stop it
+            if(Player.Playing) Player.Stop();
+
             bool result = await Task.Run(() =>
             {
                 Player.Init(path, App.Settings.AutoPlay);
@@ -202,7 +205,7 @@ namespace RedBookPlayer.GUI
             if (path == null)
                 return;
 
-            LoadImage(path);
+            await LoadImage(path);
         }
 
         public void PlayButton_Click(object sender, RoutedEventArgs e) => Player.TogglePlayPause(true);
@@ -228,6 +231,8 @@ namespace RedBookPlayer.GUI
         public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.ToggleDeEmphasis(true);
 
         public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.ToggleDeEmphasis(false);
+
+        public void EnableDisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.ToggleDeEmphasis(!Player.ApplyDeEmphasis);
 
         #endregion
     }
