@@ -23,6 +23,11 @@ namespace RedBookPlayer.Hardware
         /// </summary>
         public bool Playing => _soundOutput?.Playing ?? false;
 
+        /// <summary>
+        /// Indicates if de-emphasis should be applied
+        /// </summary>
+        public bool ApplyDeEmphasis => _soundOutput?.ApplyDeEmphasis ?? false;
+
         #endregion
 
         #region Private State Variables
@@ -258,7 +263,7 @@ namespace RedBookPlayer.Hardware
         /// Toggle de-emphasis processing
         /// </summary>
         /// <param name="enable">True to apply de-emphasis, false otherwise</param>
-        public void ToggleDeEmphasis(bool enable) => _soundOutput.ToggleDeEmphasis(enable);
+        public void ToggleDeEmphasis(bool enable) => _soundOutput?.ToggleDeEmphasis(enable);
 
         /// <summary>
         /// Update the data context for the frontend
