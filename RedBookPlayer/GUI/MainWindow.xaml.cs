@@ -115,10 +115,73 @@ namespace RedBookPlayer.GUI
 
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
+            PlayerView playerView = ContentControl.Content as PlayerView;
+
+            // Open settings window
             if(e.Key == Key.F1)
             {
                 settingsWindow = new SettingsWindow(App.Settings);
                 settingsWindow.Show();
+            }
+
+            // Load image
+            else if (e.Key == Key.F2 || e.Key == Key.Enter)
+            {
+                playerView?.LoadButton_Click(this, null);
+            }
+
+            // Toggle playback
+            else if(e.Key == Key.Space || e.Key == Key.MediaPlayPause)
+            {
+                playerView?.PlayPauseButton_Click(this, null);
+            }
+
+            // Stop playback
+            else if(e.Key == Key.Escape || e.Key == Key.MediaStop)
+            {
+                playerView?.StopButton_Click(this, null);
+            }
+
+            // Next Track
+            else if(e.Key == Key.Right || e.Key == Key.MediaNextTrack)
+            {
+                playerView?.NextTrackButton_Click(this, null);
+            }
+
+            // Previous Track
+            else if(e.Key == Key.Left || e.Key == Key.MediaPreviousTrack)
+            {
+                playerView?.PreviousTrackButton_Click(this, null);
+            }
+
+            // Next Index
+            else if(e.Key == Key.OemCloseBrackets)
+            {
+                playerView?.NextIndexButton_Click(this, null);
+            }
+
+            // Previous Index
+            else if(e.Key == Key.OemOpenBrackets)
+            {
+                playerView?.PreviousIndexButton_Click(this, null);
+            }
+
+            // Fast Foward
+            else if(e.Key == Key.OemPeriod)
+            {
+                playerView?.FastForwardButton_Click(this, null);
+            }
+
+            // Rewind
+            else if(e.Key == Key.OemComma)
+            {
+                playerView?.RewindButton_Click(this, null);
+            }
+
+            // Emphasis Toggle
+            else if(e.Key == Key.E)
+            {
+                playerView?.EnableDisableDeEmphasisButton_Click(this, null);
             }
         }
 
