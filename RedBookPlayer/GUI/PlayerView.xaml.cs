@@ -117,10 +117,17 @@ namespace RedBookPlayer.GUI
             DataContext = new PlayerViewModel();
 
             // Load the theme
-            if (xaml != null)
-                new AvaloniaXamlLoader().Load(xaml, null, this);
-            else
+            try
+            {
+                if(xaml != null)
+                    new AvaloniaXamlLoader().Load(xaml, null, this);
+                else
+                    AvaloniaXamlLoader.Load(this);
+            }
+            catch
+            {
                 AvaloniaXamlLoader.Load(this);
+            }
 
             InitializeDigits();
 
