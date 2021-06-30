@@ -209,6 +209,8 @@ namespace RedBookPlayer.GUI
 
         public void PauseButton_Click(object sender, RoutedEventArgs e) => Player.TogglePlayPause(false);
 
+        public void PlayPauseButton_Click(object sender, RoutedEventArgs e) => Player.TogglePlayPause(!Player.Playing);
+
         public void StopButton_Click(object sender, RoutedEventArgs e) => Player.Stop();
 
         public void NextTrackButton_Click(object sender, RoutedEventArgs e) => Player.NextTrack();
