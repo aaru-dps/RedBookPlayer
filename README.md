@@ -9,7 +9,7 @@
 | Key | Action |
 | --- | ------ |
 | `F1`  | Open Settings Window |
-| `F2` / `Enter` | Load New Image |
+| `F2` | Load New Image |
 | `Space` | Toggle Play / Pause |
 | `Esc` | Stop Playback |
 | `&#8594;` | Next Track |

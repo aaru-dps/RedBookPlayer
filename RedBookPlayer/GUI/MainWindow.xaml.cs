@@ -118,68 +118,68 @@ namespace RedBookPlayer.GUI
             PlayerView playerView = ContentControl.Content as PlayerView;
 
             // Open settings window
-            if(e.Key == Key.F1)
+            if(e.Key == App.Settings.OpenSettingsKey)
             {
                 settingsWindow = new SettingsWindow(App.Settings);
                 settingsWindow.Show();
             }
 
             // Load image
-            else if (e.Key == Key.F2 || e.Key == Key.Enter)
+            else if (e.Key == App.Settings.LoadImageKey)
             {
                 playerView?.LoadButton_Click(this, null);
             }
 
             // Toggle playback
-            else if(e.Key == Key.Space || e.Key == Key.MediaPlayPause)
+            else if(e.Key == App.Settings.TogglePlaybackKey || e.Key == Key.MediaPlayPause)
             {
                 playerView?.PlayPauseButton_Click(this, null);
             }
 
             // Stop playback
-            else if(e.Key == Key.Escape || e.Key == Key.MediaStop)
+            else if(e.Key == App.Settings.StopPlaybackKey || e.Key == Key.MediaStop)
             {
                 playerView?.StopButton_Click(this, null);
             }
 
             // Next Track
-            else if(e.Key == Key.Right || e.Key == Key.MediaNextTrack)
+            else if(e.Key == App.Settings.NextTrackKey || e.Key == Key.MediaNextTrack)
             {
                 playerView?.NextTrackButton_Click(this, null);
             }
 
             // Previous Track
-            else if(e.Key == Key.Left || e.Key == Key.MediaPreviousTrack)
+            else if(e.Key == App.Settings.PreviousTrackKey || e.Key == Key.MediaPreviousTrack)
             {
                 playerView?.PreviousTrackButton_Click(this, null);
             }
 
             // Next Index
-            else if(e.Key == Key.OemCloseBrackets)
+            else if(e.Key == App.Settings.NextIndexKey)
             {
                 playerView?.NextIndexButton_Click(this, null);
             }
 
             // Previous Index
-            else if(e.Key == Key.OemOpenBrackets)
+            else if(e.Key == App.Settings.PreviousIndexKey)
             {
                 playerView?.PreviousIndexButton_Click(this, null);
             }
 
             // Fast Foward
-            else if(e.Key == Key.OemPeriod)
+            else if(e.Key == App.Settings.FastForwardPlaybackKey)
             {
                 playerView?.FastForwardButton_Click(this, null);
             }
 
             // Rewind
-            else if(e.Key == Key.OemComma)
+            else if(e.Key == App.Settings.RewindPlaybackKey)
             {
                 playerView?.RewindButton_Click(this, null);
             }
 
             // Emphasis Toggle
-            else if(e.Key == Key.E)
+            else if(e.Key == App.Settings.ToggleDeEmphasisKey)
             {
                 playerView?.EnableDisableDeEmphasisButton_Click(this, null);
             }

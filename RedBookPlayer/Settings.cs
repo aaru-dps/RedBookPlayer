@@ -1,12 +1,15 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using Avalonia.Input;
 using RedBookPlayer.GUI;
 
 namespace RedBookPlayer
 {
     public class Settings
     {
+        #region Player Settings
+
         /// <summary>
         /// Indicates if discs should start playing on load
         /// </summary>
@@ -41,6 +44,67 @@ namespace RedBookPlayer
         /// Indicates the currently selected theme
         /// </summary>
         public string SelectedTheme { get; set; } = "default";
+
+        #endregion
+
+        #region Key Mappings
+
+        /// <summary>
+        /// Key assigned to open settings
+        /// </summary>
+        public Key OpenSettingsKey { get; set; } = Key.F1;
+
+        /// <summary>
+        /// Key assigned to load a new image
+        /// </summary>
+        public Key LoadImageKey { get; set; } = Key.F2;
+
+        /// <summary>
+        /// Key assigned to toggle play and pause
+        /// </summary>
+        public Key TogglePlaybackKey { get; set; } = Key.Space;
+
+        /// <summary>
+        /// Key assigned to stop playback
+        /// </summary>
+        public Key StopPlaybackKey { get; set; } = Key.Escape;
+
+        /// <summary>
+        /// Key assigned to move to the next track
+        /// </summary>
+        public Key NextTrackKey { get; set; } = Key.Right;
+
+        /// <summary>
+        /// Key assigned to move to the previous track
+        /// </summary>
+        public Key PreviousTrackKey { get; set; } = Key.Left;
+
+        /// <summary>
+        /// Key assigned to move to the next index
+        /// </summary>
+        public Key NextIndexKey { get; set; } = Key.OemCloseBrackets;
+
+        /// <summary>
+        /// Key assigned to move to the previous index
+        /// </summary>
+        public Key PreviousIndexKey { get; set; } = Key.OemOpenBrackets;
+
+        /// <summary>
+        /// Key assigned to fast forward playback
+        /// </summary>
+        public Key FastForwardPlaybackKey { get; set; } = Key.OemPeriod;
+
+        /// <summary>
+        /// Key assigned to rewind playback
+        /// </summary>
+        public Key RewindPlaybackKey { get; set; } = Key.OemComma;
+
+        /// <summary>
+        /// Key assigned to toggle de-emphasis
+        /// </summary>
+        public Key ToggleDeEmphasisKey { get; set; } = Key.E;
+
+        #endregion
 
         /// <summary>
         /// Path to the settings file
