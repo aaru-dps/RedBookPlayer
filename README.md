@@ -22,3 +22,8 @@
 | **Numpad -** | Volume Down |
 | **M** | Mute |
 | **E** | Toggle Emphasis |
+
+For both Volume Up and Volume Down:
+- Holding **Ctrl** will move in increments of 2
+- Holding **Shift** will move in increments of 5
+- Holding both will move in increments of 10

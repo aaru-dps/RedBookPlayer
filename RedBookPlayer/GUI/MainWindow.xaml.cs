@@ -181,13 +181,25 @@ namespace RedBookPlayer.GUI
             // Volume Up
             else if(e.Key == App.Settings.VolumeUpKey || e.Key == Key.VolumeUp)
             {
-                playerView?.VolumeUpButton_Click(this, null);
+                int increment = 1;
+                if(e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    increment *= 2;
+                if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                    increment *= 5;
+                
+                App.Settings.Volume += increment;
             }
 
             // Volume Down
             else if(e.Key == App.Settings.VolumeDownKey || e.Key == Key.VolumeDown)
             {
-                playerView?.VolumeDownButton_Click(this, null);
+                int decrement = 1;
+                if(e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    decrement *= 2;
+                if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                    decrement *= 5;
+
+                App.Settings.Volume -= decrement;
             }
 
             // Mute Toggle
