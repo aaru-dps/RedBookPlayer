@@ -29,7 +29,7 @@
                             <TextBlock VerticalAlignment="Center">Generate a TOC if the disc is missing one</TextBlock>
                         </WrapPanel>
                         <DockPanel Margin="0,0,0,16">
-                            <TextBlock VerticalAlignment="Center" Margin="0,0,8,0" DockPanel.Dock="Left">Volume</TextBlock>
+                            <TextBlock VerticalAlignment="Center" Margin="0,0,8,0" DockPanel.Dock="Left">Default Volume</TextBlock>
                             <TextBlock VerticalAlignment="Center" DockPanel.Dock="Right" Text="%" />
                             <TextBlock VerticalAlignment="Center" Margin="8,0,0,0" DockPanel.Dock="Right" Text="{Binding Volume}"
                                        Name="VolumeLabel" />
@@ -41,98 +41,80 @@
                 </DockPanel>
             </TabItem>
             <TabItem Header="Keyboard Bindings">
-                <StackPanel Margin="16">
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <TextBlock Grid.Column="0" Width="120">Load Image</TextBlock>
-                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="LoadImageKeyBind" Margin="8,0,0,0" Width="120"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Width="120">Toggle Play/Pause</TextBlock>
-                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="TogglePlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Column="0" Width="120">Stop Playback</TextBlock>
-                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="StopPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Load Image-->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Width="120">Load Image</TextBlock>
+                    <ComboBox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Name="LoadImageKeyBind" Margin="8,0,0,0" Width="120"/>
 
-                        <TextBlock Grid.Column="0" Width="120">Next Track</TextBlock>
-                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="NextTrackKeyBind" Margin="8,0,0,0" Width="120"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Toggle Play/Pause -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Width="120">Toggle Play/Pause</TextBlock>
+                    <ComboBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Name="TogglePlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
 
-                        <TextBlock Grid.Column="0" Width="120">Previous Track</TextBlock>
-                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="PreviousTrackKeyBind" Margin="8,0,0,0" Width="120"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Stop Playback-->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Width="120">Stop Playback</TextBlock>
+                    <ComboBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Name="StopPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
 
-                        <TextBlock Grid.Column="0" Width="120">Next Index</TextBlock>
-                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="NextIndexKeyBind" Margin="8,0,0,0" Width="120"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Next Track -->
+                    <TextBlock Grid.Row="3" Grid.Column="0" Width="120">Next Track</TextBlock>
+                    <ComboBox Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" Name="NextTrackKeyBind" Margin="8,0,0,0" Width="120"/>
 
-                        <TextBlock Grid.Column="0" Width="120">Previous Index</TextBlock>
-                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="PreviousIndexKeyBind" Margin="8,0,0,0" Width="120"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Previous Track -->
+                    <TextBlock Grid.Row="4" Grid.Column="0" Width="120">Previous Track</TextBlock>
+                    <ComboBox Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right" Name="PreviousTrackKeyBind" Margin="8,0,0,0" Width="120"/>
 
-                        <TextBlock Grid.Column="0" Width="120">Fast-Forward</TextBlock>
-                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="FastForwardPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Next Index -->
+                    <TextBlock Grid.Row="5" Grid.Column="0" Width="120">Next Index</TextBlock>
+                    <ComboBox Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right" Name="NextIndexKeyBind" Margin="8,0,0,0" Width="120"/>
 
-                        <TextBlock Grid.Column="0" Width="120">Rewind</TextBlock>
-                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="RewindPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Previous Index -->
+                    <TextBlock Grid.Row="6" Grid.Column="0" Width="120">Previous Index</TextBlock>
+                    <ComboBox Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right" Name="PreviousIndexKeyBind" Margin="8,0,0,0" Width="120"/>
 
-                        <TextBlock Grid.Column="0" Width="120">Toggle De-Emphasis</TextBlock>
-                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="ToggleDeEmphasisKeyBind" Margin="8,0,0,0" Width="120"/>
-                    </Grid>
-                </StackPanel>
+                    <!-- Fast Forward -->
+                    <TextBlock Grid.Row="7" Grid.Column="0" Width="120">Fast-Forward</TextBlock>
+                    <ComboBox Grid.Row="7" Grid.Column="1" HorizontalAlignment="Right" Name="FastForwardPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
+
+                    <!-- Rewind -->
+                    <TextBlock Grid.Row="8" Grid.Column="0" Width="120">Rewind</TextBlock>
+                    <ComboBox Grid.Row="8" Grid.Column="1" HorizontalAlignment="Right" Name="RewindPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
+
+                    <!-- Volume Up -->
+                    <TextBlock Grid.Row="9" Grid.Column="0" Width="120">Volume Up</TextBlock>
+                    <ComboBox Grid.Row="9" Grid.Column="1" HorizontalAlignment="Right" Name="VolumeUpKeyBind" Margin="8,0,0,0" Width="120"/>
+
+                    <!-- Volume Down -->
+                    <TextBlock Grid.Row="10" Grid.Column="0" Width="120">Volume Down</TextBlock>
+                    <ComboBox Grid.Row="10" Grid.Column="1" HorizontalAlignment="Right" Name="VolumeDownKeyBind" Margin="8,0,0,0" Width="120"/>
+
+                    <!-- Mute Toggle -->
+                    <TextBlock Grid.Row="11" Grid.Column="0" Width="120">Toggle Mute</TextBlock>
+                    <ComboBox Grid.Row="11" Grid.Column="1" HorizontalAlignment="Right" Name="ToggleMuteKeyBind" Margin="8,0,0,0" Width="120"/>
+
+                    <!-- De-Emphasis Toggle -->
+                    <TextBlock Grid.Row="12" Grid.Column="0" Width="120">Toggle De-Emphasis</TextBlock>
+                    <ComboBox Grid.Row="12" Grid.Column="1" HorizontalAlignment="Right" Name="ToggleDeEmphasisKeyBind" Margin="8,0,0,0" Width="120"/>
+                </Grid>
             </TabItem>
         </TabControl>
         <Button Name="ApplyButton">Apply</Button>

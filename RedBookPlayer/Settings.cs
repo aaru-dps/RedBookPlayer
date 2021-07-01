@@ -100,6 +100,21 @@ namespace RedBookPlayer
         public Key RewindPlaybackKey { get; set; } = Key.OemComma;
 
         /// <summary>
+        /// Key assigned to raise volume
+        /// </summary>
+        public Key VolumeUpKey { get; set; } = Key.OemPlus;
+
+        /// <summary>
+        /// Key assigned to lower volume
+        /// </summary>
+        public Key VolumeDownKey { get; set; } = Key.OemMinus;
+
+        /// <summary>
+        /// Key assigned to toggle mute
+        /// </summary>
+        public Key ToggleMuteKey { get; set; } = Key.M;
+
+        /// <summary>
         /// Key assigned to toggle de-emphasis
         /// </summary>
         public Key ToggleDeEmphasisKey { get; set; } = Key.E;

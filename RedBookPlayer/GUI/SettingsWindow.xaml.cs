@@ -92,41 +92,50 @@ namespace RedBookPlayer.GUI
         private void PopulateKeyboardList()
         {
             // Access all of the combo boxes
-            ComboBox LoadImageKeyBind = this.FindControl<ComboBox>("LoadImageKeyBind");
-            ComboBox TogglePlaybackKeyBind = this.FindControl<ComboBox>("TogglePlaybackKeyBind");
-            ComboBox StopPlaybackKeyBind = this.FindControl<ComboBox>("StopPlaybackKeyBind");
-            ComboBox NextTrackKeyBind = this.FindControl<ComboBox>("NextTrackKeyBind");
-            ComboBox PreviousTrackKeyBind = this.FindControl<ComboBox>("PreviousTrackKeyBind");
-            ComboBox NextIndexKeyBind = this.FindControl<ComboBox>("NextIndexKeyBind");
-            ComboBox PreviousIndexKeyBind = this.FindControl<ComboBox>("PreviousIndexKeyBind");
-            ComboBox FastForwardPlaybackKeyBind = this.FindControl<ComboBox>("FastForwardPlaybackKeyBind");
-            ComboBox RewindPlaybackKeyBind = this.FindControl<ComboBox>("RewindPlaybackKeyBind");
-            ComboBox ToggleDeEmphasisKeyBind = this.FindControl<ComboBox>("ToggleDeEmphasisKeyBind");
+            ComboBox loadImageKeyBind = this.FindControl<ComboBox>("LoadImageKeyBind");
+            ComboBox togglePlaybackKeyBind = this.FindControl<ComboBox>("TogglePlaybackKeyBind");
+            ComboBox stopPlaybackKeyBind = this.FindControl<ComboBox>("StopPlaybackKeyBind");
+            ComboBox nextTrackKeyBind = this.FindControl<ComboBox>("NextTrackKeyBind");
+            ComboBox previousTrackKeyBind = this.FindControl<ComboBox>("PreviousTrackKeyBind");
+            ComboBox nextIndexKeyBind = this.FindControl<ComboBox>("NextIndexKeyBind");
+            ComboBox previousIndexKeyBind = this.FindControl<ComboBox>("PreviousIndexKeyBind");
+            ComboBox fastForwardPlaybackKeyBind = this.FindControl<ComboBox>("FastForwardPlaybackKeyBind");
+            ComboBox rewindPlaybackKeyBind = this.FindControl<ComboBox>("RewindPlaybackKeyBind");
+            ComboBox volumeUpKeyBind = this.FindControl<ComboBox>("VolumeUpKeyBind");
+            ComboBox volumeDownKeyBind = this.FindControl<ComboBox>("VolumeDownKeyBind");
+            ComboBox toggleMuteKeyBind = this.FindControl<ComboBox>("ToggleMuteKeyBind");
+            ComboBox toggleDeEmphasisKeyBind = this.FindControl<ComboBox>("ToggleDeEmphasisKeyBind");
 
             // Assign the list of values to all of them
             Array keyboardList = GenerateKeyboardList();
-            LoadImageKeyBind.Items = keyboardList;
-            TogglePlaybackKeyBind.Items = keyboardList;
-            StopPlaybackKeyBind.Items = keyboardList;
-            NextTrackKeyBind.Items = keyboardList;
-            PreviousTrackKeyBind.Items = keyboardList;
-            NextIndexKeyBind.Items = keyboardList;
-            PreviousIndexKeyBind.Items = keyboardList;
-            FastForwardPlaybackKeyBind.Items = keyboardList;
-            RewindPlaybackKeyBind.Items = keyboardList;
-            ToggleDeEmphasisKeyBind.Items = keyboardList;
+            loadImageKeyBind.Items = keyboardList;
+            togglePlaybackKeyBind.Items = keyboardList;
+            stopPlaybackKeyBind.Items = keyboardList;
+            nextTrackKeyBind.Items = keyboardList;
+            previousTrackKeyBind.Items = keyboardList;
+            nextIndexKeyBind.Items = keyboardList;
+            previousIndexKeyBind.Items = keyboardList;
+            fastForwardPlaybackKeyBind.Items = keyboardList;
+            rewindPlaybackKeyBind.Items = keyboardList;
+            volumeUpKeyBind.Items = keyboardList;
+            volumeDownKeyBind.Items = keyboardList;
+            toggleMuteKeyBind.Items = keyboardList;
+            toggleDeEmphasisKeyBind.Items = keyboardList;
 
             // Set all of the currently selected items
-            LoadImageKeyBind.SelectedItem = _settings.LoadImageKey;
-            TogglePlaybackKeyBind.SelectedItem = _settings.TogglePlaybackKey;
-            StopPlaybackKeyBind.SelectedItem = _settings.StopPlaybackKey;
-            NextTrackKeyBind.SelectedItem = _settings.NextTrackKey;
-            PreviousTrackKeyBind.SelectedItem = _settings.PreviousTrackKey;
-            NextIndexKeyBind.SelectedItem = _settings.NextIndexKey;
-            PreviousIndexKeyBind.SelectedItem = _settings.PreviousIndexKey;
-            FastForwardPlaybackKeyBind.SelectedItem = _settings.FastForwardPlaybackKey;
-            RewindPlaybackKeyBind.SelectedItem = _settings.RewindPlaybackKey;
-            ToggleDeEmphasisKeyBind.SelectedItem = _settings.ToggleDeEmphasisKey;
+            loadImageKeyBind.SelectedItem = _settings.LoadImageKey;
+            togglePlaybackKeyBind.SelectedItem = _settings.TogglePlaybackKey;
+            stopPlaybackKeyBind.SelectedItem = _settings.StopPlaybackKey;
+            nextTrackKeyBind.SelectedItem = _settings.NextTrackKey;
+            previousTrackKeyBind.SelectedItem = _settings.PreviousTrackKey;
+            nextIndexKeyBind.SelectedItem = _settings.NextIndexKey;
+            previousIndexKeyBind.SelectedItem = _settings.PreviousIndexKey;
+            fastForwardPlaybackKeyBind.SelectedItem = _settings.FastForwardPlaybackKey;
+            rewindPlaybackKeyBind.SelectedItem = _settings.RewindPlaybackKey;
+            volumeUpKeyBind.SelectedItem = _settings.VolumeUpKey;
+            volumeDownKeyBind.SelectedItem = _settings.VolumeDownKey;
+            toggleMuteKeyBind.SelectedItem = _settings.ToggleMuteKey;
+            toggleDeEmphasisKeyBind.SelectedItem = _settings.ToggleDeEmphasisKey;
         }
 
         /// <summary>
@@ -135,28 +144,34 @@ namespace RedBookPlayer.GUI
         private void SaveKeyboardList()
         {
             // Access all of the combo boxes
-            ComboBox LoadImageKeyBind = this.FindControl<ComboBox>("LoadImageKeyBind");
-            ComboBox TogglePlaybackKeyBind = this.FindControl<ComboBox>("TogglePlaybackKeyBind");
-            ComboBox StopPlaybackKeyBind = this.FindControl<ComboBox>("StopPlaybackKeyBind");
-            ComboBox NextTrackKeyBind = this.FindControl<ComboBox>("NextTrackKeyBind");
-            ComboBox PreviousTrackKeyBind = this.FindControl<ComboBox>("PreviousTrackKeyBind");
-            ComboBox NextIndexKeyBind = this.FindControl<ComboBox>("NextIndexKeyBind");
-            ComboBox PreviousIndexKeyBind = this.FindControl<ComboBox>("PreviousIndexKeyBind");
-            ComboBox FastForwardPlaybackKeyBind = this.FindControl<ComboBox>("FastForwardPlaybackKeyBind");
-            ComboBox RewindPlaybackKeyBind = this.FindControl<ComboBox>("RewindPlaybackKeyBind");
-            ComboBox ToggleDeEmphasisKeyBind = this.FindControl<ComboBox>("ToggleDeEmphasisKeyBind");
+            ComboBox loadImageKeyBind = this.FindControl<ComboBox>("LoadImageKeyBind");
+            ComboBox togglePlaybackKeyBind = this.FindControl<ComboBox>("TogglePlaybackKeyBind");
+            ComboBox stopPlaybackKeyBind = this.FindControl<ComboBox>("StopPlaybackKeyBind");
+            ComboBox nextTrackKeyBind = this.FindControl<ComboBox>("NextTrackKeyBind");
+            ComboBox previousTrackKeyBind = this.FindControl<ComboBox>("PreviousTrackKeyBind");
+            ComboBox nextIndexKeyBind = this.FindControl<ComboBox>("NextIndexKeyBind");
+            ComboBox previousIndexKeyBind = this.FindControl<ComboBox>("PreviousIndexKeyBind");
+            ComboBox fastForwardPlaybackKeyBind = this.FindControl<ComboBox>("FastForwardPlaybackKeyBind");
+            ComboBox rewindPlaybackKeyBind = this.FindControl<ComboBox>("RewindPlaybackKeyBind");
+            ComboBox volumeUpKeyBind = this.FindControl<ComboBox>("VolumeUpKeyBind");
+            ComboBox volumeDownKeyBind = this.FindControl<ComboBox>("VolumeDownKeyBind");
+            ComboBox toggleMuteKeyBind = this.FindControl<ComboBox>("ToggleMuteKeyBind");
+            ComboBox toggleDeEmphasisKeyBind = this.FindControl<ComboBox>("ToggleDeEmphasisKeyBind");
 
             // Set all of the currently selected items
-            _settings.LoadImageKey = (Key)LoadImageKeyBind.SelectedItem;
-            _settings.TogglePlaybackKey = (Key)TogglePlaybackKeyBind.SelectedItem;
-            _settings.StopPlaybackKey = (Key)StopPlaybackKeyBind.SelectedItem;
-            _settings.NextTrackKey = (Key)NextTrackKeyBind.SelectedItem;
-            _settings.PreviousTrackKey = (Key)PreviousTrackKeyBind.SelectedItem;
-            _settings.NextIndexKey = (Key)NextIndexKeyBind.SelectedItem;
-            _settings.PreviousIndexKey = (Key)PreviousIndexKeyBind.SelectedItem;
-            _settings.FastForwardPlaybackKey = (Key)FastForwardPlaybackKeyBind.SelectedItem;
-            _settings.RewindPlaybackKey = (Key)RewindPlaybackKeyBind.SelectedItem;
-            _settings.ToggleDeEmphasisKey = (Key)ToggleDeEmphasisKeyBind.SelectedItem;
+            _settings.LoadImageKey = (Key)loadImageKeyBind.SelectedItem;
+            _settings.TogglePlaybackKey = (Key)togglePlaybackKeyBind.SelectedItem;
+            _settings.StopPlaybackKey = (Key)stopPlaybackKeyBind.SelectedItem;
+            _settings.NextTrackKey = (Key)nextTrackKeyBind.SelectedItem;
+            _settings.PreviousTrackKey = (Key)previousTrackKeyBind.SelectedItem;
+            _settings.NextIndexKey = (Key)nextIndexKeyBind.SelectedItem;
+            _settings.PreviousIndexKey = (Key)previousIndexKeyBind.SelectedItem;
+            _settings.FastForwardPlaybackKey = (Key)fastForwardPlaybackKeyBind.SelectedItem;
+            _settings.RewindPlaybackKey = (Key)rewindPlaybackKeyBind.SelectedItem;
+            _settings.VolumeUpKey = (Key)volumeUpKeyBind.SelectedItem;
+            _settings.VolumeDownKey = (Key)volumeDownKeyBind.SelectedItem;
+            _settings.ToggleMuteKey = (Key)toggleMuteKeyBind.SelectedItem;
+            _settings.ToggleDeEmphasisKey = (Key)toggleDeEmphasisKeyBind.SelectedItem;
         }
 
         /// <summary>

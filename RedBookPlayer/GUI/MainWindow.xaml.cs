@@ -178,6 +178,24 @@ namespace RedBookPlayer.GUI
                 playerView?.RewindButton_Click(this, null);
             }
 
+            // Volume Up
+            else if(e.Key == App.Settings.VolumeUpKey || e.Key == Key.VolumeUp)
+            {
+                playerView?.VolumeUpButton_Click(this, null);
+            }
+
+            // Volume Down
+            else if(e.Key == App.Settings.VolumeDownKey || e.Key == Key.VolumeDown)
+            {
+                playerView?.VolumeDownButton_Click(this, null);
+            }
+
+            // Mute Toggle
+            else if(e.Key == App.Settings.ToggleMuteKey || e.Key == Key.VolumeMute)
+            {
+                playerView?.MuteToggleButton_Click(this, null);
+            }
+
             // Emphasis Toggle
             else if(e.Key == App.Settings.ToggleDeEmphasisKey)
             {
