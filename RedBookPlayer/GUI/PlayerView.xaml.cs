@@ -240,17 +240,9 @@ namespace RedBookPlayer.GUI
 
         public void RewindButton_Click(object sender, RoutedEventArgs e) => Player.Rewind();
 
-        public void VolumeUpButton_Click(object sender, RoutedEventArgs e)
-        {
-            if(App.Settings.Volume < 100)
-                App.Settings.Volume++;
-        }
+        public void VolumeUpButton_Click(object sender, RoutedEventArgs e) => App.Settings.Volume++;
 
-        public void VolumeDownButton_Click(object sender, RoutedEventArgs e)
-        {
-            if(App.Settings.Volume > 0)
-                App.Settings.Volume--;
-        }
+        public void VolumeDownButton_Click(object sender, RoutedEventArgs e) => App.Settings.Volume--;
 
         public void MuteToggleButton_Click(object sender, RoutedEventArgs e)
         {

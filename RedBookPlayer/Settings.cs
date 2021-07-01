@@ -38,7 +38,19 @@ namespace RedBookPlayer
         /// <summary>
         /// Indicates the default playback volume
         /// </summary>
-        public int Volume { get; set; } = 100;
+        public int Volume
+        {
+            get => _volume;
+            set
+            {
+                if(value > 100)
+                    _volume = 100;
+                else if(value < 0)
+                    _volume = 0;
+                else
+                    _volume = value;
+            }
+        }
 
         /// <summary>
         /// Indicates the currently selected theme
@@ -125,6 +137,11 @@ namespace RedBookPlayer
         /// Path to the settings file
         /// </summary>
         private string _filePath;
+
+        /// <summary>
+        /// Internal value for the volume
+        /// </summary>
+        private int _volume = 100;
 
         public Settings() {}
 
