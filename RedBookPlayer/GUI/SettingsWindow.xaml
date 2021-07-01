@@ -1,40 +1,140 @@
 <Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800"
-        d:DesignHeight="450" x:Class="RedBookPlayer.GUI.SettingsWindow" Title="Settings" Width="450" Height="600">
-    <DockPanel Margin="16">
-        <TextBlock DockPanel.Dock="Top" Margin="0,0,0,4">Themes</TextBlock>
-        <StackPanel DockPanel.Dock="Bottom">
-            <WrapPanel Margin="0,0,0,16">
-                <CheckBox IsChecked="{Binding AutoPlay}" Margin="0,0,8,0" />
-                <TextBlock VerticalAlignment="Center">Auto-play CD on load</TextBlock>
-            </WrapPanel>
-            <WrapPanel Margin="0,0,0,16">
-                <CheckBox IsChecked="{Binding IndexButtonChangeTrack}" Margin="0,0,8,0" />
-                <TextBlock VerticalAlignment="Center">Index navigation can change track</TextBlock>
-            </WrapPanel>
-            <WrapPanel Margin="0,0,0,16">
-                <CheckBox IsChecked="{Binding AllowSkipHiddenTrack}" Margin="0,0,8,0" />
-                <TextBlock VerticalAlignment="Center">Treat index 0 of track 1 as track 0 (hidden track)</TextBlock>
-            </WrapPanel>
-            <WrapPanel Margin="0,0,0,16">
-                <CheckBox IsChecked="{Binding PlayDataTracks}" Margin="0,0,8,0"/>
-                <TextBlock VerticalAlignment="Center">Play data tracks like old, non-compliant players</TextBlock>
-            </WrapPanel>
-            <WrapPanel Margin="0,0,0,16">
-                <CheckBox IsChecked="{Binding GenerateMissingTOC}" Margin="0,0,8,0"/>
-                <TextBlock VerticalAlignment="Center">Generate a TOC if the disc is missing one</TextBlock>
-            </WrapPanel>
-            <DockPanel Margin="0,0,0,16">
-                <TextBlock VerticalAlignment="Center" Margin="0,0,8,0" DockPanel.Dock="Left">Volume</TextBlock>
-                <TextBlock VerticalAlignment="Center" DockPanel.Dock="Right" Text="%" />
-                <TextBlock VerticalAlignment="Center" Margin="8,0,0,0" DockPanel.Dock="Right" Text="{Binding Volume}"
-                           Name="VolumeLabel" />
-                <Slider Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding Volume}"
-                        Name="VolumeSlider" />
-            </DockPanel>
-            <Button Name="ApplyButton">Apply</Button>
-        </StackPanel>
-        <ListBox Name="ThemeList" SelectionMode="Single" Margin="0,0,0,16" />
-    </DockPanel>
+        d:DesignHeight="450" x:Class="RedBookPlayer.GUI.SettingsWindow" Title="Settings" SizeToContent="WidthAndHeight">
+    <StackPanel>
+        <TabControl>
+            <TabItem Header="UI Settings">
+                <DockPanel Margin="16">
+                    <TextBlock DockPanel.Dock="Top" Margin="0,0,0,4">Themes</TextBlock>
+                    <StackPanel DockPanel.Dock="Bottom">
+                        <WrapPanel Margin="0,0,0,16">
+                            <CheckBox IsChecked="{Binding AutoPlay}" Margin="0,0,8,0" />
+                            <TextBlock VerticalAlignment="Center">Auto-play CD on load</TextBlock>
+                        </WrapPanel>
+                        <WrapPanel Margin="0,0,0,16">
+                            <CheckBox IsChecked="{Binding IndexButtonChangeTrack}" Margin="0,0,8,0" />
+                            <TextBlock VerticalAlignment="Center">Index navigation can change track</TextBlock>
+                        </WrapPanel>
+                        <WrapPanel Margin="0,0,0,16">
+                            <CheckBox IsChecked="{Binding AllowSkipHiddenTrack}" Margin="0,0,8,0" />
+                            <TextBlock VerticalAlignment="Center">Treat index 0 of track 1 as track 0 (hidden track)</TextBlock>
+                        </WrapPanel>
+                        <WrapPanel Margin="0,0,0,16">
+                            <CheckBox IsChecked="{Binding PlayDataTracks}" Margin="0,0,8,0"/>
+                            <TextBlock VerticalAlignment="Center">Play data tracks like old, non-compliant players</TextBlock>
+                        </WrapPanel>
+                        <WrapPanel Margin="0,0,0,16">
+                            <CheckBox IsChecked="{Binding GenerateMissingTOC}" Margin="0,0,8,0"/>
+                            <TextBlock VerticalAlignment="Center">Generate a TOC if the disc is missing one</TextBlock>
+                        </WrapPanel>
+                        <DockPanel Margin="0,0,0,16">
+                            <TextBlock VerticalAlignment="Center" Margin="0,0,8,0" DockPanel.Dock="Left">Volume</TextBlock>
+                            <TextBlock VerticalAlignment="Center" DockPanel.Dock="Right" Text="%" />
+                            <TextBlock VerticalAlignment="Center" Margin="8,0,0,0" DockPanel.Dock="Right" Text="{Binding Volume}"
+                                       Name="VolumeLabel" />
+                            <Slider Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding Volume}"
+                                    Name="VolumeSlider" />
+                        </DockPanel>
+                    </StackPanel>
+                    <ListBox Name="ThemeList" SelectionMode="Single" Margin="0,0,0,16" />
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Keyboard Bindings">
+                <StackPanel Margin="16">
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Width="120">Load Image</TextBlock>
+                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="LoadImageKeyBind" Margin="8,0,0,0" Width="120"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Width="120">Toggle Play/Pause</TextBlock>
+                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="TogglePlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Width="120">Stop Playback</TextBlock>
+                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="StopPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Width="120">Next Track</TextBlock>
+                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="NextTrackKeyBind" Margin="8,0,0,0" Width="120"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Width="120">Previous Track</TextBlock>
+                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="PreviousTrackKeyBind" Margin="8,0,0,0" Width="120"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Width="120">Next Index</TextBlock>
+                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="NextIndexKeyBind" Margin="8,0,0,0" Width="120"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Width="120">Previous Index</TextBlock>
+                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="PreviousIndexKeyBind" Margin="8,0,0,0" Width="120"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Width="120">Fast-Forward</TextBlock>
+                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="FastForwardPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Width="120">Rewind</TextBlock>
+                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="RewindPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Width="120">Toggle De-Emphasis</TextBlock>
+                        <ComboBox Grid.Column="1" HorizontalAlignment="Right" Name="ToggleDeEmphasisKeyBind" Margin="8,0,0,0" Width="120"/>
+                    </Grid>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+        <Button Name="ApplyButton">Apply</Button>
+    </StackPanel>
 </Window>

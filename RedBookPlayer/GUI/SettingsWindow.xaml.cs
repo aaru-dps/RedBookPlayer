@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 
@@ -36,6 +38,7 @@ namespace RedBookPlayer.GUI
                 MainWindow.ApplyTheme(_selectedTheme);
             }
 
+            SaveKeyboardList();
             _settings.Save();
         }
 
@@ -46,6 +49,7 @@ namespace RedBookPlayer.GUI
             AvaloniaXamlLoader.Load(this);
             
             PopulateThemes();
+            PopulateKeyboardList();
 
             this.FindControl<Button>("ApplyButton").Click            += ApplySettings;
             this.FindControl<Slider>("VolumeSlider").PropertyChanged += (s, e) => UpdateView();
@@ -80,6 +84,88 @@ namespace RedBookPlayer.GUI
             }
 
             _themeList.Items = items;
+        }
+
+        /// <summary>
+        /// Populate all of the keyboard bindings
+        /// </summary>
+        private void PopulateKeyboardList()
+        {
+            // Access all of the combo boxes
+            ComboBox LoadImageKeyBind = this.FindControl<ComboBox>("LoadImageKeyBind");
+            ComboBox TogglePlaybackKeyBind = this.FindControl<ComboBox>("TogglePlaybackKeyBind");
+            ComboBox StopPlaybackKeyBind = this.FindControl<ComboBox>("StopPlaybackKeyBind");
+            ComboBox NextTrackKeyBind = this.FindControl<ComboBox>("NextTrackKeyBind");
+            ComboBox PreviousTrackKeyBind = this.FindControl<ComboBox>("PreviousTrackKeyBind");
+            ComboBox NextIndexKeyBind = this.FindControl<ComboBox>("NextIndexKeyBind");
+            ComboBox PreviousIndexKeyBind = this.FindControl<ComboBox>("PreviousIndexKeyBind");
+            ComboBox FastForwardPlaybackKeyBind = this.FindControl<ComboBox>("FastForwardPlaybackKeyBind");
+            ComboBox RewindPlaybackKeyBind = this.FindControl<ComboBox>("RewindPlaybackKeyBind");
+            ComboBox ToggleDeEmphasisKeyBind = this.FindControl<ComboBox>("ToggleDeEmphasisKeyBind");
+
+            // Assign the list of values to all of them
+            Array keyboardList = GenerateKeyboardList();
+            LoadImageKeyBind.Items = keyboardList;
+            TogglePlaybackKeyBind.Items = keyboardList;
+            StopPlaybackKeyBind.Items = keyboardList;
+            NextTrackKeyBind.Items = keyboardList;
+            PreviousTrackKeyBind.Items = keyboardList;
+            NextIndexKeyBind.Items = keyboardList;
+            PreviousIndexKeyBind.Items = keyboardList;
+            FastForwardPlaybackKeyBind.Items = keyboardList;
+            RewindPlaybackKeyBind.Items = keyboardList;
+            ToggleDeEmphasisKeyBind.Items = keyboardList;
+
+            // Set all of the currently selected items
+            LoadImageKeyBind.SelectedItem = _settings.LoadImageKey;
+            TogglePlaybackKeyBind.SelectedItem = _settings.TogglePlaybackKey;
+            StopPlaybackKeyBind.SelectedItem = _settings.StopPlaybackKey;
+            NextTrackKeyBind.SelectedItem = _settings.NextTrackKey;
+            PreviousTrackKeyBind.SelectedItem = _settings.PreviousTrackKey;
+            NextIndexKeyBind.SelectedItem = _settings.NextIndexKey;
+            PreviousIndexKeyBind.SelectedItem = _settings.PreviousIndexKey;
+            FastForwardPlaybackKeyBind.SelectedItem = _settings.FastForwardPlaybackKey;
+            RewindPlaybackKeyBind.SelectedItem = _settings.RewindPlaybackKey;
+            ToggleDeEmphasisKeyBind.SelectedItem = _settings.ToggleDeEmphasisKey;
+        }
+
+        /// <summary>
+        /// Save back all values from keyboard bindings
+        /// </summary>
+        private void SaveKeyboardList()
+        {
+            // Access all of the combo boxes
+            ComboBox LoadImageKeyBind = this.FindControl<ComboBox>("LoadImageKeyBind");
+            ComboBox TogglePlaybackKeyBind = this.FindControl<ComboBox>("TogglePlaybackKeyBind");
+            ComboBox StopPlaybackKeyBind = this.FindControl<ComboBox>("StopPlaybackKeyBind");
+            ComboBox NextTrackKeyBind = this.FindControl<ComboBox>("NextTrackKeyBind");
+            ComboBox PreviousTrackKeyBind = this.FindControl<ComboBox>("PreviousTrackKeyBind");
+            ComboBox NextIndexKeyBind = this.FindControl<ComboBox>("NextIndexKeyBind");
+            ComboBox PreviousIndexKeyBind = this.FindControl<ComboBox>("PreviousIndexKeyBind");
+            ComboBox FastForwardPlaybackKeyBind = this.FindControl<ComboBox>("FastForwardPlaybackKeyBind");
+            ComboBox RewindPlaybackKeyBind = this.FindControl<ComboBox>("RewindPlaybackKeyBind");
+            ComboBox ToggleDeEmphasisKeyBind = this.FindControl<ComboBox>("ToggleDeEmphasisKeyBind");
+
+            // Set all of the currently selected items
+            _settings.LoadImageKey = (Key)LoadImageKeyBind.SelectedItem;
+            _settings.TogglePlaybackKey = (Key)TogglePlaybackKeyBind.SelectedItem;
+            _settings.StopPlaybackKey = (Key)StopPlaybackKeyBind.SelectedItem;
+            _settings.NextTrackKey = (Key)NextTrackKeyBind.SelectedItem;
+            _settings.PreviousTrackKey = (Key)PreviousTrackKeyBind.SelectedItem;
+            _settings.NextIndexKey = (Key)NextIndexKeyBind.SelectedItem;
+            _settings.PreviousIndexKey = (Key)PreviousIndexKeyBind.SelectedItem;
+            _settings.FastForwardPlaybackKey = (Key)FastForwardPlaybackKeyBind.SelectedItem;
+            _settings.RewindPlaybackKey = (Key)RewindPlaybackKeyBind.SelectedItem;
+            _settings.ToggleDeEmphasisKey = (Key)ToggleDeEmphasisKeyBind.SelectedItem;
+        }
+
+        /// <summary>
+        /// Generate a list of keyboard keys for mapping
+        /// </summary>
+        /// <returns></returns>
+        private Array GenerateKeyboardList()
+        {
+           return Enum.GetValues(typeof(Key));
         }
     }
 }
