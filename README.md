@@ -18,7 +18,7 @@
 | **[** | Previous Index |
 | **.** | Fast Forward |
 | **,** | Rewind |
-| **+** | Volume Up |
-| **-** | Volume Down |
+| **Numpad +** | Volume Up |
+| **Numpad -** | Volume Down |
 | **M** | Mute |
 | **E** | Toggle Emphasis |

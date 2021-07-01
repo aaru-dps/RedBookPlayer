@@ -102,12 +102,12 @@ namespace RedBookPlayer
         /// <summary>
         /// Key assigned to raise volume
         /// </summary>
-        public Key VolumeUpKey { get; set; } = Key.OemPlus;
+        public Key VolumeUpKey { get; set; } = Key.Add;
 
         /// <summary>
         /// Key assigned to lower volume
         /// </summary>
-        public Key VolumeDownKey { get; set; } = Key.OemMinus;
+        public Key VolumeDownKey { get; set; } = Key.Subtract;
 
         /// <summary>
         /// Key assigned to toggle mute
