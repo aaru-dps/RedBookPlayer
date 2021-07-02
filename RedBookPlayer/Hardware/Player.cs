@@ -274,8 +274,9 @@ namespace RedBookPlayer.Hardware
             if(!Initialized || dataContext == null)
                 return;
 
-            dataContext.HiddenTrack = _opticalDisc.TimeOffset > 150;
+            dataContext.Volume = App.Settings.Volume;
             dataContext.ApplyDeEmphasis = _soundOutput.ApplyDeEmphasis;
+            dataContext.HiddenTrack = _opticalDisc.TimeOffset > 150;
 
             if(_opticalDisc is CompactDisc compactDisc)
             {

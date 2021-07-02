@@ -4,6 +4,13 @@ namespace RedBookPlayer.GUI
 {
     public class PlayerViewModel : ReactiveObject
     {
+        private int _volume;
+        public int Volume
+        {
+            get => _volume;
+            set => this.RaiseAndSetIfChanged(ref _volume, value);
+        }
+
         private bool _applyDeEmphasis;
         public bool ApplyDeEmphasis
         {
