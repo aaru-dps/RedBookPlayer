@@ -233,11 +233,7 @@ namespace RedBookPlayer.Hardware
                 return string.Empty.PadLeft(20, '-');
 
             // Otherwise, take the current time into account
-            ulong sectorTime = _opticalDisc.CurrentSector;
-            if(_opticalDisc.SectionStartSector != 0)
-                sectorTime -= _opticalDisc.SectionStartSector;
-            else
-                sectorTime += _opticalDisc.TimeOffset;
+            ulong sectorTime = GetCurrentSectorTime();
 
             int[] numbers = new int[]
             {
@@ -274,7 +270,11 @@ namespace RedBookPlayer.Hardware
             if(!Initialized || dataContext == null)
                 return;
 
+            dataContext.Playing = Playing;
+            dataContext.CurrentSector = GetCurrentSectorTime();
+            dataContext.TotalSectors = _opticalDisc.TotalTime;
             dataContext.Volume = App.Settings.Volume;
+
             dataContext.ApplyDeEmphasis = _soundOutput.ApplyDeEmphasis;
             dataContext.HiddenTrack = _opticalDisc.TimeOffset > 150;
 
@@ -292,6 +292,21 @@ namespace RedBookPlayer.Hardware
                 dataContext.CopyAllowed = false;
                 dataContext.TrackHasEmphasis = false;
             }
+        }
+
+        /// <summary>
+        /// Get current sector time, accounting for offsets
+        /// </summary>
+        /// <returns>ulong representing the current sector time</returns>
+        private ulong GetCurrentSectorTime()
+        {
+            ulong sectorTime = _opticalDisc.CurrentSector;
+            if(_opticalDisc.SectionStartSector != 0)
+                sectorTime -= _opticalDisc.SectionStartSector;
+            else
+                sectorTime += _opticalDisc.TimeOffset;
+
+            return sectorTime;
         }
 
         #endregion
