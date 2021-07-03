@@ -13,6 +13,11 @@ namespace RedBookPlayer.GUI
         /// </summary>
         private Player _player;
 
+        /// <summary>
+        /// Last volume for mute toggling
+        /// </summary>
+        private int? _lastVolume = null;
+
         #region Player Status
 
         public bool Initialized => _player?.Initialized ?? false;
@@ -187,6 +192,23 @@ namespace RedBookPlayer.GUI
             };
 
             return string.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
+        }
+
+        /// <summary>
+        /// Temporarily mute playback
+        /// </summary>
+        public void ToggleMute()
+        {
+            if(_lastVolume == null)
+            {
+                _lastVolume = Volume;
+                Volume = 0;
+            }
+            else
+            {
+                Volume = _lastVolume.Value;
+                _lastVolume = null;
+            }
         }
 
         /// <summary>

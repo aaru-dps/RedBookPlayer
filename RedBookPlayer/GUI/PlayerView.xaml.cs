@@ -35,11 +35,6 @@ namespace RedBookPlayer.GUI
         /// </summary>
         private Timer _updateTimer;
 
-        /// <summary>
-        /// Last volume for mute toggling
-        /// </summary>
-        private int? _lastVolume = null;
-
         public PlayerView() => InitializeComponent(null);
 
         public PlayerView(string xaml) => InitializeComponent(xaml);
@@ -262,19 +257,7 @@ namespace RedBookPlayer.GUI
 
         public void VolumeDownButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Volume--;
 
-        public void MuteToggleButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_lastVolume == null)
-            {
-                _lastVolume = PlayerViewModel.Volume;
-                PlayerViewModel.Volume = 0;
-            }
-            else
-            {
-                PlayerViewModel.Volume = _lastVolume.Value;
-                _lastVolume = null;
-            }
-        }
+        public void MuteToggleButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ToggleMute();
 
         public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ApplyDeEmphasis = true;
 
