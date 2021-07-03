@@ -295,6 +295,19 @@ namespace RedBookPlayer.Hardware
         }
 
         /// <summary>
+        /// Update the internal values from the frontend
+        /// </summary>
+        /// <param name="dataContext">Data context to update from</param>
+        public void UpdateModel(PlayerViewModel dataContext)
+        {
+            if(!Initialized || dataContext == null)
+                return;
+
+            App.Settings.Volume = dataContext.Volume;
+            ToggleDeEmphasis(dataContext.ApplyDeEmphasis);
+        }
+
+        /// <summary>
         /// Get current sector time, accounting for offsets
         /// </summary>
         /// <returns>ulong representing the current sector time</returns>

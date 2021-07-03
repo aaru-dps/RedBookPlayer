@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -120,6 +121,7 @@ namespace RedBookPlayer.GUI
         private void InitializeComponent(string xaml)
         {
             DataContext = new PlayerViewModel();
+            (DataContext as PlayerViewModel).PropertyChanged += UpdateModel;
 
             // Load the theme
             try
@@ -187,6 +189,17 @@ namespace RedBookPlayer.GUI
                 this.FindControl<Image>("TotalTimeDigit5"),
                 this.FindControl<Image>("TotalTimeDigit6"),
             };
+        }
+
+        /// <summary>
+        /// Update the Player with the most recent information from the UI
+        /// </summary>
+        private void UpdateModel(object sender, PropertyChangedEventArgs e)
+        {
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                Player.UpdateModel(DataContext as PlayerViewModel);
+            });
         }
 
         /// <summary>
