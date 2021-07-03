@@ -186,8 +186,9 @@ namespace RedBookPlayer.GUI
                     increment *= 2;
                 if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
                     increment *= 5;
-                
-                App.Settings.Volume += increment;
+
+                if(playerView?.PlayerViewModel?.Volume != null)
+                    playerView.PlayerViewModel.Volume += increment;
             }
 
             // Volume Down
@@ -199,7 +200,8 @@ namespace RedBookPlayer.GUI
                 if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
                     decrement *= 5;
 
-                App.Settings.Volume -= decrement;
+                if (playerView?.PlayerViewModel?.Volume != null)
+                    playerView.PlayerViewModel.Volume -= decrement;
             }
 
             // Mute Toggle

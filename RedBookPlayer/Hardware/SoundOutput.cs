@@ -27,6 +27,23 @@ namespace RedBookPlayer.Hardware
         /// </summary>
         public bool Playing => _soundOut.PlaybackState == PlaybackState.Playing;
 
+        /// <summary>
+        /// Current playback volume
+        /// </summary>
+        public int Volume
+        {
+            get => _volume;
+            set
+            {
+                if(value > 100)
+                    _volume = 100;
+                else if(value < 0)
+                    _volume = 0;
+                else
+                    _volume = value;
+            }
+        }
+
         #endregion
 
         #region Private State Variables
@@ -43,6 +60,11 @@ namespace RedBookPlayer.Hardware
         /// TODO: Can we remove the need for a local reference to OpticalDisc?
         /// </remarks>
         private OpticalDisc _opticalDisc;
+
+        /// <summary>
+        /// Internal value for the volume
+        /// </summary>
+        private int _volume = 100;
 
         /// <summary>
         /// Data provider for sound output
@@ -76,7 +98,8 @@ namespace RedBookPlayer.Hardware
         /// </summary>
         /// <param name="opticalDisc">OpticalDisc to load from</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(OpticalDisc opticalDisc, bool autoPlay = false)
+        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
+        public void Init(OpticalDisc opticalDisc, bool autoPlay = false, int defaultVolume = 100)
         {
             // If we have an unusable disc, just return
             if(opticalDisc == null || !opticalDisc.Initialized)
@@ -84,6 +107,9 @@ namespace RedBookPlayer.Hardware
 
             // Save a reference to the disc
             _opticalDisc = opticalDisc;
+
+            // Set the initial playback volume
+            Volume = defaultVolume;
 
             // Enable de-emphasis for CDs, if necessary
             if(opticalDisc is CompactDisc compactDisc)
@@ -116,7 +142,7 @@ namespace RedBookPlayer.Hardware
         public int ProviderRead(byte[] buffer, int offset, int count)
         {
             // Set the current volume
-            _soundOut.Volume = (float)App.Settings.Volume / 100;
+            _soundOut.Volume = (float)Volume / 100;
 
             // Determine how many sectors we can read
             ulong sectorsToRead;
@@ -243,7 +269,7 @@ namespace RedBookPlayer.Hardware
         /// Toggle de-emphasis processing
         /// </summary>
         /// <param name="enable">True to apply de-emphasis, false otherwise</param>
-        public void ToggleDeEmphasis(bool enable) => ApplyDeEmphasis = enable;
+        public void SetDeEmphasis(bool enable) => ApplyDeEmphasis = enable;
 
         /// <summary>
         /// Sets or resets the de-emphasis filters

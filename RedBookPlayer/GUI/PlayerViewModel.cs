@@ -110,11 +110,10 @@ namespace RedBookPlayer.GUI
         /// </summary>
         /// <param name="path">Path to the disc image</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, bool autoPlay)
+        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
+        public void Init(string path, bool autoPlay, int defaultVolume)
         {
-            _player = new Player();
-            _player.Init(path, autoPlay);
-
+            _player = new Player(path, autoPlay, defaultVolume);
             if(Initialized)
                 UpdateModel();
         }
@@ -201,7 +200,7 @@ namespace RedBookPlayer.GUI
             Playing = _player.Playing;
             CurrentSector = _player.GetCurrentSectorTime();
             TotalSectors = _player.OpticalDisc.TotalTime;
-            Volume = App.Settings.Volume;
+            Volume = _player.Volume;
 
             ApplyDeEmphasis = _player.ApplyDeEmphasis;
             HiddenTrack = _player.OpticalDisc.TimeOffset > 150;
@@ -230,9 +229,9 @@ namespace RedBookPlayer.GUI
             if(_player?.Initialized != true)
                 return;
 
-            _player.SetPlayingState(Playing);
-            App.Settings.Volume = Volume;
-            _player.SetDeEmphasis(ApplyDeEmphasis);
+            _player.Playing = Playing;
+            _player.Volume = Volume;
+            _player.ApplyDeEmphasis = ApplyDeEmphasis;
         }
 
         #endregion

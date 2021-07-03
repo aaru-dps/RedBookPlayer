@@ -74,7 +74,7 @@ namespace RedBookPlayer.GUI
 
             bool result = await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                PlayerViewModel.Init(path, App.Settings.AutoPlay);
+                PlayerViewModel.Init(path, App.Settings.AutoPlay, App.Settings.Volume);
                 return PlayerViewModel.Initialized;
             });
 
