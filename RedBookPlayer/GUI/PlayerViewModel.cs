@@ -118,6 +118,10 @@ namespace RedBookPlayer.GUI
         /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
         public void Init(string path, bool autoPlay, int defaultVolume)
         {
+            // Stop current playback, if necessary
+            if(Playing != null) Playing = null;
+
+            // Create and attempt to initialize new Player
             _player = new Player(path, autoPlay, defaultVolume);
             if(Initialized)
                 UpdateModel();

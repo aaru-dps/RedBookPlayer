@@ -64,9 +64,6 @@ namespace RedBookPlayer.GUI
         /// <param name="path">Path to the image to load</param>
         public async Task<bool> LoadImage(string path)
         {
-            // If the player is currently running, stop it
-            if(PlayerViewModel.Playing != true) PlayerViewModel.Playing = null;
-
             bool result = await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 PlayerViewModel.Init(path, App.Settings.AutoPlay, App.Settings.Volume);
