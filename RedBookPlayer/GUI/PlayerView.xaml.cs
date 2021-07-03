@@ -12,16 +12,15 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using RedBookPlayer.Hardware;
 
 namespace RedBookPlayer.GUI
 {
     public class PlayerView : UserControl
     {
         /// <summary>
-        /// Player representing the internal state
+        /// Read-only access to the view model
         /// </summary>
-        public static Player Player = new Player();
+        public PlayerViewModel PlayerViewModel => DataContext as PlayerViewModel;
 
         /// <summary>
         /// Set of images representing the digits for the UI
@@ -71,13 +70,12 @@ namespace RedBookPlayer.GUI
         public async Task<bool> LoadImage(string path)
         {
             // If the player is currently running, stop it
-            if((DataContext as PlayerViewModel).Playing != true)
-                (DataContext as PlayerViewModel).Playing = null;
+            if(PlayerViewModel.Playing != true) PlayerViewModel.Playing = null;
 
-            bool result = await Task.Run(() =>
+            bool result = await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                Player.Init(path, App.Settings.AutoPlay);
-                return Player.Initialized;
+                PlayerViewModel.Init(path, App.Settings.AutoPlay);
+                return PlayerViewModel.Initialized;
             });
 
             if(result)
@@ -122,7 +120,7 @@ namespace RedBookPlayer.GUI
         private void InitializeComponent(string xaml)
         {
             DataContext = new PlayerViewModel();
-            (DataContext as PlayerViewModel).PropertyChanged += UpdateModel;
+            PlayerViewModel.PropertyChanged += UpdateModel;
 
             // Load the theme
             try
@@ -199,7 +197,7 @@ namespace RedBookPlayer.GUI
         {
             Dispatcher.UIThread.InvokeAsync(() =>
             {
-                Player.UpdateModel(DataContext as PlayerViewModel);
+                PlayerViewModel.UpdateModel();
             });
         }
 
@@ -210,14 +208,14 @@ namespace RedBookPlayer.GUI
         {
             Dispatcher.UIThread.InvokeAsync(() =>
             {
-                string digitString = Player.GenerateDigitString();
+                string digitString = PlayerViewModel.GenerateDigitString();
                 for (int i = 0; i < _digits.Length; i++)
                 {
                     if (_digits[i] != null)
                         _digits[i].Source = GetBitmap(digitString[i]);
                 }
 
-                Player.UpdateDataContext(DataContext as PlayerViewModel);
+                PlayerViewModel?.UpdateView();
             });
         }
 
@@ -234,49 +232,55 @@ namespace RedBookPlayer.GUI
             await LoadImage(path);
         }
 
-        public void PlayButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Playing = true;
+        public void PlayButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Playing = true;
 
-        public void PauseButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Playing = false;
+        public void PauseButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Playing = false;
 
-        public void PlayPauseButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Playing = !(DataContext as PlayerViewModel).Playing;
+        public void PlayPauseButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(PlayerViewModel.Playing == true)
+                PlayerViewModel.Playing = false;
+            else
+                PlayerViewModel.Playing = true;
+        }
 
-        public void StopButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Playing = null;
+        public void StopButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Playing = null;
 
-        public void NextTrackButton_Click(object sender, RoutedEventArgs e) => Player.NextTrack();
+        public void NextTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.NextTrack();
 
-        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => Player.PreviousTrack();
+        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousTrack();
 
-        public void NextIndexButton_Click(object sender, RoutedEventArgs e) => Player.NextIndex(App.Settings.IndexButtonChangeTrack);
+        public void NextIndexButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.NextIndex(App.Settings.IndexButtonChangeTrack);
 
-        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => Player.PreviousIndex(App.Settings.IndexButtonChangeTrack);
+        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousIndex(App.Settings.IndexButtonChangeTrack);
 
-        public void FastForwardButton_Click(object sender, RoutedEventArgs e) => Player.FastForward();
+        public void FastForwardButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.FastForward();
 
-        public void RewindButton_Click(object sender, RoutedEventArgs e) => Player.Rewind();
+        public void RewindButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Rewind();
 
-        public void VolumeUpButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Volume++;
+        public void VolumeUpButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Volume++;
 
-        public void VolumeDownButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Volume--;
+        public void VolumeDownButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Volume--;
 
         public void MuteToggleButton_Click(object sender, RoutedEventArgs e)
         {
             if (_lastVolume == null)
             {
-                _lastVolume = (DataContext as PlayerViewModel).Volume;
-                (DataContext as PlayerViewModel).Volume = 0;
+                _lastVolume = PlayerViewModel.Volume;
+                PlayerViewModel.Volume = 0;
             }
             else
             {
-                (DataContext as PlayerViewModel).Volume = _lastVolume.Value;
+                PlayerViewModel.Volume = _lastVolume.Value;
                 _lastVolume = null;
             }
         }
 
-        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).ApplyDeEmphasis = true;
+        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ApplyDeEmphasis = true;
 
-        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).ApplyDeEmphasis = false;
+        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ApplyDeEmphasis = false;
 
-        public void EnableDisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).ApplyDeEmphasis = !(DataContext as PlayerViewModel).ApplyDeEmphasis;
+        public void EnableDisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ApplyDeEmphasis = !PlayerViewModel.ApplyDeEmphasis;
 
         #endregion
     }
