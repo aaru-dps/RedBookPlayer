@@ -6,12 +6,30 @@ namespace RedBookPlayer.GUI
     {
         #region Player Status
 
-        private bool _playing;
-        public bool Playing
+        private bool? _playing;
+        public bool? Playing
         {
             get => _playing;
             set => this.RaiseAndSetIfChanged(ref _playing, value);
         }
+
+        private int _volume;
+        public int Volume
+        {
+            get => _volume;
+            set => this.RaiseAndSetIfChanged(ref _volume, value);
+        }
+
+        private bool _applyDeEmphasis;
+        public bool ApplyDeEmphasis
+        {
+            get => _applyDeEmphasis;
+            set => this.RaiseAndSetIfChanged(ref _applyDeEmphasis, value);
+        }
+
+        #endregion
+
+        #region Model-Provided Playback Information
 
         private ulong _currentSector;
         public ulong CurrentSector
@@ -34,20 +52,6 @@ namespace RedBookPlayer.GUI
         public int TotalFrames => (int)(_totalSectors / (75 * 60));
         public int TotalSeconds => (int)(_totalSectors / 75 % 60);
         public int TotalMinutes => (int)(_totalSectors % 75);
-
-        private int _volume;
-        public int Volume
-        {
-            get => _volume;
-            set => this.RaiseAndSetIfChanged(ref _volume, value);
-        }
-
-        private bool _applyDeEmphasis;
-        public bool ApplyDeEmphasis
-        {
-            get => _applyDeEmphasis;
-            set => this.RaiseAndSetIfChanged(ref _applyDeEmphasis, value);
-        }
 
         #endregion
 

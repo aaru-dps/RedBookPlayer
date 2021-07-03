@@ -71,7 +71,8 @@ namespace RedBookPlayer.GUI
         public async Task<bool> LoadImage(string path)
         {
             // If the player is currently running, stop it
-            if(Player.Playing) Player.Stop();
+            if((DataContext as PlayerViewModel).Playing != true)
+                (DataContext as PlayerViewModel).Playing = null;
 
             bool result = await Task.Run(() =>
             {
@@ -233,13 +234,13 @@ namespace RedBookPlayer.GUI
             await LoadImage(path);
         }
 
-        public void PlayButton_Click(object sender, RoutedEventArgs e) => Player.TogglePlayPause(true);
+        public void PlayButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Playing = true;
 
-        public void PauseButton_Click(object sender, RoutedEventArgs e) => Player.TogglePlayPause(false);
+        public void PauseButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Playing = false;
 
-        public void PlayPauseButton_Click(object sender, RoutedEventArgs e) => Player.TogglePlayPause(!Player.Playing);
+        public void PlayPauseButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Playing = !(DataContext as PlayerViewModel).Playing;
 
-        public void StopButton_Click(object sender, RoutedEventArgs e) => Player.Stop();
+        public void StopButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Playing = null;
 
         public void NextTrackButton_Click(object sender, RoutedEventArgs e) => Player.NextTrack();
 
@@ -253,29 +254,29 @@ namespace RedBookPlayer.GUI
 
         public void RewindButton_Click(object sender, RoutedEventArgs e) => Player.Rewind();
 
-        public void VolumeUpButton_Click(object sender, RoutedEventArgs e) => App.Settings.Volume++;
+        public void VolumeUpButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Volume++;
 
-        public void VolumeDownButton_Click(object sender, RoutedEventArgs e) => App.Settings.Volume--;
+        public void VolumeDownButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).Volume--;
 
         public void MuteToggleButton_Click(object sender, RoutedEventArgs e)
         {
             if (_lastVolume == null)
             {
-                _lastVolume = App.Settings.Volume;
-                App.Settings.Volume = 0;
+                _lastVolume = (DataContext as PlayerViewModel).Volume;
+                (DataContext as PlayerViewModel).Volume = 0;
             }
             else
             {
-                App.Settings.Volume = _lastVolume.Value;
+                (DataContext as PlayerViewModel).Volume = _lastVolume.Value;
                 _lastVolume = null;
             }
         }
 
-        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.ToggleDeEmphasis(true);
+        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).ApplyDeEmphasis = true;
 
-        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.ToggleDeEmphasis(false);
+        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).ApplyDeEmphasis = false;
 
-        public void EnableDisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => Player.ToggleDeEmphasis(!Player.ApplyDeEmphasis);
+        public void EnableDisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => (DataContext as PlayerViewModel).ApplyDeEmphasis = !(DataContext as PlayerViewModel).ApplyDeEmphasis;
 
         #endregion
     }

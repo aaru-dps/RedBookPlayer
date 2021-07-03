@@ -90,7 +90,7 @@ namespace RedBookPlayer.GUI
 
             Closing += (e, f) =>
             {
-                PlayerView.Player.Stop();
+                ((PlayerView)ContentControl.Content).StopButton_Click(this, null);
             };
 
             AddHandler(DragDrop.DropEvent, MainWindow_Drop);

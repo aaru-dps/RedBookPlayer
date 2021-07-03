@@ -90,35 +90,28 @@ namespace RedBookPlayer.Hardware
         #region Playback
 
         /// <summary>
-        /// Toggle audio playback
+        /// Set the current audio playback state
         /// </summary>
-        /// <param name="start">True to start playback, false to pause</param>
-        public void TogglePlayPause(bool start)
+        /// <param name="start">True to start playback, false to pause, null to stop</param>
+        private void SetPlayingState(bool? start)
         {
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
-            if(start)
+            if(start == true)
             {
                 _soundOutput.Play();
                 _opticalDisc.SetTotalIndexes();
             }
-            else
+            else if(start == false)
             {
                 _soundOutput.Stop();
             }
-        }
-
-        /// <summary>
-        /// Stop the current audio playback
-        /// </summary>
-        public void Stop()
-        {
-            if(_opticalDisc == null || !_opticalDisc.Initialized)
-                return;
-
-            _soundOutput.Stop();
-            _opticalDisc.LoadFirstTrack();
+            else
+            {
+                _soundOutput.Stop();
+                _opticalDisc.LoadFirstTrack();
+            }
         }
 
         /// <summary>
@@ -130,13 +123,13 @@ namespace RedBookPlayer.Hardware
                 return;
 
             bool wasPlaying = Playing;
-            if(wasPlaying) TogglePlayPause(false);
+            if(wasPlaying) SetPlayingState(false);
 
             _opticalDisc.NextTrack();
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
 
-            if(wasPlaying) TogglePlayPause(true);
+            if(wasPlaying) SetPlayingState(true);
         }
 
         /// <summary>
@@ -148,13 +141,13 @@ namespace RedBookPlayer.Hardware
                 return;
 
             bool wasPlaying = Playing;
-            if(wasPlaying) TogglePlayPause(false);
+            if(wasPlaying) SetPlayingState(false);
 
             _opticalDisc.PreviousTrack();
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
 
-            if(wasPlaying) TogglePlayPause(true);
+            if(wasPlaying) SetPlayingState(true);
         }
 
         /// <summary>
@@ -167,13 +160,13 @@ namespace RedBookPlayer.Hardware
                 return;
 
             bool wasPlaying = Playing;
-            if(wasPlaying) TogglePlayPause(false);
+            if(wasPlaying) SetPlayingState(false);
 
             _opticalDisc.NextIndex(changeTrack);
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
 
-            if(wasPlaying) TogglePlayPause(true);
+            if(wasPlaying) SetPlayingState(true);
         }
 
         /// <summary>
@@ -186,13 +179,13 @@ namespace RedBookPlayer.Hardware
                 return;
 
             bool wasPlaying = Playing;
-            if(wasPlaying) TogglePlayPause(false);
+            if(wasPlaying) SetPlayingState(false);
 
             _opticalDisc.PreviousIndex(changeTrack);
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
 
-            if(wasPlaying) TogglePlayPause(true);
+            if(wasPlaying) SetPlayingState(true);
         }
 
         /// <summary>
@@ -256,12 +249,6 @@ namespace RedBookPlayer.Hardware
         }
 
         /// <summary>
-        /// Toggle de-emphasis processing
-        /// </summary>
-        /// <param name="enable">True to apply de-emphasis, false otherwise</param>
-        public void ToggleDeEmphasis(bool enable) => _soundOutput?.ToggleDeEmphasis(enable);
-
-        /// <summary>
         /// Update the data context for the frontend
         /// </summary>
         /// <param name="dataContext">Data context to be updated</param>
@@ -303,8 +290,9 @@ namespace RedBookPlayer.Hardware
             if(!Initialized || dataContext == null)
                 return;
 
+            SetPlayingState(dataContext.Playing);
             App.Settings.Volume = dataContext.Volume;
-            ToggleDeEmphasis(dataContext.ApplyDeEmphasis);
+            _soundOutput?.ToggleDeEmphasis(dataContext.ApplyDeEmphasis);
         }
 
         /// <summary>
