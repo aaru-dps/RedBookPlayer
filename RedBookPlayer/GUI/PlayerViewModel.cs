@@ -42,16 +42,16 @@ namespace RedBookPlayer.GUI
             set => this.RaiseAndSetIfChanged(ref _volume, value);
         }
 
-        #endregion
-
-        #region Disc Flags
-
         private bool _applyDeEmphasis;
         public bool ApplyDeEmphasis
         {
             get => _applyDeEmphasis;
             set => this.RaiseAndSetIfChanged(ref _applyDeEmphasis, value);
         }
+
+        #endregion
+
+        #region Disc Flags
 
         private bool _quadChannel;
         public bool QuadChannel
