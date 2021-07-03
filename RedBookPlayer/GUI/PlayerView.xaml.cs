@@ -231,13 +231,7 @@ namespace RedBookPlayer.GUI
 
         public void PauseButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Playing = false;
 
-        public void PlayPauseButton_Click(object sender, RoutedEventArgs e)
-        {
-            if(PlayerViewModel.Playing == true)
-                PlayerViewModel.Playing = false;
-            else
-                PlayerViewModel.Playing = true;
-        }
+        public void PlayPauseButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Playing = !(PlayerViewModel.Playing ?? false);
 
         public void StopButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Playing = null;
 
