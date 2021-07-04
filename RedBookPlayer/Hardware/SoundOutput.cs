@@ -64,7 +64,7 @@ namespace RedBookPlayer.Hardware
         /// <summary>
         /// Internal value for the volume
         /// </summary>
-        private int _volume = 100;
+        private int _volume;
 
         /// <summary>
         /// Data provider for sound output

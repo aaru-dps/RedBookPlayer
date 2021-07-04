@@ -124,7 +124,7 @@ namespace RedBookPlayer.GUI
             // Create and attempt to initialize new Player
             _player = new Player(path, autoPlay, defaultVolume);
             if(Initialized)
-                UpdateModel();
+                UpdateView();
         }
 
         #region Playback
