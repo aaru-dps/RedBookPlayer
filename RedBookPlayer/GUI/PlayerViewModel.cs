@@ -20,27 +20,48 @@ namespace RedBookPlayer.GUI
 
         #region Player Status
 
+        /// <summary>
+        /// Indicate if the model is ready to be used
+        /// </summary>
         public bool Initialized => _player?.Initialized ?? false;
 
-        private bool? _playing;
+        /// <summary>
+        /// Indicate the player state
+        /// </summary>
         public bool? Playing
         {
-            get => _playing;
-            set => this.RaiseAndSetIfChanged(ref _playing, value);
+            get => _player?.Playing ?? false;
+            set
+            {
+                if(_player != null)
+                    _player.Playing = value;
+            }
         }
 
-        private int _volume;
+        /// <summary>
+        /// Indicate the current playback volume
+        /// </summary>
         public int Volume
         {
-            get => _volume;
-            set => this.RaiseAndSetIfChanged(ref _volume, value);
+            get => _player?.Volume ?? 100;
+            set
+            {
+                if(_player != null)
+                    _player.Volume = value;
+            }
         }
 
-        private bool _applyDeEmphasis;
+        /// <summary>
+        /// Indicates if de-emphasis should be applied
+        /// </summary>
         public bool ApplyDeEmphasis
         {
-            get => _applyDeEmphasis;
-            set => this.RaiseAndSetIfChanged(ref _applyDeEmphasis, value);
+            get => _player?.ApplyDeEmphasis ?? false;
+            set
+            {
+                if(_player != null)
+                    _player.ApplyDeEmphasis = value;
+            }
         }
 
         #endregion
@@ -223,12 +244,9 @@ namespace RedBookPlayer.GUI
             if(_player?.Initialized != true)
                 return;
 
-            Playing = _player.Playing;
             CurrentSector = _player.GetCurrentSectorTime();
             TotalSectors = _player.OpticalDisc.TotalTime;
-            Volume = _player.Volume;
 
-            ApplyDeEmphasis = _player.ApplyDeEmphasis;
             HiddenTrack = _player.OpticalDisc.TimeOffset > 150;
 
             if(_player.OpticalDisc is CompactDisc compactDisc)
@@ -245,19 +263,6 @@ namespace RedBookPlayer.GUI
                 CopyAllowed = false;
                 TrackHasEmphasis = false;
             }
-        }
-
-        /// <summary>
-        /// Update the internal player from the UI
-        /// </summary>
-        public void UpdateModel()
-        {
-            if(_player?.Initialized != true)
-                return;
-
-            _player.Playing = Playing;
-            _player.Volume = Volume;
-            _player.ApplyDeEmphasis = ApplyDeEmphasis;
         }
 
         #endregion
