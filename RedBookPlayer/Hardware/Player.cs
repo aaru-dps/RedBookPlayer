@@ -1,11 +1,8 @@
 using System;
 using System.IO;
-using System.Linq;
-using Aaru.CommonTypes.Enums;
 using Aaru.DiscImages;
 using Aaru.Filters;
 using RedBookPlayer.Discs;
-using RedBookPlayer.GUI;
 
 namespace RedBookPlayer.Hardware
 {
@@ -19,18 +16,67 @@ namespace RedBookPlayer.Hardware
         public bool Initialized { get; private set; } = false;
 
         /// <summary>
+        /// OpticalDisc object
+        /// </summary>
+        public OpticalDisc OpticalDisc { get; private set; }
+
+        /// <summary>
         /// Indicate if the disc is playing
         /// </summary>
-        public bool Playing => _soundOutput?.Playing ?? false;
+        public bool? Playing
+        {
+            get => _soundOutput?.Playing;
+            set
+            {
+                if(OpticalDisc == null || !OpticalDisc.Initialized)
+                    return;
+
+                // If the playing state has not changed, do nothing
+                if(value == _soundOutput?.Playing)
+                    return;
+
+                if(value == true)
+                {
+                    _soundOutput.Play();
+                    OpticalDisc.SetTotalIndexes();
+                }
+                else if(value == false)
+                {
+                    _soundOutput.Stop();
+                }
+                else
+                {
+                    _soundOutput.Stop();
+                    OpticalDisc.LoadFirstTrack();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Indicate the current playback volume
+        /// </summary>
+        public int Volume
+        {
+            get => _soundOutput?.Volume ?? 100;
+            set
+            {
+                if(_soundOutput != null)
+                    _soundOutput.Volume = value;
+            }
+        }
+
+        /// <summary>
+        /// Indicates if de-emphasis should be applied
+        /// </summary>
+        public bool ApplyDeEmphasis
+        {
+            get => _soundOutput?.ApplyDeEmphasis ?? false;
+            set => _soundOutput?.SetDeEmphasis(value);
+        }
 
         #endregion
 
         #region Private State Variables
-
-        /// <summary>
-        /// OpticalDisc object
-        /// </summary>
-        private OpticalDisc _opticalDisc;
 
         /// <summary>
         /// Sound output handling class
@@ -40,17 +86,18 @@ namespace RedBookPlayer.Hardware
         #endregion
 
         /// <summary>
-        /// Initialize the player with a given image path
+        /// Create a new Player from a given image path
         /// </summary>
         /// <param name="path">Path to the disc image</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, bool autoPlay = false)
+        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
+        public Player(string path, bool autoPlay = false, int defaultVolume = 100)
         {
-            // Reset the internal state for initialization
+            // Set the internal state for initialization
             Initialized = false;
             _soundOutput = new SoundOutput();
             _soundOutput.ApplyDeEmphasis = false;
-            _opticalDisc = null;
+            OpticalDisc = null;
 
             try
             {
@@ -65,7 +112,7 @@ namespace RedBookPlayer.Hardware
                 image.Open(filter);
 
                 // Generate and instantiate the disc
-                _opticalDisc = OpticalDiscFactory.GenerateFromImage(image, App.Settings.AutoPlay);
+                OpticalDisc = OpticalDiscFactory.GenerateFromImage(image, autoPlay);
             }
             catch
             {
@@ -74,7 +121,7 @@ namespace RedBookPlayer.Hardware
             }
 
             // Initialize the sound output
-            _soundOutput.Init(_opticalDisc, autoPlay);
+            _soundOutput.Init(OpticalDisc, autoPlay, defaultVolume);
             if(_soundOutput == null || !_soundOutput.Initialized)
                 return;
 
@@ -85,53 +132,21 @@ namespace RedBookPlayer.Hardware
         #region Playback
 
         /// <summary>
-        /// Toggle audio playback
-        /// </summary>
-        /// <param name="start">True to start playback, false to pause</param>
-        public void TogglePlayPause(bool start)
-        {
-            if(_opticalDisc == null || !_opticalDisc.Initialized)
-                return;
-
-            if(start)
-            {
-                _soundOutput.Play();
-                _opticalDisc.SetTotalIndexes();
-            }
-            else
-            {
-                _soundOutput.Stop();
-            }
-        }
-
-        /// <summary>
-        /// Stop the current audio playback
-        /// </summary>
-        public void Stop()
-        {
-            if(_opticalDisc == null || !_opticalDisc.Initialized)
-                return;
-
-            _soundOutput.Stop();
-            _opticalDisc.LoadFirstTrack();
-        }
-
-        /// <summary>
         /// Move to the next playable track
         /// </summary>
         public void NextTrack()
         {
-            if(_opticalDisc == null || !_opticalDisc.Initialized)
+            if(OpticalDisc == null || !OpticalDisc.Initialized)
                 return;
 
-            bool wasPlaying = Playing;
-            if(wasPlaying) TogglePlayPause(false);
+            bool? wasPlaying = Playing;
+            if(wasPlaying == true) Playing = false;
 
-            _opticalDisc.NextTrack();
-            if(_opticalDisc is CompactDisc compactDisc)
+            OpticalDisc.NextTrack();
+            if(OpticalDisc is CompactDisc compactDisc)
                 _soundOutput.ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
 
-            if(wasPlaying) TogglePlayPause(true);
+            if(wasPlaying == true) Playing = true;
         }
 
         /// <summary>
@@ -139,17 +154,17 @@ namespace RedBookPlayer.Hardware
         /// </summary>
         public void PreviousTrack()
         {
-            if(_opticalDisc == null || !_opticalDisc.Initialized)
+            if(OpticalDisc == null || !OpticalDisc.Initialized)
                 return;
 
-            bool wasPlaying = Playing;
-            if(wasPlaying) TogglePlayPause(false);
+            bool? wasPlaying = Playing;
+            if(wasPlaying == true) Playing = false;
 
-            _opticalDisc.PreviousTrack();
-            if(_opticalDisc is CompactDisc compactDisc)
+            OpticalDisc.PreviousTrack();
+            if(OpticalDisc is CompactDisc compactDisc)
                 _soundOutput.ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
 
-            if(wasPlaying) TogglePlayPause(true);
+            if(wasPlaying == true) Playing = true;
         }
 
         /// <summary>
@@ -158,17 +173,17 @@ namespace RedBookPlayer.Hardware
         /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
         public void NextIndex(bool changeTrack)
         {
-            if(_opticalDisc == null || !_opticalDisc.Initialized)
+            if(OpticalDisc == null || !OpticalDisc.Initialized)
                 return;
 
-            bool wasPlaying = Playing;
-            if(wasPlaying) TogglePlayPause(false);
+            bool? wasPlaying = Playing;
+            if(wasPlaying == true) Playing = false;
 
-            _opticalDisc.NextIndex(changeTrack);
-            if(_opticalDisc is CompactDisc compactDisc)
+            OpticalDisc.NextIndex(changeTrack);
+            if(OpticalDisc is CompactDisc compactDisc)
                 _soundOutput.ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
 
-            if(wasPlaying) TogglePlayPause(true);
+            if(wasPlaying == true) Playing = true;
         }
 
         /// <summary>
@@ -177,17 +192,17 @@ namespace RedBookPlayer.Hardware
         /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
         public void PreviousIndex(bool changeTrack)
         {
-            if(_opticalDisc == null || !_opticalDisc.Initialized)
+            if(OpticalDisc == null || !OpticalDisc.Initialized)
                 return;
 
-            bool wasPlaying = Playing;
-            if(wasPlaying) TogglePlayPause(false);
+            bool? wasPlaying = Playing;
+            if(wasPlaying == true) Playing = false;
 
-            _opticalDisc.PreviousIndex(changeTrack);
-            if(_opticalDisc is CompactDisc compactDisc)
+            OpticalDisc.PreviousIndex(changeTrack);
+            if(OpticalDisc is CompactDisc compactDisc)
                 _soundOutput.ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
 
-            if(wasPlaying) TogglePlayPause(true);
+            if(wasPlaying == true) Playing = true;
         }
 
         /// <summary>
@@ -195,10 +210,10 @@ namespace RedBookPlayer.Hardware
         /// </summary>
         public void FastForward()
         {
-            if(_opticalDisc == null || !_opticalDisc.Initialized)
+            if(OpticalDisc == null || !OpticalDisc.Initialized)
                 return;
 
-            _opticalDisc.CurrentSector = Math.Min(_opticalDisc.TotalSectors, _opticalDisc.CurrentSector + 75);
+            OpticalDisc.CurrentSector = Math.Min(OpticalDisc.TotalSectors, OpticalDisc.CurrentSector + 75);
         }
 
         /// <summary>
@@ -206,11 +221,11 @@ namespace RedBookPlayer.Hardware
         /// </summary>
         public void Rewind()
         {
-            if(_opticalDisc == null || !_opticalDisc.Initialized)
+            if(OpticalDisc == null || !OpticalDisc.Initialized)
                 return;
 
-            if(_opticalDisc.CurrentSector >= 75)
-                _opticalDisc.CurrentSector -= 75;
+            if(OpticalDisc.CurrentSector >= 75)
+                OpticalDisc.CurrentSector -= 75;
         }
 
         #endregion
@@ -218,75 +233,25 @@ namespace RedBookPlayer.Hardware
         #region Helpers
 
         /// <summary>
-        /// Generate the digit string to be interpreted by the frontend
+        /// Get current sector time, accounting for offsets
         /// </summary>
-        /// <returns>String representing the digits for the frontend</returns>
-        public string GenerateDigitString()
+        /// <returns>ulong representing the current sector time</returns>
+        public ulong GetCurrentSectorTime()
         {
-            // If the disc isn't initialized, return all '-' characters
-            if(_opticalDisc == null || !_opticalDisc.Initialized)
-                return string.Empty.PadLeft(20, '-');
-
-            // Otherwise, take the current time into account
-            ulong sectorTime = _opticalDisc.CurrentSector;
-            if(_opticalDisc.SectionStartSector != 0)
-                sectorTime -= _opticalDisc.SectionStartSector;
+            ulong sectorTime = OpticalDisc.CurrentSector;
+            if (OpticalDisc.SectionStartSector != 0)
+                sectorTime -= OpticalDisc.SectionStartSector;
             else
-                sectorTime += _opticalDisc.TimeOffset;
+                sectorTime += OpticalDisc.TimeOffset;
 
-            int[] numbers = new int[]
-            {
-                _opticalDisc.CurrentTrackNumber + 1,
-                _opticalDisc.CurrentTrackIndex,
-
-                (int)(sectorTime / (75 * 60)),
-                (int)(sectorTime / 75 % 60),
-                (int)(sectorTime % 75),
-
-                _opticalDisc.TotalTracks,
-                _opticalDisc.TotalIndexes,
-
-                (int)(_opticalDisc.TotalTime / (75 * 60)),
-                (int)(_opticalDisc.TotalTime / 75 % 60),
-                (int)(_opticalDisc.TotalTime % 75),
-            };
-
-            return string.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
+            return sectorTime;
         }
 
         /// <summary>
-        /// Toggle de-emphasis processing
+        /// Set if de-emphasis should be applied
         /// </summary>
-        /// <param name="enable">True to apply de-emphasis, false otherwise</param>
-        public void ToggleDeEmphasis(bool enable) => _soundOutput.ToggleDeEmphasis(enable);
-
-        /// <summary>
-        /// Update the data context for the frontend
-        /// </summary>
-        /// <param name="dataContext">Data context to be updated</param>
-        public void UpdateDataContext(PlayerViewModel dataContext)
-        {
-            if(!Initialized || dataContext == null)
-                return;
-
-            dataContext.HiddenTrack = _opticalDisc.TimeOffset > 150;
-            dataContext.ApplyDeEmphasis = _soundOutput.ApplyDeEmphasis;
-
-            if(_opticalDisc is CompactDisc compactDisc)
-            {
-                dataContext.QuadChannel = compactDisc.QuadChannel;
-                dataContext.IsDataTrack = compactDisc.IsDataTrack;
-                dataContext.CopyAllowed = compactDisc.CopyAllowed;
-                dataContext.TrackHasEmphasis = compactDisc.TrackHasEmphasis;
-            }
-            else
-            {
-                dataContext.QuadChannel = false;
-                dataContext.IsDataTrack = _opticalDisc.TrackType != TrackType.Audio;
-                dataContext.CopyAllowed = false;
-                dataContext.TrackHasEmphasis = false;
-            }
-        }
+        /// <param name="apply">True to enable, false to disable</param>
+        public void SetDeEmphasis(bool apply) => _soundOutput?.SetDeEmphasis(apply);
 
         #endregion
     }

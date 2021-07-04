@@ -79,8 +79,8 @@ namespace RedBookPlayer.Discs
 
                 // Ensure that the value is valid, wrapping around if necessary
                 if(value > track.Indexes.Keys.Max())
-                    _currentTrackIndex = 0;
-                else if(value < 0)
+                    _currentTrackIndex = track.Indexes.Keys.Min();
+                else if(value < track.Indexes.Keys.Min())
                     _currentTrackIndex = track.Indexes.Keys.Max();
                 else
                     _currentTrackIndex = value;
