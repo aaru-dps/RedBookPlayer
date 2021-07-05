@@ -31,7 +31,11 @@ namespace RedBookPlayer.Discs
         /// <summary>
         /// Represents the sector starting the section
         /// </summary>
-        public ulong SectionStartSector { get; protected set; }
+        public ulong SectionStartSector
+        {
+            get => _sectionStartSector;
+            protected set => this.RaiseAndSetIfChanged(ref _sectionStartSector, value);
+        }
 
         /// <summary>
         /// Number of bytes per sector for the current track
@@ -67,6 +71,8 @@ namespace RedBookPlayer.Discs
         /// Represents the total playing time for the disc
         /// </summary>
         public ulong TotalTime { get; protected set; } = 0;
+
+        private ulong _sectionStartSector;
 
         #endregion
 

@@ -43,6 +43,15 @@ namespace RedBookPlayer.Hardware
         }
 
         /// <summary>
+        /// Represents the sector starting the section
+        /// </summary>
+        public ulong SectionStartSector
+        {
+            get => _sectionStartSector;
+            protected set => this.RaiseAndSetIfChanged(ref _sectionStartSector, value);
+        }
+
+        /// <summary>
         /// Represents if the disc has a hidden track
         /// </summary>
         public bool HiddenTrack
@@ -115,6 +124,7 @@ namespace RedBookPlayer.Hardware
         private int _currentTrackNumber;
         private ushort _currentTrackIndex;
         private ulong _currentSector;
+        private ulong _sectionStartSector;
 
         private bool _hasHiddenTrack;
         private bool _quadChannel;
@@ -372,21 +382,6 @@ namespace RedBookPlayer.Hardware
         #region Helpers
 
         /// <summary>
-        /// Get current sector time, accounting for offsets
-        /// </summary>
-        /// <returns>ulong representing the current sector time</returns>
-        public ulong GetCurrentSectorTime()
-        {
-            ulong sectorTime = _opticalDisc.CurrentSector;
-            if (_opticalDisc.SectionStartSector != 0)
-                sectorTime -= _opticalDisc.SectionStartSector;
-            else
-                sectorTime += _opticalDisc.TimeOffset;
-
-            return sectorTime;
-        }
-
-        /// <summary>
         /// Set de-emphasis status
         /// </summary>
         /// <param name="apply"></param>
@@ -415,6 +410,7 @@ namespace RedBookPlayer.Hardware
             CurrentTrackNumber = _opticalDisc.CurrentTrackNumber;
             CurrentTrackIndex = _opticalDisc.CurrentTrackIndex;
             CurrentSector = _opticalDisc.CurrentSector;
+            SectionStartSector = _opticalDisc.SectionStartSector;
 
             HiddenTrack = TimeOffset > 150;
 

@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -25,9 +24,6 @@ namespace RedBookPlayer.GUI
         /// <summary>
         /// Set of images representing the digits for the UI
         /// </summary>
-        /// <remarks>
-        /// TODO: Does it make sense to have this as an array?
-        /// </remarks>
         private Image[] _digits;
 
         public PlayerView() => InitializeComponent(null);
@@ -167,13 +163,61 @@ namespace RedBookPlayer.GUI
         {
             Dispatcher.UIThread.InvokeAsync(() =>
             {
-                string digitString = PlayerViewModel.GenerateDigitString();
+                string digitString = GenerateDigitString();
                 for(int i = 0; i < _digits.Length; i++)
                 {
                     if(_digits[i] != null)
                         _digits[i].Source = GetBitmap(digitString[i]);
                 }
             });
+        }
+
+        /// <summary>
+        /// Generate the digit string to be interpreted by the frontend
+        /// </summary>
+        /// <returns>String representing the digits for the frontend</returns>
+        private string GenerateDigitString()
+        {
+            // If the disc isn't initialized, return all '-' characters
+            if(PlayerViewModel?.Initialized != true)
+                return string.Empty.PadLeft(20, '-');
+
+            // Otherwise, take the current time into account
+            ulong sectorTime = GetCurrentSectorTime();
+
+            int[] numbers = new int[]
+            {
+                PlayerViewModel.CurrentTrackNumber + 1,
+                PlayerViewModel.CurrentTrackIndex,
+
+                (int)(sectorTime / (75 * 60)),
+                (int)(sectorTime / 75 % 60),
+                (int)(sectorTime % 75),
+
+                PlayerViewModel.TotalTracks,
+                PlayerViewModel.TotalIndexes,
+
+                (int)(PlayerViewModel.TotalTime / (75 * 60)),
+                (int)(PlayerViewModel.TotalTime / 75 % 60),
+                (int)(PlayerViewModel.TotalTime % 75),
+            };
+
+            return string.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
+        }
+
+        /// <summary>
+        /// Get current sector time, accounting for offsets
+        /// </summary>
+        /// <returns>ulong representing the current sector time</returns>
+        private ulong GetCurrentSectorTime()
+        {
+            ulong sectorTime = PlayerViewModel.CurrentSector;
+            if(PlayerViewModel.SectionStartSector != 0)
+                sectorTime -= PlayerViewModel.SectionStartSector;
+            else
+                sectorTime += PlayerViewModel.TimeOffset;
+
+            return sectorTime;
         }
 
         #endregion

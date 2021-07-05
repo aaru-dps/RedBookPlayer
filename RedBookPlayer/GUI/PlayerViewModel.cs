@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Linq;
 using ReactiveUI;
 using RedBookPlayer.Hardware;
 
@@ -46,6 +45,15 @@ namespace RedBookPlayer.GUI
         {
             get => _currentSector;
             private set => this.RaiseAndSetIfChanged(ref _currentSector, value);
+        }
+
+        /// <summary>
+        /// Represents the sector starting the section
+        /// </summary>
+        public ulong SectionStartSector
+        {
+            get => _sectionStartSector;
+            protected set => this.RaiseAndSetIfChanged(ref _sectionStartSector, value);
         }
 
         /// <summary>
@@ -121,6 +129,7 @@ namespace RedBookPlayer.GUI
         private int _currentTrackNumber;
         private ushort _currentTrackIndex;
         private ulong _currentSector;
+        private ulong _sectionStartSector;
 
         private bool _hasHiddenTrack;
         private bool _quadChannel;
@@ -244,42 +253,6 @@ namespace RedBookPlayer.GUI
         #endregion
 
         #region Helpers
-
-        /// <summary>
-        /// Generate the digit string to be interpreted by the frontend
-        /// </summary>
-        /// <returns>String representing the digits for the frontend</returns>
-        /// <remarks>
-        /// TODO: The model shouldn't care about this
-        /// </remarks>
-        public string GenerateDigitString()
-        {
-            // If the disc isn't initialized, return all '-' characters
-            if(_player?.Initialized != true)
-                return string.Empty.PadLeft(20, '-');
-
-            // Otherwise, take the current time into account
-            ulong sectorTime = _player.GetCurrentSectorTime();
-
-            int[] numbers = new int[]
-            {
-                _player.CurrentTrackNumber + 1,
-                _player.CurrentTrackIndex,
-
-                (int)(sectorTime / (75 * 60)),
-                (int)(sectorTime / 75 % 60),
-                (int)(sectorTime % 75),
-
-                _player.TotalTracks,
-                _player.TotalIndexes,
-
-                (int)(_player.TotalTime / (75 * 60)),
-                (int)(_player.TotalTime / 75 % 60),
-                (int)(_player.TotalTime % 75),
-            };
-
-            return string.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
-        }
 
         /// <summary>
         /// Set de-emphasis status
