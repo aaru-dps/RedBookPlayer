@@ -2,9 +2,9 @@ using System;
 using System.ComponentModel;
 using Aaru.CommonTypes.Enums;
 using ReactiveUI;
-using RedBookPlayer.Discs;
+using RedBookPlayer.Common.Discs;
 
-namespace RedBookPlayer.Hardware
+namespace RedBookPlayer.Common.Hardware
 {
     public class Player : ReactiveObject
     {

@@ -4,7 +4,7 @@ using System.Text.Json;
 using Avalonia.Input;
 using RedBookPlayer.GUI;
 
-namespace RedBookPlayer
+namespace RedBookPlayer.GUI
 {
     public class Settings
     {

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedBookPlayer", "RedBookPlayer\RedBookPlayer.csproj", "{94944959-0352-4ABF-9C5C-19FF33747ECE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedBookPlayer.GUI", "RedBookPlayer.GUI\RedBookPlayer.GUI.csproj", "{94944959-0352-4ABF-9C5C-19FF33747ECE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cscore", "cscore", "{9A371299-4C59-4E46-9C3B-4FE024017491}"
 EndProject
@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.sh = build.sh
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedBookPlayer.Common", "RedBookPlayer.Common\RedBookPlayer.Common.csproj", "{462A3B8E-A5D4-4539-8469-1647B47AB2A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -194,6 +196,18 @@ Global
 		{ED8E11B7-786F-4EFF-9E4C-B937B7A2DE89}.Release|x64.Build.0 = Release|Any CPU
 		{ED8E11B7-786F-4EFF-9E4C-B937B7A2DE89}.Release|x86.ActiveCfg = Release|Any CPU
 		{ED8E11B7-786F-4EFF-9E4C-B937B7A2DE89}.Release|x86.Build.0 = Release|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Debug|x64.Build.0 = Debug|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Debug|x86.Build.0 = Debug|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Release|x64.ActiveCfg = Release|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Release|x64.Build.0 = Release|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Release|x86.ActiveCfg = Release|Any CPU
+		{462A3B8E-A5D4-4539-8469-1647B47AB2A8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

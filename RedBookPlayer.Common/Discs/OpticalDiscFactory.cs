@@ -4,7 +4,7 @@ using Aaru.CommonTypes.Metadata;
 using Aaru.DiscImages;
 using Aaru.Filters;
 
-namespace RedBookPlayer.Discs
+namespace RedBookPlayer.Common.Discs
 {
     public static class OpticalDiscFactory
     {

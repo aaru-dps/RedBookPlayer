@@ -2,7 +2,7 @@ using Aaru.CommonTypes.Enums;
 using Aaru.CommonTypes.Interfaces;
 using ReactiveUI;
 
-namespace RedBookPlayer.Discs
+namespace RedBookPlayer.Common.Discs
 {
     public abstract class OpticalDisc : ReactiveObject
     {

@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using ReactiveUI;
-using RedBookPlayer.Hardware;
+using RedBookPlayer.Common.Hardware;
 
 namespace RedBookPlayer.GUI
 {
