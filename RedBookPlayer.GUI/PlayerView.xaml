@@ -98,6 +98,7 @@
             <TextBlock Margin="0,0,16,0" IsVisible="{Binding QuadChannel}">4CH</TextBlock>
             <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !HiddenTrack}">HIDDEN</TextBlock>
             <TextBlock Margin="0,0,16,0" IsVisible="{Binding HiddenTrack}">HIDDEN</TextBlock>
+            <TextBlock Margin="0,0,16,0" Text="{Binding Volume}"/>
         </StackPanel>
     </StackPanel>
 </UserControl>

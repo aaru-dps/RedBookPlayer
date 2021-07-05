@@ -2,7 +2,7 @@ using System.ComponentModel;
 using ReactiveUI;
 using RedBookPlayer.Common.Hardware;
 
-namespace RedBookPlayer.GUI
+namespace RedBookPlayer.Common
 {
     public class PlayerViewModel : ReactiveObject
     {
@@ -170,7 +170,7 @@ namespace RedBookPlayer.GUI
         public int Volume
         {
             get => _volume;
-            set => this.RaiseAndSetIfChanged(ref _volume, value);
+            private set => this.RaiseAndSetIfChanged(ref _volume, value);
         }
 
         private bool? _playing;
@@ -271,6 +271,12 @@ namespace RedBookPlayer.GUI
         public void SetLoadDataTracks(bool load) => _player?.SetLoadDataTracks(load);
 
         /// <summary>
+        /// Set the value for the volume
+        /// </summary>
+        /// <param name="volume">New volume value</param>
+        public void SetVolume(int volume) => _player?.SetVolume(volume);
+
+        /// <summary>
         /// Temporarily mute playback
         /// </summary>
         public void ToggleMute()
@@ -278,11 +284,11 @@ namespace RedBookPlayer.GUI
             if(_lastVolume == null)
             {
                 _lastVolume = Volume;
-                Volume = 0;
+                _player?.SetVolume(0);
             }
             else
             {
-                Volume = _lastVolume.Value;
+                _player?.SetVolume(_lastVolume.Value);
                 _lastVolume = null;
             }
         }

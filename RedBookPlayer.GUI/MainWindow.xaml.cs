@@ -189,7 +189,7 @@ namespace RedBookPlayer.GUI
                     increment *= 5;
 
                 if(playerView?.PlayerViewModel?.Volume != null)
-                    playerView.PlayerViewModel.Volume += increment;
+                    playerView.PlayerViewModel.SetVolume(playerView.PlayerViewModel.Volume + increment);
             }
 
             // Volume Down
@@ -202,7 +202,7 @@ namespace RedBookPlayer.GUI
                     decrement *= 5;
 
                 if (playerView?.PlayerViewModel?.Volume != null)
-                    playerView.PlayerViewModel.Volume -= decrement;
+                    playerView.PlayerViewModel.SetVolume(playerView.PlayerViewModel.Volume - decrement);
             }
 
             // Mute Toggle

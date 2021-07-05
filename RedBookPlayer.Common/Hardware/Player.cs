@@ -390,6 +390,12 @@ namespace RedBookPlayer.Common.Hardware
         public void SetLoadDataTracks(bool load) => (_opticalDisc as CompactDisc)?.SetLoadDataTracks(load);
 
         /// <summary>
+        /// Set the value for the volume
+        /// </summary>
+        /// <param name="volume">New volume value</param>
+        public void SetVolume(int volume) => _soundOutput?.SetVolume(volume);
+
+        /// <summary>
         /// Update the player from the current OpticalDisc
         /// </summary>
         private void OpticalDiscStateChanged(object sender, PropertyChangedEventArgs e)

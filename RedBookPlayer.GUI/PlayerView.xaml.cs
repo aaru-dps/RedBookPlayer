@@ -11,6 +11,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using RedBookPlayer.Common;
 
 namespace RedBookPlayer.GUI
 {
@@ -270,9 +271,9 @@ namespace RedBookPlayer.GUI
 
         public void RewindButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Rewind();
 
-        public void VolumeUpButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Volume++;
+        public void VolumeUpButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.SetVolume(PlayerViewModel.Volume + 1);
 
-        public void VolumeDownButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Volume--;
+        public void VolumeDownButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.SetVolume(PlayerViewModel.Volume - 1);
 
         public void MuteToggleButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ToggleMute();
 

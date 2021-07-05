@@ -304,6 +304,12 @@ namespace RedBookPlayer.Common.Hardware
         public void SetDeEmphasis(bool apply) => ApplyDeEmphasis = apply;
 
         /// <summary>
+        /// Set the value for the volume
+        /// </summary>
+        /// <param name="volume">New volume value</param>
+        public void SetVolume(int volume) => Volume = volume;
+
+        /// <summary>
         /// Sets or resets the de-emphasis filters
         /// </summary>
         private void SetupFilters()
