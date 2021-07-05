@@ -251,7 +251,7 @@ namespace RedBookPlayer.Common.Hardware
             _currentSectorReadPosition += count;
             if(_currentSectorReadPosition >= _opticalDisc.BytesPerSector)
             {
-                _opticalDisc.CurrentSector += (ulong)(_currentSectorReadPosition / _opticalDisc.BytesPerSector);
+                _opticalDisc.SetCurrentSector(_opticalDisc.CurrentSector + (ulong)(_currentSectorReadPosition / _opticalDisc.BytesPerSector));
                 _currentSectorReadPosition %= _opticalDisc.BytesPerSector;
             }
 

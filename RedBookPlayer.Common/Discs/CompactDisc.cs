@@ -99,7 +99,7 @@ namespace RedBookPlayer.Common.Discs
         public override ulong CurrentSector
         {
             get => _currentSector;
-            set
+            protected set
             {
                 // Unset image means we can't do anything
                 if(_image == null)

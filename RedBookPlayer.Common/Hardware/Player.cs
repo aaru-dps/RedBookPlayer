@@ -358,7 +358,7 @@ namespace RedBookPlayer.Common.Hardware
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
-            _opticalDisc.CurrentSector = Math.Min(_opticalDisc.TotalSectors, _opticalDisc.CurrentSector + 75);
+            _opticalDisc.SetCurrentSector(Math.Min(_opticalDisc.TotalSectors, _opticalDisc.CurrentSector + 75));
         }
 
         /// <summary>
@@ -370,7 +370,7 @@ namespace RedBookPlayer.Common.Hardware
                 return;
 
             if(_opticalDisc.CurrentSector >= 75)
-                _opticalDisc.CurrentSector -= 75;
+                _opticalDisc.SetCurrentSector(_opticalDisc.CurrentSector - 75);
         }
 
         #endregion

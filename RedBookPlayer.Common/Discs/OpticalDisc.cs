@@ -26,8 +26,7 @@ namespace RedBookPlayer.Common.Discs
         /// <summary>
         /// Current sector number
         /// </summary>
-        /// TODO: Maske this `protected set`
-        public abstract ulong CurrentSector { get; set; }
+        public abstract ulong CurrentSector { get; protected set; }
 
         /// <summary>
         /// Represents the sector starting the section
@@ -164,6 +163,12 @@ namespace RedBookPlayer.Common.Discs
         /// Set the total indexes from the current track
         /// </summary>
         public abstract void SetTotalIndexes();
+
+        /// <summary>
+        /// Set the current sector
+        /// </summary>
+        /// <param name="sector">New sector number to use</param>
+        public void SetCurrentSector(ulong sector) => CurrentSector = sector;
 
         /// <summary>
         /// Load the desired track, if possible
