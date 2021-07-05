@@ -193,8 +193,6 @@ namespace RedBookPlayer.GUI
                     if (_digits[i] != null)
                         _digits[i].Source = GetBitmap(digitString[i]);
                 }
-
-                PlayerViewModel?.UpdateView();
             });
         }
 
@@ -211,13 +209,19 @@ namespace RedBookPlayer.GUI
             await LoadImage(path);
         }
 
-        public void PlayButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Playing = true;
+        public void PlayButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Play();
 
-        public void PauseButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Playing = false;
+        public void PauseButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Pause();
 
-        public void PlayPauseButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Playing = !(PlayerViewModel.Playing ?? false);
+        public void PlayPauseButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(PlayerViewModel.Playing == true)
+                PlayerViewModel.Pause();
+            else
+                PlayerViewModel.Play();
+        }
 
-        public void StopButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Playing = null;
+        public void StopButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Stop();
 
         public void NextTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.NextTrack();
 
@@ -237,11 +241,11 @@ namespace RedBookPlayer.GUI
 
         public void MuteToggleButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ToggleMute();
 
-        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ApplyDeEmphasis = true;
+        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.SetDeEmphasis(true);
 
-        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ApplyDeEmphasis = false;
+        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.SetDeEmphasis(false);
 
-        public void EnableDisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ApplyDeEmphasis = !PlayerViewModel.ApplyDeEmphasis;
+        public void EnableDisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.SetDeEmphasis(!PlayerViewModel.ApplyDeEmphasis);
 
         #endregion
     }

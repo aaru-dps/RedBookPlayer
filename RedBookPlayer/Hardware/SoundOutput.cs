@@ -4,11 +4,12 @@ using System.Threading.Tasks;
 using CSCore.SoundOut;
 using NWaves.Audio;
 using NWaves.Filters.BiQuad;
+using ReactiveUI;
 using RedBookPlayer.Discs;
 
 namespace RedBookPlayer.Hardware
 {
-    public class SoundOutput
+    public class SoundOutput : ReactiveObject
     {
         #region Public Fields
 
@@ -18,14 +19,22 @@ namespace RedBookPlayer.Hardware
         public bool Initialized { get; private set; } = false;
 
         /// <summary>
-        /// Indicates if de-emphasis should be applied
-        /// </summary>
-        public bool ApplyDeEmphasis { get; set; } = false;
-
-        /// <summary>
         /// Indicate if the output is playing
         /// </summary>
-        public bool Playing => _soundOut.PlaybackState == PlaybackState.Playing;
+        public bool Playing
+        {
+            get => _playing;
+            private set => this.RaiseAndSetIfChanged(ref _playing, value);
+        }
+
+        /// <summary>
+        /// Indicates if de-emphasis should be applied
+        /// </summary>
+        public bool ApplyDeEmphasis
+        {
+            get => _applyDeEmphasis;
+            private set => this.RaiseAndSetIfChanged(ref _applyDeEmphasis, value);
+        }
 
         /// <summary>
         /// Current playback volume
@@ -35,23 +44,23 @@ namespace RedBookPlayer.Hardware
             get => _volume;
             set
             {
+                int tempVolume = value;
                 if(value > 100)
-                    _volume = 100;
+                    tempVolume = 100;
                 else if(value < 0)
-                    _volume = 0;
-                else
-                    _volume = value;
+                    tempVolume = 0;
+
+                this.RaiseAndSetIfChanged(ref _volume, tempVolume);
             }
         }
+
+        private bool _playing;
+        private bool _applyDeEmphasis;
+        private int _volume;
 
         #endregion
 
         #region Private State Variables
-
-        /// <summary>
-        /// Current position in the sector
-        /// </summary>
-        private int _currentSectorReadPosition = 0;
 
         /// <summary>
         /// OpticalDisc from the parent player for easy access
@@ -60,11 +69,6 @@ namespace RedBookPlayer.Hardware
         /// TODO: Can we remove the need for a local reference to OpticalDisc?
         /// </remarks>
         private OpticalDisc _opticalDisc;
-
-        /// <summary>
-        /// Internal value for the volume
-        /// </summary>
-        private int _volume;
 
         /// <summary>
         /// Data provider for sound output
@@ -85,6 +89,11 @@ namespace RedBookPlayer.Hardware
         /// Right channel de-emphasis filter
         /// </summary>
         private BiQuadFilter _deEmphasisFilterRight;
+
+        /// <summary>
+        /// Current position in the sector
+        /// </summary>
+        private int _currentSectorReadPosition = 0;
 
         /// <summary>
         /// Lock object for reading track data
@@ -254,22 +263,45 @@ namespace RedBookPlayer.Hardware
         /// <summary>
         /// Start audio playback
         /// </summary>
-        public void Play() => _soundOut.Play();
+        public void Play()
+        {
+            if (_soundOut.PlaybackState != PlaybackState.Playing)
+                _soundOut.Play();
+
+            Playing = _soundOut.PlaybackState == PlaybackState.Playing;
+        }
+
+        /// <summary>
+        /// Pause audio playback
+        /// </summary>
+        public void Pause()
+        {
+            if(_soundOut.PlaybackState != PlaybackState.Paused)
+                _soundOut.Pause();
+
+            Playing = _soundOut.PlaybackState == PlaybackState.Playing;
+        }
 
         /// <summary>
         /// Stop audio playback
         /// </summary>
-        public void Stop() => _soundOut.Stop();
+        public void Stop()
+        {
+            if(_soundOut.PlaybackState != PlaybackState.Stopped)
+                _soundOut.Stop();
+
+            Playing = _soundOut.PlaybackState == PlaybackState.Playing;
+        }
 
         #endregion
 
         #region Helpers
 
         /// <summary>
-        /// Toggle de-emphasis processing
+        /// Set de-emphasis status
         /// </summary>
-        /// <param name="enable">True to apply de-emphasis, false otherwise</param>
-        public void SetDeEmphasis(bool enable) => ApplyDeEmphasis = enable;
+        /// <param name="apply"></param>
+        public void SetDeEmphasis(bool apply) => ApplyDeEmphasis = apply;
 
         /// <summary>
         /// Sets or resets the de-emphasis filters

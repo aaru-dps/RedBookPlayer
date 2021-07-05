@@ -1,7 +1,6 @@
+using System.ComponentModel;
 using System.Linq;
-using Aaru.CommonTypes.Enums;
 using ReactiveUI;
-using RedBookPlayer.Discs;
 using RedBookPlayer.Hardware;
 
 namespace RedBookPlayer.GUI
@@ -18,7 +17,7 @@ namespace RedBookPlayer.GUI
         /// </summary>
         private int? _lastVolume = null;
 
-        #region Player Status
+        #region Player Passthrough
 
         /// <summary>
         /// Indicate if the model is ready to be used
@@ -26,29 +25,12 @@ namespace RedBookPlayer.GUI
         public bool Initialized => _player?.Initialized ?? false;
 
         /// <summary>
-        /// Indicate the player state
+        /// Indicate if the output is playing
         /// </summary>
         public bool? Playing
         {
-            get => _player?.Playing ?? false;
-            set
-            {
-                if(_player != null)
-                    _player.Playing = value;
-            }
-        }
-
-        /// <summary>
-        /// Indicate the current playback volume
-        /// </summary>
-        public int Volume
-        {
-            get => _player?.Volume ?? 100;
-            set
-            {
-                if(_player != null)
-                    _player.Volume = value;
-            }
+            get => _playing;
+            private set => this.RaiseAndSetIfChanged(ref _playing, value);
         }
 
         /// <summary>
@@ -56,13 +38,22 @@ namespace RedBookPlayer.GUI
         /// </summary>
         public bool ApplyDeEmphasis
         {
-            get => _player?.ApplyDeEmphasis ?? false;
-            set
-            {
-                if(_player != null)
-                    _player.ApplyDeEmphasis = value;
-            }
+            get => _applyDeEmphasis;
+            private set => this.RaiseAndSetIfChanged(ref _applyDeEmphasis, value);
         }
+
+        /// <summary>
+        /// Current playback volume
+        /// </summary>
+        public int Volume
+        {
+            get => _volume;
+            set => this.RaiseAndSetIfChanged(ref _volume, value);
+        }
+
+        private bool? _playing;
+        private bool _applyDeEmphasis;
+        private int _volume;
 
         #endregion
 
@@ -145,10 +136,28 @@ namespace RedBookPlayer.GUI
             // Create and attempt to initialize new Player
             _player = new Player(path, autoPlay, defaultVolume);
             if(Initialized)
-                UpdateView();
+            {
+                _player.PropertyChanged += PlayerStateChanged;
+                PlayerStateChanged(this, null);
+            }
         }
 
         #region Playback
+
+        /// <summary>
+        /// Begin playback
+        /// </summary>
+        public void Play() => _player.Play();
+
+        /// <summary>
+        /// Pause current playback
+        /// </summary>
+        public void Pause() => _player.Pause();
+
+        /// <summary>
+        /// Stop current playback
+        /// </summary>
+        public void Stop() => _player.Stop();
 
         /// <summary>
         /// Move to the next playable track
@@ -193,7 +202,7 @@ namespace RedBookPlayer.GUI
         public string GenerateDigitString()
         {
             // If the disc isn't initialized, return all '-' characters
-            if(_player?.OpticalDisc == null || !_player.OpticalDisc.Initialized)
+            if(_player?.Initialized != true)
                 return string.Empty.PadLeft(20, '-');
 
             // Otherwise, take the current time into account
@@ -201,23 +210,29 @@ namespace RedBookPlayer.GUI
 
             int[] numbers = new int[]
             {
-                _player.OpticalDisc.CurrentTrackNumber + 1,
-                _player.OpticalDisc.CurrentTrackIndex,
+                _player.CurrentTrackNumber + 1,
+                _player.CurrentTrackIndex,
 
                 (int)(sectorTime / (75 * 60)),
                 (int)(sectorTime / 75 % 60),
                 (int)(sectorTime % 75),
 
-                _player.OpticalDisc.TotalTracks,
-                _player.OpticalDisc.TotalIndexes,
+                _player.TotalTracks,
+                _player.TotalIndexes,
 
-                (int)(_player.OpticalDisc.TotalTime / (75 * 60)),
-                (int)(_player.OpticalDisc.TotalTime / 75 % 60),
-                (int)(_player.OpticalDisc.TotalTime % 75),
+                (int)(_player.TotalTime / (75 * 60)),
+                (int)(_player.TotalTime / 75 % 60),
+                (int)(_player.TotalTime % 75),
             };
 
             return string.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
         }
+
+        /// <summary>
+        /// Set de-emphasis status
+        /// </summary>
+        /// <param name="apply"></param>
+        public void SetDeEmphasis(bool apply) => _player?.SetDeEmphasis(apply);
 
         /// <summary>
         /// Temporarily mute playback
@@ -239,30 +254,24 @@ namespace RedBookPlayer.GUI
         /// <summary>
         /// Update the UI from the internal player
         /// </summary>
-        public void UpdateView()
+        private void PlayerStateChanged(object sender, PropertyChangedEventArgs e)
         {
             if(_player?.Initialized != true)
                 return;
 
+            Playing = _player.Playing;
+            ApplyDeEmphasis = _player.ApplyDeEmphasis;
+            Volume = _player.Volume;
+
             CurrentSector = _player.GetCurrentSectorTime();
-            TotalSectors = _player.OpticalDisc.TotalTime;
+            TotalSectors = _player.TotalTime;
 
-            HiddenTrack = _player.OpticalDisc.TimeOffset > 150;
+            HiddenTrack = _player.HiddenTrack;
 
-            if(_player.OpticalDisc is CompactDisc compactDisc)
-            {
-                QuadChannel = compactDisc.QuadChannel;
-                IsDataTrack = compactDisc.IsDataTrack;
-                CopyAllowed = compactDisc.CopyAllowed;
-                TrackHasEmphasis = compactDisc.TrackHasEmphasis;
-            }
-            else
-            {
-                QuadChannel = false;
-                IsDataTrack = _player.OpticalDisc.TrackType != TrackType.Audio;
-                CopyAllowed = false;
-                TrackHasEmphasis = false;
-            }
+            QuadChannel = _player.QuadChannel;
+            IsDataTrack = _player.IsDataTrack;
+            CopyAllowed = _player.CopyAllowed;
+            TrackHasEmphasis = _player.TrackHasEmphasis;
         }
 
         #endregion
