@@ -1,9 +1,10 @@
 using Aaru.CommonTypes.Enums;
 using Aaru.CommonTypes.Interfaces;
+using ReactiveUI;
 
 namespace RedBookPlayer.Discs
 {
-    public abstract class OpticalDisc
+    public abstract class OpticalDisc : ReactiveObject
     {
         #region Public Fields
 
@@ -55,7 +56,7 @@ namespace RedBookPlayer.Discs
         /// <summary>
         /// Total sectors in the image
         /// </summary>
-        public ulong TotalSectors => _image.Info.Sectors;
+        public ulong TotalSectors => _image?.Info.Sectors ?? 0;
 
         /// <summary>
         /// Represents the time adjustment offset for the disc

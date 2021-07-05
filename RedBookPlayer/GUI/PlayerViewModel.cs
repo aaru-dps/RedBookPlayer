@@ -19,6 +19,119 @@ namespace RedBookPlayer.GUI
 
         #region Player Passthrough
 
+        #region OpticalDisc Passthrough
+
+        /// <summary>
+        /// Current track number
+        /// </summary>
+        public int CurrentTrackNumber
+        {
+            get => _currentTrackNumber;
+            private set => this.RaiseAndSetIfChanged(ref _currentTrackNumber, value);
+        }
+
+        /// <summary>
+        /// Current track index
+        /// </summary>
+        public ushort CurrentTrackIndex
+        {
+            get => _currentTrackIndex;
+            private set => this.RaiseAndSetIfChanged(ref _currentTrackIndex, value);
+        }
+
+        /// <summary>
+        /// Current sector number
+        /// </summary>
+        public ulong CurrentSector
+        {
+            get => _currentSector;
+            private set => this.RaiseAndSetIfChanged(ref _currentSector, value);
+        }
+
+        /// <summary>
+        /// Represents if the disc has a hidden track
+        /// </summary>
+        public bool HiddenTrack
+        {
+            get => _hasHiddenTrack;
+            private set => this.RaiseAndSetIfChanged(ref _hasHiddenTrack, value);
+        }
+
+        /// <summary>
+        /// Represents the 4CH flag [CompactDisc only]
+        /// </summary>
+        public bool QuadChannel
+        {
+            get => _quadChannel;
+            private set => this.RaiseAndSetIfChanged(ref _quadChannel, value);
+        }
+
+        /// <summary>
+        /// Represents the DATA flag [CompactDisc only]
+        /// </summary>
+        public bool IsDataTrack
+        {
+            get => _isDataTrack;
+            private set => this.RaiseAndSetIfChanged(ref _isDataTrack, value);
+        }
+
+        /// <summary>
+        /// Represents the DCP flag [CompactDisc only]
+        /// </summary>
+        public bool CopyAllowed
+        {
+            get => _copyAllowed;
+            private set => this.RaiseAndSetIfChanged(ref _copyAllowed, value);
+        }
+
+        /// <summary>
+        /// Represents the PRE flag [CompactDisc only]
+        /// </summary>
+        public bool TrackHasEmphasis
+        {
+            get => _trackHasEmphasis;
+            private set => this.RaiseAndSetIfChanged(ref _trackHasEmphasis, value);
+        }
+
+        /// <summary>
+        /// Represents the total tracks on the disc
+        /// </summary>
+        public int TotalTracks => _player.TotalTracks;
+
+        /// <summary>
+        /// Represents the total indices on the disc
+        /// </summary>
+        public int TotalIndexes => _player.TotalIndexes;
+
+        /// <summary>
+        /// Total sectors in the image
+        /// </summary>
+        public ulong TotalSectors => _player.TotalSectors;
+
+        /// <summary>
+        /// Represents the time adjustment offset for the disc
+        /// </summary>
+        public ulong TimeOffset => _player.TimeOffset;
+
+        /// <summary>
+        /// Represents the total playing time for the disc
+        /// </summary>
+        public ulong TotalTime => _player.TotalTime;
+
+        private int _currentTrackNumber;
+        private ushort _currentTrackIndex;
+        private ulong _currentSector;
+
+        private bool _hasHiddenTrack;
+        private bool _quadChannel;
+        private bool _isDataTrack;
+        private bool _copyAllowed;
+        private bool _trackHasEmphasis;
+
+        #endregion
+
+        #region SoundOutput Passthrough
+
         /// <summary>
         /// Indicate if the model is ready to be used
         /// </summary>
@@ -56,69 +169,6 @@ namespace RedBookPlayer.GUI
         private int _volume;
 
         #endregion
-
-        #region Model-Provided Playback Information
-
-        private ulong _currentSector;
-        public ulong CurrentSector
-        {
-            get => _currentSector;
-            set => this.RaiseAndSetIfChanged(ref _currentSector, value);
-        }
-
-        public int CurrentFrame => (int)(_currentSector / (75 * 60));
-        public int CurrentSecond => (int)(_currentSector / 75 % 60);
-        public int CurrentMinute => (int)(_currentSector % 75);
-
-        private ulong _totalSectors;
-        public ulong TotalSectors
-        {
-            get => _totalSectors;
-            set => this.RaiseAndSetIfChanged(ref _totalSectors, value);
-        }
-
-        public int TotalFrames => (int)(_totalSectors / (75 * 60));
-        public int TotalSeconds => (int)(_totalSectors / 75 % 60);
-        public int TotalMinutes => (int)(_totalSectors % 75);
-
-        #endregion
-
-        #region Disc Flags
-
-        private bool _quadChannel;
-        public bool QuadChannel
-        {
-            get => _quadChannel;
-            set => this.RaiseAndSetIfChanged(ref _quadChannel, value);
-        }
-
-        private bool _isDataTrack;
-        public bool IsDataTrack
-        {
-            get => _isDataTrack;
-            set => this.RaiseAndSetIfChanged(ref _isDataTrack, value);
-        }
-
-        private bool _copyAllowed;
-        public bool CopyAllowed
-        {
-            get => _copyAllowed;
-            set => this.RaiseAndSetIfChanged(ref _copyAllowed, value);
-        }
-
-        private bool _trackHasEmphasis;
-        public bool TrackHasEmphasis
-        {
-            get => _trackHasEmphasis;
-            set => this.RaiseAndSetIfChanged(ref _trackHasEmphasis, value);
-        }
-
-        private bool _hiddenTrack;
-        public bool HiddenTrack
-        {
-            get => _hiddenTrack;
-            set => this.RaiseAndSetIfChanged(ref _hiddenTrack, value);
-        }
 
         #endregion
 
@@ -199,6 +249,9 @@ namespace RedBookPlayer.GUI
         /// Generate the digit string to be interpreted by the frontend
         /// </summary>
         /// <returns>String representing the digits for the frontend</returns>
+        /// <remarks>
+        /// TODO: The model shouldn't care about this
+        /// </remarks>
         public string GenerateDigitString()
         {
             // If the disc isn't initialized, return all '-' characters
@@ -259,12 +312,9 @@ namespace RedBookPlayer.GUI
             if(_player?.Initialized != true)
                 return;
 
-            Playing = _player.Playing;
-            ApplyDeEmphasis = _player.ApplyDeEmphasis;
-            Volume = _player.Volume;
-
-            CurrentSector = _player.GetCurrentSectorTime();
-            TotalSectors = _player.TotalTime;
+            CurrentTrackNumber = _player.CurrentTrackNumber;
+            CurrentTrackIndex = _player.CurrentTrackIndex;
+            CurrentSector = _player.CurrentSector;
 
             HiddenTrack = _player.HiddenTrack;
 
@@ -272,6 +322,10 @@ namespace RedBookPlayer.GUI
             IsDataTrack = _player.IsDataTrack;
             CopyAllowed = _player.CopyAllowed;
             TrackHasEmphasis = _player.TrackHasEmphasis;
+
+            Playing = _player.Playing;
+            ApplyDeEmphasis = _player.ApplyDeEmphasis;
+            Volume = _player.Volume;
         }
 
         #endregion

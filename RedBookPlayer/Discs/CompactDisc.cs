@@ -6,11 +6,12 @@ using Aaru.CommonTypes.Interfaces;
 using Aaru.CommonTypes.Structs;
 using Aaru.Decoders.CD;
 using Aaru.Helpers;
+using ReactiveUI;
 using static Aaru.Decoders.CD.FullTOC;
 
 namespace RedBookPlayer.Discs
 {
-    public class CompactDisc : OpticalDisc
+    public class CompactDisc : OpticalDisc, IReactiveObject
     {
         #region Public Fields
 
@@ -26,7 +27,7 @@ namespace RedBookPlayer.Discs
 
                 // Cache the value and the current track number
                 int cachedValue = value;
-                int cachedTrackNumber = _currentTrackNumber;
+                int cachedTrackNumber;
 
                 // Check if we're incrementing or decrementing the track
                 bool increment = cachedValue >= _currentTrackNumber;
@@ -39,10 +40,10 @@ namespace RedBookPlayer.Discs
                     else if(cachedValue < 0)
                         cachedValue = _image.Tracks.Count - 1;
 
-                    _currentTrackNumber = cachedValue;
+                    cachedTrackNumber = cachedValue;
 
                     // Cache the current track for easy access
-                    Track track = _image.Tracks[_currentTrackNumber];
+                    Track track = _image.Tracks[cachedTrackNumber];
 
                     // Set track flags from subchannel data, if possible
                     SetTrackFlags(track);
@@ -52,7 +53,7 @@ namespace RedBookPlayer.Discs
 
                     // If the track is playable, just return
                     if(TrackType == TrackType.Audio || App.Settings.PlayDataTracks)
-                        return;
+                        break;
 
                     // If we're not playing the track, skip
                     if(increment)
@@ -60,7 +61,9 @@ namespace RedBookPlayer.Discs
                     else
                         cachedValue--;
                 }
-                while(cachedValue != cachedTrackNumber);
+                while(cachedValue != _currentTrackNumber);
+
+                this.RaiseAndSetIfChanged(ref _currentTrackNumber, cachedTrackNumber);
             }
         }
 
@@ -78,12 +81,13 @@ namespace RedBookPlayer.Discs
                 Track track = _image.Tracks[CurrentTrackNumber];
 
                 // Ensure that the value is valid, wrapping around if necessary
+                ushort fixedValue = value;
                 if(value > track.Indexes.Keys.Max())
-                    _currentTrackIndex = track.Indexes.Keys.Min();
+                    fixedValue = track.Indexes.Keys.Min();
                 else if(value < track.Indexes.Keys.Min())
-                    _currentTrackIndex = track.Indexes.Keys.Max();
-                else
-                    _currentTrackIndex = value;
+                    fixedValue = track.Indexes.Keys.Max();
+
+                this.RaiseAndSetIfChanged(ref _currentTrackIndex, fixedValue);
 
                 // Set new index-specific data
                 SectionStartSector = (ulong)track.Indexes[CurrentTrackIndex];
@@ -104,7 +108,7 @@ namespace RedBookPlayer.Discs
                 // Cache the current track for easy access
                 Track track = _image.Tracks[CurrentTrackNumber];
 
-                _currentSector = value;
+                this.RaiseAndSetIfChanged(ref _currentSector, value);
 
                 if((CurrentTrackNumber < _image.Tracks.Count - 1 && CurrentSector >= _image.Tracks[CurrentTrackNumber + 1].TrackStartSector)
                     || (CurrentTrackNumber > 0 && CurrentSector < track.TrackStartSector))
@@ -135,22 +139,43 @@ namespace RedBookPlayer.Discs
         /// <summary>
         /// Represents the 4CH flag
         /// </summary>
-        public bool QuadChannel { get; private set; } = false;
+        public bool QuadChannel
+        {
+            get => _quadChannel;
+            private set => this.RaiseAndSetIfChanged(ref _quadChannel, value);
+        }
 
         /// <summary>
         /// Represents the DATA flag
         /// </summary>
-        public bool IsDataTrack => TrackType != TrackType.Audio;
+        public bool IsDataTrack
+        {
+            get => _isDataTrack;
+            private set => this.RaiseAndSetIfChanged(ref _isDataTrack, value);
+        }
 
         /// <summary>
         /// Represents the DCP flag
         /// </summary>
-        public bool CopyAllowed { get; private set; } = false;
+        public bool CopyAllowed
+        {
+            get => _copyAllowed;
+            private set => this.RaiseAndSetIfChanged(ref _copyAllowed, value);
+        }
 
         /// <summary>
         /// Represents the PRE flag
         /// </summary>
-        public bool TrackHasEmphasis { get; private set; } = false;
+        public bool TrackHasEmphasis
+        {
+            get => _trackHasEmphasis;
+            private set => this.RaiseAndSetIfChanged(ref _trackHasEmphasis, value);
+        }
+
+        private bool _quadChannel;
+        private bool _isDataTrack;
+        private bool _copyAllowed;
+        private bool _trackHasEmphasis;
 
         #endregion
 
@@ -369,8 +394,9 @@ namespace RedBookPlayer.Discs
         /// <param name="track">Track object to read from</param>
         private void SetDefaultTrackFlags(Track track)
         {
-            QuadChannel = false;
             TrackType = track.TrackType;
+            QuadChannel = false;
+            IsDataTrack = track.TrackType != TrackType.Audio;
             CopyAllowed = false;
             TrackHasEmphasis = false;
         }
@@ -390,8 +416,10 @@ namespace RedBookPlayer.Discs
                 byte flags = (byte)(descriptor.CONTROL & 0x0D);
                 TrackHasEmphasis = (flags & (byte)TocControl.TwoChanPreEmph) == (byte)TocControl.TwoChanPreEmph;
                 CopyAllowed = (flags & (byte)TocControl.CopyPermissionMask) == (byte)TocControl.CopyPermissionMask;
-                TrackType = (flags & (byte)TocControl.DataTrack) == (byte)TocControl.DataTrack ? TrackType.Data : TrackType.Audio;
+                IsDataTrack = (flags & (byte)TocControl.DataTrack) == (byte)TocControl.DataTrack;
                 QuadChannel = (flags & (byte)TocControl.FourChanNoPreEmph) == (byte)TocControl.FourChanNoPreEmph;
+
+                TrackType = IsDataTrack ? TrackType.Data : TrackType.Audio;
 
                 return;
             }
