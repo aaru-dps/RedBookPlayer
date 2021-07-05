@@ -305,7 +305,7 @@ namespace RedBookPlayer.GUI
         }
 
         /// <summary>
-        /// Update the UI from the internal player
+        /// Update the view-model from the Player
         /// </summary>
         private void PlayerStateChanged(object sender, PropertyChangedEventArgs e)
         {

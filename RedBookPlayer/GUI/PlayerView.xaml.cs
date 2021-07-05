@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,11 +29,6 @@ namespace RedBookPlayer.GUI
         /// TODO: Does it make sense to have this as an array?
         /// </remarks>
         private Image[] _digits;
-
-        /// <summary>
-        /// Timer for performing UI updates
-        /// </summary>
-        private Timer _updateTimer;
 
         public PlayerView() => InitializeComponent(null);
 
@@ -111,6 +107,7 @@ namespace RedBookPlayer.GUI
         private void InitializeComponent(string xaml)
         {
             DataContext = new PlayerViewModel();
+            PlayerViewModel.PropertyChanged += PlayerViewModelStateChanged;
 
             // Load the theme
             try
@@ -126,23 +123,6 @@ namespace RedBookPlayer.GUI
             }
 
             InitializeDigits();
-
-            _updateTimer = new Timer(1000 / 60);
-
-            _updateTimer.Elapsed += (sender, e) =>
-            {
-                try
-                {
-                    UpdateView(sender, e);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-            };
-
-            _updateTimer.AutoReset = true;
-            _updateTimer.Start();
         }
 
         /// <summary>
@@ -181,16 +161,16 @@ namespace RedBookPlayer.GUI
         }
 
         /// <summary>
-        /// Update the UI with the most recent information from the Player
+        /// Update the UI from the view-model
         /// </summary>
-        private void UpdateView(object sender, ElapsedEventArgs e)
+        private void PlayerViewModelStateChanged(object sender, PropertyChangedEventArgs e)
         {
             Dispatcher.UIThread.InvokeAsync(() =>
             {
                 string digitString = PlayerViewModel.GenerateDigitString();
-                for (int i = 0; i < _digits.Length; i++)
+                for(int i = 0; i < _digits.Length; i++)
                 {
-                    if (_digits[i] != null)
+                    if(_digits[i] != null)
                         _digits[i].Source = GetBitmap(digitString[i]);
                 }
             });

@@ -211,6 +211,10 @@ namespace RedBookPlayer.Hardware
                 return;
             }
 
+            // Add event handling for the optical disc
+            if(_opticalDisc != null)
+                _opticalDisc.PropertyChanged += OpticalDiscStateChanged;
+
             // Initialize the sound output
             _soundOutput.Init(_opticalDisc, autoPlay, defaultVolume);
             if(_soundOutput == null || !_soundOutput.Initialized)
@@ -408,6 +412,11 @@ namespace RedBookPlayer.Hardware
         /// </summary>
         /// <param name="apply"></param>
         public void SetDeEmphasis(bool apply) => _soundOutput?.SetDeEmphasis(apply);
+
+        /// <summary>
+        /// Update the player from the current OpticalDisc
+        /// </summary>
+        private void OpticalDiscStateChanged(object sender, PropertyChangedEventArgs e) => SetDiscInformation();
 
         /// <summary>
         /// Update the player from the current SoundOutput
