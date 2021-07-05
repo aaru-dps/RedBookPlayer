@@ -26,6 +26,7 @@ namespace RedBookPlayer.Common.Discs
         /// <summary>
         /// Current sector number
         /// </summary>
+        /// TODO: Maske this `protected set`
         public abstract ulong CurrentSector { get; set; }
 
         /// <summary>

@@ -160,7 +160,7 @@ namespace RedBookPlayer.Common.Hardware
         public int Volume
         {
             get => _volume;
-            set => this.RaiseAndSetIfChanged(ref _volume, value);
+            private set => this.RaiseAndSetIfChanged(ref _volume, value);
         }
 
         private bool? _playing;

@@ -42,7 +42,7 @@ namespace RedBookPlayer.Common.Hardware
         public int Volume
         {
             get => _volume;
-            set
+            private set
             {
                 int tempVolume = value;
                 if(value > 100)

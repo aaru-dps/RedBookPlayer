@@ -53,7 +53,7 @@ namespace RedBookPlayer.Common
         public ulong SectionStartSector
         {
             get => _sectionStartSector;
-            protected set => this.RaiseAndSetIfChanged(ref _sectionStartSector, value);
+            private set => this.RaiseAndSetIfChanged(ref _sectionStartSector, value);
         }
 
         /// <summary>
