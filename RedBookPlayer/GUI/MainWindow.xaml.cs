@@ -121,6 +121,7 @@ namespace RedBookPlayer.GUI
             if(e.Key == App.Settings.OpenSettingsKey)
             {
                 settingsWindow = new SettingsWindow(App.Settings);
+                settingsWindow.Closed += OnSettingsClosed;
                 settingsWindow.Show();
             }
 
@@ -215,6 +216,12 @@ namespace RedBookPlayer.GUI
             {
                 playerView?.EnableDisableDeEmphasisButton_Click(this, null);
             }
+        }
+
+        public void OnSettingsClosed(object sender, EventArgs e)
+        {
+            PlayerView playerView = ContentControl.Content as PlayerView;
+            playerView?.UpdateViewModel();
         }
 
         #endregion

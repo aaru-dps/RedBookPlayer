@@ -27,10 +27,15 @@ namespace RedBookPlayer.GUI
         private Image[] _digits;
 
         /// <summary>
+        /// Initialize the UI based on the default theme
+        /// </summary>
+        public PlayerView() : this(null) { }
+
+        /// <summary>
         /// Initialize the UI based on the currently selected theme
         /// </summary>
         /// <param name="xaml">XAML data representing the theme, null for default</param>
-        public PlayerView(string xaml = null)
+        public PlayerView(string xaml)
         {
             DataContext = new PlayerViewModel();
             PlayerViewModel.PropertyChanged += PlayerViewModelStateChanged;
@@ -42,23 +47,6 @@ namespace RedBookPlayer.GUI
         #region Helpers
 
         /// <summary>
-        /// Generate a path selection dialog box
-        /// </summary>
-        /// <returns>User-selected path, if possible</returns>
-        public async Task<string> GetPath()
-        {
-            var dialog = new OpenFileDialog { AllowMultiple = false };
-            List<string> knownExtensions = new Aaru.DiscImages.AaruFormat().KnownExtensions.ToList();
-            dialog.Filters.Add(new FileDialogFilter()
-            {
-                Name       = "Aaru Image Format (*" + string.Join(", *", knownExtensions) + ")",
-                Extensions = knownExtensions.ConvertAll(e => e.TrimStart('.'))
-            });
-
-            return (await dialog.ShowAsync((Window)Parent.Parent))?.FirstOrDefault();
-        }
-
-        /// <summary>
         /// Load an image from the path
         /// </summary>
         /// <param name="path">Path to the image to load</param>
@@ -66,13 +54,18 @@ namespace RedBookPlayer.GUI
         {
             return await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                PlayerViewModel.Init(path, App.Settings.AutoPlay, App.Settings.Volume);
+                PlayerViewModel.Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayDataTracks, App.Settings.AutoPlay, App.Settings.Volume);
                 if (PlayerViewModel.Initialized)
                     MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
 
                 return PlayerViewModel.Initialized;
             });
         }
+
+        /// <summary>
+        /// Update the view model with new settings
+        /// </summary>
+        public void UpdateViewModel() => PlayerViewModel.SetLoadDataTracks(App.Settings.PlayDataTracks);
 
         /// <summary>
         /// Generate the digit string to be interpreted by the frontend
@@ -108,21 +101,6 @@ namespace RedBookPlayer.GUI
         }
 
         /// <summary>
-        /// Get current sector time, accounting for offsets
-        /// </summary>
-        /// <returns>ulong representing the current sector time</returns>
-        private ulong GetCurrentSectorTime()
-        {
-            ulong sectorTime = PlayerViewModel.CurrentSector;
-            if(PlayerViewModel.SectionStartSector != 0)
-                sectorTime -= PlayerViewModel.SectionStartSector;
-            else
-                sectorTime += PlayerViewModel.TimeOffset;
-
-            return sectorTime;
-        }
-
-        /// <summary>
         /// Load the png image for a given character based on the theme
         /// </summary>
         /// <param name="character">Character to load the image for</param>
@@ -148,6 +126,38 @@ namespace RedBookPlayer.GUI
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Get current sector time, accounting for offsets
+        /// </summary>
+        /// <returns>ulong representing the current sector time</returns>
+        private ulong GetCurrentSectorTime()
+        {
+            ulong sectorTime = PlayerViewModel.CurrentSector;
+            if(PlayerViewModel.SectionStartSector != 0)
+                sectorTime -= PlayerViewModel.SectionStartSector;
+            else
+                sectorTime += PlayerViewModel.TimeOffset;
+
+            return sectorTime;
+        }
+
+        /// <summary>
+        /// Generate a path selection dialog box
+        /// </summary>
+        /// <returns>User-selected path, if possible</returns>
+        private async Task<string> GetPath()
+        {
+            var dialog = new OpenFileDialog { AllowMultiple = false };
+            List<string> knownExtensions = new Aaru.DiscImages.AaruFormat().KnownExtensions.ToList();
+            dialog.Filters.Add(new FileDialogFilter()
+            {
+                Name = "Aaru Image Format (*" + string.Join(", *", knownExtensions) + ")",
+                Extensions = knownExtensions.ConvertAll(e => e.TrimStart('.'))
+            });
+
+            return (await dialog.ShowAsync((Window)Parent.Parent))?.FirstOrDefault();
         }
 
         /// <summary>
@@ -250,11 +260,11 @@ namespace RedBookPlayer.GUI
 
         public void NextTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.NextTrack();
 
-        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousTrack();
+        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousTrack(App.Settings.AllowSkipHiddenTrack);
 
         public void NextIndexButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.NextIndex(App.Settings.IndexButtonChangeTrack);
 
-        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousIndex(App.Settings.IndexButtonChangeTrack);
+        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousIndex(App.Settings.IndexButtonChangeTrack, App.Settings.AllowSkipHiddenTrack);
 
         public void FastForwardButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.FastForward();
 

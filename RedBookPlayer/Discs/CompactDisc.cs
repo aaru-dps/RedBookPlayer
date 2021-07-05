@@ -52,7 +52,7 @@ namespace RedBookPlayer.Discs
                     CurrentTrackIndex = track.Indexes.Keys.Min();
 
                     // If the track is playable, just return
-                    if(TrackType == TrackType.Audio || App.Settings.PlayDataTracks)
+                    if(TrackType == TrackType.Audio || _loadDataTracks)
                         break;
 
                     // If we're not playing the track, skip
@@ -197,14 +197,35 @@ namespace RedBookPlayer.Discs
         private ulong _currentSector = 0;
 
         /// <summary>
+        /// Indicate if a TOC should be generated if missing
+        /// </summary>
+        private readonly bool _generateMissingToc = false;
+
+        /// <summary>
+        /// Indicate if data tracks should be loaded
+        /// </summary>
+        private bool _loadDataTracks = false;
+
+        /// <summary>
         /// Current disc table of contents
         /// </summary>
         private CDFullTOC _toc;
 
         #endregion
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="generateMissingToc">Generate a TOC if the disc is missing one</param>
+        /// <param name="loadDataTracks">Load data tracks for playback</param>
+        public CompactDisc(bool generateMissingToc, bool loadDataTracks)
+        {
+            _generateMissingToc = generateMissingToc;
+            _loadDataTracks = loadDataTracks;
+        }
+
         /// <inheritdoc/>
-        public override void Init(IOpticalMediaImage image, bool autoPlay = false)
+        public override void Init(IOpticalMediaImage image, bool autoPlay)
         {
             // If the image is null, we can't do anything
             if(image == null)
@@ -260,7 +281,7 @@ namespace RedBookPlayer.Discs
         }
 
         /// <inheritdoc/>
-        public override bool PreviousIndex(bool changeTrack)
+        public override bool PreviousIndex(bool changeTrack, bool playHiddenTrack)
         {
             if(_image == null)
                 return false;
@@ -269,7 +290,7 @@ namespace RedBookPlayer.Discs
             {
                 if(changeTrack)
                 {
-                    PreviousTrack();
+                    PreviousTrack(playHiddenTrack);
                     CurrentSector = (ulong)_image.Tracks[CurrentTrackNumber].Indexes.Values.Max();
                     return true;
                 }
@@ -292,6 +313,12 @@ namespace RedBookPlayer.Discs
             CurrentTrackNumber = 0;
             LoadTrack(CurrentTrackNumber);
         }
+
+        /// <summary>
+        /// Set the value for loading data tracks
+        /// </summary>
+        /// <param name="load">True to enable loading data tracks, false otherwise</param>
+        public void SetLoadDataTracks(bool load) => _loadDataTracks = load;
 
         /// <inheritdoc/>
         public override void SetTotalIndexes()
@@ -329,7 +356,7 @@ namespace RedBookPlayer.Discs
             if(_image.Info.ReadableMediaTags?.Contains(MediaTagType.CD_FullTOC) != true)
             {
                 // Only generate the TOC if we have it set
-                if(!App.Settings.GenerateMissingTOC)
+                if(!_generateMissingToc)
                 {
                     Console.WriteLine("Full TOC not found");
                     return false;

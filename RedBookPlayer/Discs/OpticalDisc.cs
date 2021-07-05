@@ -90,7 +90,7 @@ namespace RedBookPlayer.Discs
         /// </summary>
         /// <param name="image">Aaruformat image to load</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public abstract void Init(IOpticalMediaImage image, bool autoPlay = false);
+        public abstract void Init(IOpticalMediaImage image, bool autoPlay);
 
         #region Seeking
 
@@ -109,14 +109,15 @@ namespace RedBookPlayer.Discs
         /// <summary>
         /// Try to move to the previous track, wrapping around if necessary
         /// </summary>
-        public void PreviousTrack()
+        /// <param name="playHiddenTrack">True to play the hidden track, if it exists</param>
+        public void PreviousTrack(bool playHiddenTrack)
         {
             if(_image == null)
                 return;
 
             if(CurrentSector < (ulong)_image.Tracks[CurrentTrackNumber].Indexes[1] + 75)
             {
-                if(App.Settings.AllowSkipHiddenTrack && CurrentTrackNumber == 0 && CurrentSector >= 75)
+                if(playHiddenTrack && CurrentTrackNumber == 0 && CurrentSector >= 75)
                     CurrentSector = 0;
                 else
                     CurrentTrackNumber--;
@@ -138,8 +139,9 @@ namespace RedBookPlayer.Discs
         /// Try to move to the previous track index
         /// </summary>
         /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
+        /// <param name="playHiddenTrack">True to play the hidden track, if it exists</param>
         /// <returns>True if the track was changed, false otherwise</returns>
-        public abstract bool PreviousIndex(bool changeTrack);
+        public abstract bool PreviousIndex(bool changeTrack, bool playHiddenTrack);
 
         #endregion
 
