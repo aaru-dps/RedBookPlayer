@@ -298,6 +298,7 @@ namespace RedBookPlayer.GUI
             CurrentTrackNumber = _player.CurrentTrackNumber;
             CurrentTrackIndex = _player.CurrentTrackIndex;
             CurrentSector = _player.CurrentSector;
+            SectionStartSector = _player.SectionStartSector;
 
             HiddenTrack = _player.HiddenTrack;
 

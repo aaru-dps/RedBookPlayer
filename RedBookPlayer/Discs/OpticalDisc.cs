@@ -40,7 +40,7 @@ namespace RedBookPlayer.Discs
         /// <summary>
         /// Number of bytes per sector for the current track
         /// </summary>
-        public int BytesPerSector => _image.Tracks[CurrentTrackNumber].TrackBytesPerSector;
+        public int BytesPerSector => _image.Tracks[CurrentTrackNumber].TrackRawBytesPerSector;
 
         /// <summary>
         /// Represents the track type
