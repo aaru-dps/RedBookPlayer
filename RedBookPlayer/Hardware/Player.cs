@@ -217,8 +217,9 @@ namespace RedBookPlayer.Hardware
             // Mark the player as ready
             Initialized = true;
 
-            // Force a refresh of the disc information
+            // Force a refresh of the state information
             OpticalDiscStateChanged(this, null);
+            SoundOutputStateChanged(this, null);
         }
 
         #region Playback
