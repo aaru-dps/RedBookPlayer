@@ -1,10 +1,44 @@
+using System.IO;
 using Aaru.CommonTypes.Interfaces;
 using Aaru.CommonTypes.Metadata;
+using Aaru.DiscImages;
+using Aaru.Filters;
 
 namespace RedBookPlayer.Discs
 {
     public static class OpticalDiscFactory
     {
+        /// <summary>
+        /// Generate an OpticalDisc from an input path
+        /// </summary>
+        /// <param name="path">Path to load the image from</param>
+        /// <param name="autoPlay">True if the image should be playable immediately, false otherwise</param>
+        /// <returns>Instantiated OpticalDisc, if possible</returns>
+        public static OpticalDisc GenerateFromPath(string path, bool autoPlay)
+        {
+            try
+            {
+                // Validate the image exists
+                if(string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                    return null;
+
+                // Load the disc image to memory
+                // TODO: Assumes Aaruformat right now for all
+                var image = new AaruFormat();
+                var filter = new ZZZNoFilter();
+                filter.Open(path);
+                image.Open(filter);
+
+                // Generate and instantiate the disc
+                return GenerateFromImage(image, autoPlay);
+            }
+            catch
+            {
+                // All errors mean an invalid image in some way
+                return null;
+            }
+        }
+
         /// <summary>
         /// Generate an OpticalDisc from an input IOpticalMediaImage
         /// </summary>

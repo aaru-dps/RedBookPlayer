@@ -1,9 +1,6 @@
 using System;
 using System.ComponentModel;
-using System.IO;
 using Aaru.CommonTypes.Enums;
-using Aaru.DiscImages;
-using Aaru.Filters;
 using ReactiveUI;
 using RedBookPlayer.Discs;
 
@@ -188,32 +185,14 @@ namespace RedBookPlayer.Hardware
             Initialized = false;
             _soundOutput = new SoundOutput();
             _soundOutput.SetDeEmphasis(false);
-            _opticalDisc = null;
 
-            try
-            {
-                // Validate the image exists
-                if(string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-                    return;
-
-                // Load the disc image to memory
-                var image = new AaruFormat();
-                var filter = new ZZZNoFilter();
-                filter.Open(path);
-                image.Open(filter);
-
-                // Generate and instantiate the disc
-                _opticalDisc = OpticalDiscFactory.GenerateFromImage(image, autoPlay);
-            }
-            catch
-            {
-                // All errors mean an invalid image in some way
+            // Initalize the disc
+            _opticalDisc = OpticalDiscFactory.GenerateFromPath(path, autoPlay);
+            if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
-            }
 
             // Add event handling for the optical disc
-            if(_opticalDisc != null)
-                _opticalDisc.PropertyChanged += OpticalDiscStateChanged;
+            _opticalDisc.PropertyChanged += OpticalDiscStateChanged;
 
             // Initialize the sound output
             _soundOutput.Init(_opticalDisc, autoPlay, defaultVolume);
