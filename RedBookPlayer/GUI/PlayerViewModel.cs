@@ -197,17 +197,17 @@ namespace RedBookPlayer.GUI
         /// <summary>
         /// Begin playback
         /// </summary>
-        public void Play() => _player.Play();
+        public void Play() => _player?.Play();
 
         /// <summary>
         /// Pause current playback
         /// </summary>
-        public void Pause() => _player.Pause();
+        public void Pause() => _player?.Pause();
 
         /// <summary>
         /// Stop current playback
         /// </summary>
-        public void Stop() => _player.Stop();
+        public void Stop() => _player?.Stop();
 
         /// <summary>
         /// Move to the next playable track
