@@ -26,9 +26,18 @@ namespace RedBookPlayer.GUI
         /// </summary>
         private Image[] _digits;
 
-        public PlayerView() => InitializeComponent(null);
+        /// <summary>
+        /// Initialize the UI based on the currently selected theme
+        /// </summary>
+        /// <param name="xaml">XAML data representing the theme, null for default</param>
+        public PlayerView(string xaml = null)
+        {
+            DataContext = new PlayerViewModel();
+            PlayerViewModel.PropertyChanged += PlayerViewModelStateChanged;
 
-        public PlayerView(string xaml) => InitializeComponent(xaml);
+            LoadTheme(xaml);
+            InitializeDigits();
+        }
 
         #region Helpers
 
@@ -55,120 +64,13 @@ namespace RedBookPlayer.GUI
         /// <param name="path">Path to the image to load</param>
         public async Task<bool> LoadImage(string path)
         {
-            bool result = await Dispatcher.UIThread.InvokeAsync(() =>
+            return await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 PlayerViewModel.Init(path, App.Settings.AutoPlay, App.Settings.Volume);
-                return PlayerViewModel.Initialized;
-            });
-
-            if(result)
-            {
-                await Dispatcher.UIThread.InvokeAsync(() =>
-                {
+                if (PlayerViewModel.Initialized)
                     MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
-                });
-            }
 
-            return result;
-        }
-
-        /// <summary>
-        /// Load the png image for a given character based on the theme
-        /// </summary>
-        /// <param name="character">Character to load the image for</param>
-        /// <returns>Bitmap representing the loaded image</returns>
-        /// <remarks>
-        /// TODO: Currently assumes that an image must always exist
-        /// </remarks>
-        private Bitmap GetBitmap(char character)
-        {
-            if(App.Settings.SelectedTheme == "default")
-            {
-                IAssetLoader assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-
-                return new Bitmap(assets.Open(new Uri($"avares://RedBookPlayer/Assets/{character}.png")));
-            }
-            else
-            {
-                string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{App.Settings.SelectedTheme}";
-                using FileStream stream = File.Open($"{themeDirectory}/{character}.png", FileMode.Open);
-                return new Bitmap(stream);
-            }
-        }
-
-        /// <summary>
-        /// Initialize the UI based on the currently selected theme
-        /// </summary>
-        /// <param name="xaml">XAML data representing the theme, null for default</param>
-        private void InitializeComponent(string xaml)
-        {
-            DataContext = new PlayerViewModel();
-            PlayerViewModel.PropertyChanged += PlayerViewModelStateChanged;
-
-            // Load the theme
-            try
-            {
-                if(xaml != null)
-                    new AvaloniaXamlLoader().Load(xaml, null, this);
-                else
-                    AvaloniaXamlLoader.Load(this);
-            }
-            catch
-            {
-                AvaloniaXamlLoader.Load(this);
-            }
-
-            InitializeDigits();
-        }
-
-        /// <summary>
-        /// Initialize the displayed digits array
-        /// </summary>
-        private void InitializeDigits()
-        {
-            _digits = new Image[]
-            {
-                this.FindControl<Image>("TrackDigit1"),
-                this.FindControl<Image>("TrackDigit2"),
-
-                this.FindControl<Image>("IndexDigit1"),
-                this.FindControl<Image>("IndexDigit2"),
-
-                this.FindControl<Image>("TimeDigit1"),
-                this.FindControl<Image>("TimeDigit2"),
-                this.FindControl<Image>("TimeDigit3"),
-                this.FindControl<Image>("TimeDigit4"),
-                this.FindControl<Image>("TimeDigit5"),
-                this.FindControl<Image>("TimeDigit6"),
-
-                this.FindControl<Image>("TotalTracksDigit1"),
-                this.FindControl<Image>("TotalTracksDigit2"),
-
-                this.FindControl<Image>("TotalIndexesDigit1"),
-                this.FindControl<Image>("TotalIndexesDigit2"),
-
-                this.FindControl<Image>("TotalTimeDigit1"),
-                this.FindControl<Image>("TotalTimeDigit2"),
-                this.FindControl<Image>("TotalTimeDigit3"),
-                this.FindControl<Image>("TotalTimeDigit4"),
-                this.FindControl<Image>("TotalTimeDigit5"),
-                this.FindControl<Image>("TotalTimeDigit6"),
-            };
-        }
-
-        /// <summary>
-        /// Update the UI from the view-model
-        /// </summary>
-        private void PlayerViewModelStateChanged(object sender, PropertyChangedEventArgs e)
-        {
-            Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                string digitString = GenerateDigitString();
-                for(int i = 0; i < _digits.Length; i++)
-                {
-                    if(_digits[i] != null)
-                        _digits[i].Source = GetBitmap(digitString[i]);
-                }
+                return PlayerViewModel.Initialized;
             });
         }
 
@@ -218,6 +120,105 @@ namespace RedBookPlayer.GUI
                 sectorTime += PlayerViewModel.TimeOffset;
 
             return sectorTime;
+        }
+
+        /// <summary>
+        /// Load the png image for a given character based on the theme
+        /// </summary>
+        /// <param name="character">Character to load the image for</param>
+        /// <returns>Bitmap representing the loaded image</returns>
+        private Bitmap GetBitmap(char character)
+        {
+            try
+            {
+                if(App.Settings.SelectedTheme == "default")
+                {
+                    IAssetLoader assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+
+                    return new Bitmap(assets.Open(new Uri($"avares://RedBookPlayer/Assets/{character}.png")));
+                }
+                else
+                {
+                    string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{App.Settings.SelectedTheme}";
+                    using FileStream stream = File.Open($"{themeDirectory}/{character}.png", FileMode.Open);
+                    return new Bitmap(stream);
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Initialize the displayed digits array
+        /// </summary>
+        private void InitializeDigits()
+        {
+            _digits = new Image[]
+            {
+                this.FindControl<Image>("TrackDigit1"),
+                this.FindControl<Image>("TrackDigit2"),
+
+                this.FindControl<Image>("IndexDigit1"),
+                this.FindControl<Image>("IndexDigit2"),
+
+                this.FindControl<Image>("TimeDigit1"),
+                this.FindControl<Image>("TimeDigit2"),
+                this.FindControl<Image>("TimeDigit3"),
+                this.FindControl<Image>("TimeDigit4"),
+                this.FindControl<Image>("TimeDigit5"),
+                this.FindControl<Image>("TimeDigit6"),
+
+                this.FindControl<Image>("TotalTracksDigit1"),
+                this.FindControl<Image>("TotalTracksDigit2"),
+
+                this.FindControl<Image>("TotalIndexesDigit1"),
+                this.FindControl<Image>("TotalIndexesDigit2"),
+
+                this.FindControl<Image>("TotalTimeDigit1"),
+                this.FindControl<Image>("TotalTimeDigit2"),
+                this.FindControl<Image>("TotalTimeDigit3"),
+                this.FindControl<Image>("TotalTimeDigit4"),
+                this.FindControl<Image>("TotalTimeDigit5"),
+                this.FindControl<Image>("TotalTimeDigit6"),
+            };
+        }
+
+        /// <summary>
+        /// Load the theme from a XAML, if possible
+        /// </summary>
+        /// <param name="xaml">XAML data representing the theme, null for default</param>
+        private void LoadTheme(string xaml)
+        {
+            try
+            {
+                if(xaml != null)
+                    new AvaloniaXamlLoader().Load(xaml, null, this);
+                else
+                    AvaloniaXamlLoader.Load(this);
+            }
+            catch
+            {
+                AvaloniaXamlLoader.Load(this);
+            }
+        }
+
+        /// <summary>
+        /// Update the UI from the view-model
+        /// </summary>
+        private void PlayerViewModelStateChanged(object sender, PropertyChangedEventArgs e)
+        {
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                string digitString = GenerateDigitString();
+                for(int i = 0; i < _digits.Length; i++)
+                {
+                    Bitmap digitImage = GetBitmap(digitString[i]);
+                    if(_digits[i] != null && digitImage != null)
+                        _digits[i].Source = digitImage;
+                }
+            });
         }
 
         #endregion
