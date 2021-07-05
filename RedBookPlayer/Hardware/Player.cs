@@ -216,7 +216,9 @@ namespace RedBookPlayer.Hardware
 
             // Mark the player as ready
             Initialized = true;
-            SetDiscInformation();
+
+            // Force a refresh of the disc information
+            OpticalDiscStateChanged(this, null);
         }
 
         #region Playback
@@ -286,8 +288,6 @@ namespace RedBookPlayer.Hardware
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.SetDeEmphasis(compactDisc.TrackHasEmphasis);
 
-            SetDiscInformation();
-
             if(wasPlaying == true) Play();
         }
 
@@ -307,8 +307,6 @@ namespace RedBookPlayer.Hardware
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.SetDeEmphasis(compactDisc.TrackHasEmphasis);
 
-            SetDiscInformation();
-
             if(wasPlaying == true) Play();
         }
 
@@ -327,8 +325,6 @@ namespace RedBookPlayer.Hardware
             _opticalDisc.NextIndex(changeTrack);
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.SetDeEmphasis(compactDisc.TrackHasEmphasis);
-
-            SetDiscInformation();
 
             if(wasPlaying == true) Play();
         }
@@ -350,8 +346,6 @@ namespace RedBookPlayer.Hardware
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.SetDeEmphasis(compactDisc.TrackHasEmphasis);
 
-            SetDiscInformation();
-
             if(wasPlaying == true) Play();
         }
 
@@ -364,7 +358,6 @@ namespace RedBookPlayer.Hardware
                 return;
 
             _opticalDisc.CurrentSector = Math.Min(_opticalDisc.TotalSectors, _opticalDisc.CurrentSector + 75);
-            SetDiscInformation();
         }
 
         /// <summary>
@@ -377,8 +370,6 @@ namespace RedBookPlayer.Hardware
 
             if(_opticalDisc.CurrentSector >= 75)
                 _opticalDisc.CurrentSector -= 75;
-
-            SetDiscInformation();
         }
 
         #endregion
@@ -400,22 +391,7 @@ namespace RedBookPlayer.Hardware
         /// <summary>
         /// Update the player from the current OpticalDisc
         /// </summary>
-        private void OpticalDiscStateChanged(object sender, PropertyChangedEventArgs e) => SetDiscInformation();
-
-        /// <summary>
-        /// Update the player from the current SoundOutput
-        /// </summary>
-        private void SoundOutputStateChanged(object sender, PropertyChangedEventArgs e)
-        {
-            Playing = _soundOutput.Playing;
-            ApplyDeEmphasis = _soundOutput.ApplyDeEmphasis;
-            //Volume = _soundOutput.Volume;
-        }
-
-        /// <summary>
-        /// Set all current disc information
-        /// </summary>
-        private void SetDiscInformation()
+        private void OpticalDiscStateChanged(object sender, PropertyChangedEventArgs e)
         {
             CurrentTrackNumber = _opticalDisc.CurrentTrackNumber;
             CurrentTrackIndex = _opticalDisc.CurrentTrackIndex;
@@ -438,6 +414,16 @@ namespace RedBookPlayer.Hardware
                 CopyAllowed = false;
                 TrackHasEmphasis = false;
             }
+        }
+
+        /// <summary>
+        /// Update the player from the current SoundOutput
+        /// </summary>
+        private void SoundOutputStateChanged(object sender, PropertyChangedEventArgs e)
+        {
+            Playing = _soundOutput.Playing;
+            ApplyDeEmphasis = _soundOutput.ApplyDeEmphasis;
+            Volume = _soundOutput.Volume;
         }
 
         #endregion
