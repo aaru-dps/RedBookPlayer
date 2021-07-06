@@ -94,12 +94,18 @@ namespace RedBookPlayer.GUI
             if(PlayerViewModel?.Initialized != true)
                 return string.Empty.PadLeft(20, '-');
 
+            int usableTrackNumber = PlayerViewModel.CurrentTrackNumber;
+            if(usableTrackNumber < 0)
+                usableTrackNumber = 0;
+            else if(usableTrackNumber > 99)
+                usableTrackNumber = 99;
+
             // Otherwise, take the current time into account
             ulong sectorTime = GetCurrentSectorTime();
 
             int[] numbers = new int[]
             {
-                PlayerViewModel.CurrentTrackNumber,
+                usableTrackNumber,
                 PlayerViewModel.CurrentTrackIndex,
 
                 (int)(sectorTime / (75 * 60)),

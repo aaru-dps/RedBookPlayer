@@ -25,6 +25,10 @@ namespace RedBookPlayer.Common.Discs
                 if(_image == null)
                     return;
 
+                // Data tracks only and flag disabled means we can't do anything
+                if(_image.Tracks.All(t => t.TrackType != TrackType.Audio) && !_loadDataTracks)
+                    return;
+
                 // Cache the value and the current track number
                 int cachedValue = value;
                 int cachedTrackNumber;
@@ -58,6 +62,8 @@ namespace RedBookPlayer.Common.Discs
 
                     // Cache the current track for easy access
                     Track track = GetTrack(cachedTrackNumber);
+                    if(track == null)
+                        return;
 
                     // Set track flags from subchannel data, if possible
                     SetTrackFlags(track);
@@ -74,10 +80,26 @@ namespace RedBookPlayer.Common.Discs
                 }
                 while(cachedValue != _currentTrackNumber);
 
-                this.RaiseAndSetIfChanged(ref _currentTrackNumber, cachedTrackNumber);
+                // If we looped around, ensure it reloads
+                if(cachedValue == _currentTrackNumber)
+                {
+                    this.RaiseAndSetIfChanged(ref _currentTrackNumber, -1);
 
-                TotalIndexes = GetTrack(_currentTrackNumber).Indexes.Keys.Max();
-                CurrentTrackIndex = GetTrack(_currentTrackNumber).Indexes.Keys.Min();
+                    Track track = GetTrack(cachedValue);
+                    if(track == null)
+                        return;
+
+                    SetTrackFlags(track);
+                }
+
+                this.RaiseAndSetIfChanged(ref _currentTrackNumber, cachedValue);
+
+                Track cachedTrack = GetTrack(cachedValue);
+                if(cachedTrack == null)
+                    return;
+
+                TotalIndexes = cachedTrack.Indexes.Keys.Max();
+                CurrentTrackIndex = cachedTrack.Indexes.Keys.Min();
             }
         }
 
@@ -93,6 +115,8 @@ namespace RedBookPlayer.Common.Discs
 
                 // Cache the current track for easy access
                 Track track = GetTrack(CurrentTrackNumber);
+                if(track == null)
+                    return;
 
                 // Ensure that the value is valid, wrapping around if necessary
                 ushort fixedValue = value;
@@ -121,10 +145,12 @@ namespace RedBookPlayer.Common.Discs
 
                 // Cache the current track for easy access
                 Track track = GetTrack(CurrentTrackNumber);
+                if(track == null)
+                    return;
 
                 this.RaiseAndSetIfChanged(ref _currentSector, value);
 
-                if((CurrentTrackNumber < _image.Tracks.Count - 1 && CurrentSector >= GetTrack(CurrentTrackNumber + 1).TrackStartSector)
+                if((CurrentTrackNumber < _image.Tracks.Count - 1 && CurrentSector >= (GetTrack(CurrentTrackNumber + 1)?.TrackStartSector ?? 0))
                     || (CurrentTrackNumber > 0 && CurrentSector < track.TrackStartSector))
                 {
                     foreach(Track trackData in _image.Tracks.ToArray().Reverse())
@@ -151,7 +177,7 @@ namespace RedBookPlayer.Common.Discs
         }
 
         /// <inheritdoc/>
-        public override int BytesPerSector => GetTrack(CurrentTrackNumber).TrackRawBytesPerSector;
+        public override int BytesPerSector => GetTrack(CurrentTrackNumber)?.TrackRawBytesPerSector ?? 0;
 
         /// <summary>
         /// Represents the 4CH flag
@@ -309,6 +335,8 @@ namespace RedBookPlayer.Common.Discs
 
             // Cache the current track for easy access
             Track track = GetTrack(CurrentTrackNumber);
+            if(track == null)
+                return false;
 
             // If the index is greater than the highest index, change tracks if needed
             if(CurrentTrackIndex + 1 > track.Indexes.Keys.Max())
@@ -349,6 +377,8 @@ namespace RedBookPlayer.Common.Discs
 
             // Cache the current track for easy access
             Track track = GetTrack(CurrentTrackNumber);
+            if(track == null)
+                return false;
 
             // If the index is less than the lowest index, change tracks if needed
             if(CurrentTrackIndex - 1 < track.Indexes.Keys.Min())
@@ -410,7 +440,7 @@ namespace RedBookPlayer.Common.Discs
             if(_image == null)
                 return;
 
-            TotalIndexes = GetTrack(CurrentTrackNumber).Indexes.Keys.Max();
+            TotalIndexes = GetTrack(CurrentTrackNumber)?.Indexes.Keys.Max() ?? 0;
         }
 
         /// <inheritdoc/>

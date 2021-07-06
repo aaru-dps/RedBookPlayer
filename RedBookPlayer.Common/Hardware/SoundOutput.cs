@@ -153,6 +153,13 @@ namespace RedBookPlayer.Common.Hardware
             // Set the current volume
             _soundOut.Volume = (float)Volume / 100;
 
+            // If we have an unreadable track, just return
+            if (_opticalDisc.BytesPerSector <= 0)
+            {
+                Array.Clear(buffer, offset, count);
+                return count;
+            }
+
             // Determine how many sectors we can read
             ulong sectorsToRead;
             ulong zeroSectorsAmount;
