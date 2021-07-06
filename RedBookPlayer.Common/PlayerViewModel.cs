@@ -193,7 +193,7 @@ namespace RedBookPlayer.Common
         public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay, int defaultVolume)
         {
             // Stop current playback, if necessary
-            if(Playing != null) Playing = null;
+            if(Playing != null) Stop();
 
             // Create and attempt to initialize new Player
             _player = new Player(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay, defaultVolume);
