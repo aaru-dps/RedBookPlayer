@@ -410,7 +410,7 @@ namespace RedBookPlayer.Common.Discs
             if(_image == null)
                 return;
 
-            TotalIndexes = _image.Tracks[CurrentTrackNumber].Indexes.Keys.Max();
+            TotalIndexes = GetTrack(CurrentTrackNumber).Indexes.Keys.Max();
         }
 
         /// <inheritdoc/>
