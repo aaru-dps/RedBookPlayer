@@ -5,6 +5,7 @@ using System.Xml;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
+using RedBookPlayer.Common;
 
 namespace RedBookPlayer.GUI
 {
@@ -30,10 +31,13 @@ namespace RedBookPlayer.GUI
             if(string.IsNullOrWhiteSpace(theme))
                 return;
 
+            // If we already have a view, cache the view model
+            PlayerViewModel pvm = ((PlayerView)Instance.ContentControl.Content).PlayerViewModel;
+
             // If the theme name is "default", we assume the internal theme is used
             if(theme.Equals("default", StringComparison.CurrentCultureIgnoreCase))
             {
-                Instance.ContentControl.Content = new PlayerView();
+                Instance.ContentControl.Content = new PlayerView(pvm);
             }
             else
             {
@@ -50,12 +54,12 @@ namespace RedBookPlayer.GUI
                 {
                     string xaml = File.ReadAllText(xamlPath);
                     xaml = xaml.Replace("Source=\"", $"Source=\"file://{themeDirectory}/");
-                    Instance.ContentControl.Content = new PlayerView(xaml);
+                    Instance.ContentControl.Content = new PlayerView(xaml, pvm);
                 }
                 catch(XmlException ex)
                 {
                     Console.WriteLine($"Error: invalid theme XAML ({ex.Message}), reverting to default");
-                    Instance.ContentControl.Content = new PlayerView();
+                    Instance.ContentControl.Content = new PlayerView(pvm);
                 }
             }
 

@@ -30,15 +30,27 @@ namespace RedBookPlayer.GUI
         /// <summary>
         /// Initialize the UI based on the default theme
         /// </summary>
-        public PlayerView() : this(null) { }
+        public PlayerView() : this(null, null) { }
+
+        /// <summary>
+        /// Initialize the UI based on the default theme with an existing view model
+        /// </summary>
+        /// <param name="xaml">XAML data representing the theme, null for default</param>
+        /// <param name="playerViewModel">Existing PlayerViewModel to load in instead of creating a new one</param>
+        public PlayerView(PlayerViewModel playerViewModel) : this(null, playerViewModel) { }
 
         /// <summary>
         /// Initialize the UI based on the currently selected theme
         /// </summary>
         /// <param name="xaml">XAML data representing the theme, null for default</param>
-        public PlayerView(string xaml)
+        /// <param name="playerViewModel">Existing PlayerViewModel to load in instead of creating a new one</param>
+        public PlayerView(string xaml, PlayerViewModel playerViewModel)
         {
-            DataContext = new PlayerViewModel();
+            if(playerViewModel != null)
+                DataContext = playerViewModel;
+            else
+                DataContext = new PlayerViewModel();
+
             PlayerViewModel.PropertyChanged += PlayerViewModelStateChanged;
 
             LoadTheme(xaml);
