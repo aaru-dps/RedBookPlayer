@@ -270,7 +270,7 @@ namespace RedBookPlayer.Common.Discs
                 TotalIndexes = 0;
 
             // Set the internal disc state
-            TotalTracks = _image.Tracks.Count;
+            TotalTracks = (int)_image.Tracks.Max(t => t.TrackSequence);
             TrackDataDescriptor firstTrack = _toc.TrackDescriptors.First(d => d.ADR == 1 && d.POINT == 1);
             TimeOffset = (ulong)((firstTrack.PMIN * 60 * 75) + (firstTrack.PSEC * 75) + firstTrack.PFRAME);
             TotalTime = TimeOffset + _image.Tracks.Last().TrackEndSector;
