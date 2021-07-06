@@ -62,9 +62,6 @@ namespace RedBookPlayer.Common.Discs
                     // Set track flags from subchannel data, if possible
                     SetTrackFlags(track);
 
-                    TotalIndexes = track.Indexes.Keys.Max();
-                    CurrentTrackIndex = track.Indexes.Keys.Min();
-
                     // If the track is playable, just return
                     if(TrackType == TrackType.Audio || _loadDataTracks)
                         break;
@@ -78,6 +75,9 @@ namespace RedBookPlayer.Common.Discs
                 while(cachedValue != _currentTrackNumber);
 
                 this.RaiseAndSetIfChanged(ref _currentTrackNumber, cachedTrackNumber);
+
+                TotalIndexes = GetTrack(_currentTrackNumber).Indexes.Keys.Max();
+                CurrentTrackIndex = GetTrack(_currentTrackNumber).Indexes.Keys.Min();
             }
         }
 
