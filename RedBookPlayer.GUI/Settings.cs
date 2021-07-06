@@ -21,9 +21,14 @@ namespace RedBookPlayer.GUI
         public bool IndexButtonChangeTrack { get; set; } = false;
 
         /// <summary>
-        /// Indicates if the index 0 of track 1 is treated like a hidden track
+        /// Indicates if hidden tracks should be played
         /// </summary>
-        public bool AllowSkipHiddenTrack { get; set; } = false;
+        /// <remarks>
+        /// Hidden tracks can be one of the following:
+        /// - TrackSequence == 0
+        /// - Larget pregap of track 1 (> 150 sectors)
+        /// </remarks>
+        public bool PlayHiddenTracks { get; set; } = false;
 
         /// <summary>
         /// Indicates if data tracks should be played like old, non-compliant players

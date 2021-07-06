@@ -55,7 +55,7 @@ namespace RedBookPlayer.GUI
         {
             return await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                PlayerViewModel.Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayDataTracks, App.Settings.AutoPlay, App.Settings.Volume);
+                PlayerViewModel.Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.PlayDataTracks, App.Settings.AutoPlay, App.Settings.Volume);
                 if (PlayerViewModel.Initialized)
                     MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
 
@@ -66,7 +66,11 @@ namespace RedBookPlayer.GUI
         /// <summary>
         /// Update the view model with new settings
         /// </summary>
-        public void UpdateViewModel() => PlayerViewModel.SetLoadDataTracks(App.Settings.PlayDataTracks);
+        public void UpdateViewModel()
+        {
+            PlayerViewModel.SetLoadDataTracks(App.Settings.PlayDataTracks);
+            PlayerViewModel.SetLoadHiddenTracks(App.Settings.PlayHiddenTracks);
+        }
 
         /// <summary>
         /// Generate the digit string to be interpreted by the frontend
@@ -83,7 +87,7 @@ namespace RedBookPlayer.GUI
 
             int[] numbers = new int[]
             {
-                PlayerViewModel.CurrentTrackNumber + 1,
+                PlayerViewModel.CurrentTrackNumber,
                 PlayerViewModel.CurrentTrackIndex,
 
                 (int)(sectorTime / (75 * 60)),
@@ -138,7 +142,7 @@ namespace RedBookPlayer.GUI
             ulong sectorTime = PlayerViewModel.CurrentSector;
             if(PlayerViewModel.SectionStartSector != 0)
                 sectorTime -= PlayerViewModel.SectionStartSector;
-            else
+            else if (PlayerViewModel.CurrentTrackNumber > 0)
                 sectorTime += PlayerViewModel.TimeOffset;
 
             return sectorTime;
@@ -261,11 +265,11 @@ namespace RedBookPlayer.GUI
 
         public void NextTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.NextTrack();
 
-        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousTrack(App.Settings.AllowSkipHiddenTrack);
+        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousTrack();
 
         public void NextIndexButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.NextIndex(App.Settings.IndexButtonChangeTrack);
 
-        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousIndex(App.Settings.IndexButtonChangeTrack, App.Settings.AllowSkipHiddenTrack);
+        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousIndex(App.Settings.IndexButtonChangeTrack);
 
         public void FastForwardButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.FastForward();
 

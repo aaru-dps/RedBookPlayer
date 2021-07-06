@@ -186,16 +186,17 @@ namespace RedBookPlayer.Common
         /// </summary>
         /// <param name="path">Path to the disc image</param>
         /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
+        /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
         /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
         /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public void Init(string path, bool generateMissingToc, bool loadDataTracks, bool autoPlay, int defaultVolume)
+        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay, int defaultVolume)
         {
             // Stop current playback, if necessary
             if(Playing != null) Playing = null;
 
             // Create and attempt to initialize new Player
-            _player = new Player(path, generateMissingToc, loadDataTracks, autoPlay, defaultVolume);
+            _player = new Player(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay, defaultVolume);
             if(Initialized)
             {
                 _player.PropertyChanged += PlayerStateChanged;
@@ -228,8 +229,7 @@ namespace RedBookPlayer.Common
         /// <summary>
         /// Move to the previous playable track
         /// </summary>
-        /// <param name="playHiddenTrack">True to play the hidden track, if it exists</param>
-        public void PreviousTrack(bool playHiddenTrack) => _player?.PreviousTrack(playHiddenTrack);
+        public void PreviousTrack() => _player?.PreviousTrack();
 
         /// <summary>
         /// Move to the next index
@@ -241,8 +241,7 @@ namespace RedBookPlayer.Common
         /// Move to the previous index
         /// </summary>
         /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
-        /// <param name="playHiddenTrack">True to play the hidden track, if it exists</param>
-        public void PreviousIndex(bool changeTrack, bool playHiddenTrack) => _player?.PreviousIndex(changeTrack, playHiddenTrack);
+        public void PreviousIndex(bool changeTrack) => _player?.PreviousIndex(changeTrack);
 
         /// <summary>
         /// Fast-forward playback by 75 sectors, if possible
@@ -269,6 +268,12 @@ namespace RedBookPlayer.Common
         /// </summary>
         /// <param name="load">True to enable loading data tracks, false otherwise</param>
         public void SetLoadDataTracks(bool load) => _player?.SetLoadDataTracks(load);
+
+        /// <summary>
+        /// Set the value for loading hidden tracks [CompactDisc only]
+        /// </summary>
+        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
+        public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
 
         /// <summary>
         /// Set the value for the volume

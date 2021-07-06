@@ -34,16 +34,30 @@ namespace RedBookPlayer.Common.Discs
 
                 do
                 {
-                    // Ensure that the value is valid, wrapping around if necessary
-                    if(cachedValue >= _image.Tracks.Count)
-                        cachedValue = 0;
-                    else if(cachedValue < 0)
-                        cachedValue = _image.Tracks.Count - 1;
+                    // If we're over the last track, wrap around
+                    if(cachedValue > _image.Tracks.Max(t => t.TrackSequence))
+                    {
+                        cachedValue = (int)_image.Tracks.Min(t => t.TrackSequence);
+                        if(cachedValue == 0 && !_loadHiddenTracks)
+                            cachedValue++;
+                    }
+
+                    // If we're under the first track and we're not loading hidden tracks, wrap around
+                    else if(cachedValue < 1 && !_loadHiddenTracks)
+                    {
+                        cachedValue = (int)_image.Tracks.Max(t => t.TrackSequence);
+                    }
+
+                    // If we're under the first valid track, wrap around
+                    else if(cachedValue < _image.Tracks.Min(t => t.TrackSequence))
+                    {
+                        cachedValue = (int)_image.Tracks.Max(t => t.TrackSequence);
+                    }
 
                     cachedTrackNumber = cachedValue;
 
                     // Cache the current track for easy access
-                    Track track = _image.Tracks[cachedTrackNumber];
+                    Track track = GetTrack(cachedTrackNumber);
 
                     // Set track flags from subchannel data, if possible
                     SetTrackFlags(track);
@@ -78,7 +92,7 @@ namespace RedBookPlayer.Common.Discs
                     return;
 
                 // Cache the current track for easy access
-                Track track = _image.Tracks[CurrentTrackNumber];
+                Track track = GetTrack(CurrentTrackNumber);
 
                 // Ensure that the value is valid, wrapping around if necessary
                 ushort fixedValue = value;
@@ -106,18 +120,18 @@ namespace RedBookPlayer.Common.Discs
                     return;
 
                 // Cache the current track for easy access
-                Track track = _image.Tracks[CurrentTrackNumber];
+                Track track = GetTrack(CurrentTrackNumber);
 
                 this.RaiseAndSetIfChanged(ref _currentSector, value);
 
-                if((CurrentTrackNumber < _image.Tracks.Count - 1 && CurrentSector >= _image.Tracks[CurrentTrackNumber + 1].TrackStartSector)
+                if((CurrentTrackNumber < _image.Tracks.Count - 1 && CurrentSector >= GetTrack(CurrentTrackNumber + 1).TrackStartSector)
                     || (CurrentTrackNumber > 0 && CurrentSector < track.TrackStartSector))
                 {
                     foreach(Track trackData in _image.Tracks.ToArray().Reverse())
                     {
                         if(CurrentSector >= trackData.TrackStartSector)
                         {
-                            CurrentTrackNumber = (int)trackData.TrackSequence - 1;
+                            CurrentTrackNumber = (int)trackData.TrackSequence;
                             break;
                         }
                     }
@@ -135,6 +149,9 @@ namespace RedBookPlayer.Common.Discs
                 CurrentTrackIndex = 0;
             }
         }
+
+        /// <inheritdoc/>
+        public override int BytesPerSector => GetTrack(CurrentTrackNumber).TrackRawBytesPerSector;
 
         /// <summary>
         /// Represents the 4CH flag
@@ -207,6 +224,11 @@ namespace RedBookPlayer.Common.Discs
         private bool _loadDataTracks = false;
 
         /// <summary>
+        /// Indicate if hidden tracks should be loaded
+        /// </summary>
+        private bool _loadHiddenTracks = false;
+
+        /// <summary>
         /// Current disc table of contents
         /// </summary>
         private CDFullTOC _toc;
@@ -217,10 +239,12 @@ namespace RedBookPlayer.Common.Discs
         /// Constructor
         /// </summary>
         /// <param name="generateMissingToc">Generate a TOC if the disc is missing one</param>
+        /// <param name="loadHiddenTracks">Load hidden tracks for playback</param>
         /// <param name="loadDataTracks">Load data tracks for playback</param>
-        public CompactDisc(bool generateMissingToc, bool loadDataTracks)
+        public CompactDisc(bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks)
         {
             _generateMissingToc = generateMissingToc;
+            _loadHiddenTracks = loadHiddenTracks;
             _loadDataTracks = loadDataTracks;
         }
 
@@ -258,46 +282,100 @@ namespace RedBookPlayer.Common.Discs
         #region Seeking
 
         /// <inheritdoc/>
+        public override void NextTrack()
+        {
+            if(_image == null)
+                return;
+
+            CurrentTrackNumber++;
+            LoadTrack(CurrentTrackNumber);
+        }
+
+        /// <inheritdoc/>
+        public override void PreviousTrack()
+        {
+            if(_image == null)
+                return;
+
+            CurrentTrackNumber--;
+            LoadTrack(CurrentTrackNumber);
+        }
+
+        /// <inheritdoc/>
         public override bool NextIndex(bool changeTrack)
         {
             if(_image == null)
                 return false;
 
-            if(CurrentTrackIndex + 1 > _image.Tracks[CurrentTrackNumber].Indexes.Keys.Max())
+            // Cache the current track for easy access
+            Track track = GetTrack(CurrentTrackNumber);
+
+            // If the index is greater than the highest index, change tracks if needed
+            if(CurrentTrackIndex + 1 > track.Indexes.Keys.Max())
             {
                 if(changeTrack)
                 {
                     NextTrack();
-                    CurrentSector = (ulong)_image.Tracks[CurrentTrackNumber].Indexes.Values.Min();
+                    CurrentSector = (ulong)GetTrack(CurrentTrackNumber).Indexes.Values.Min();
                     return true;
                 }
             }
+
+            // If the next index has an invalid offset, change tracks if needed
+            else if(track.Indexes[(ushort)(CurrentTrackIndex + 1)] < 0)
+            {
+                if(changeTrack)
+                {
+                    NextTrack();
+                    CurrentSector = (ulong)GetTrack(CurrentTrackNumber).Indexes.Values.Min();
+                    return true;
+                }
+            }
+
+            // Otherwise, just move to the next index
             else
             {
-                CurrentSector = (ulong)_image.Tracks[CurrentTrackNumber].Indexes[++CurrentTrackIndex];
+                CurrentSector = (ulong)track.Indexes[++CurrentTrackIndex];
             }
 
             return false;
         }
 
         /// <inheritdoc/>
-        public override bool PreviousIndex(bool changeTrack, bool playHiddenTrack)
+        public override bool PreviousIndex(bool changeTrack)
         {
             if(_image == null)
                 return false;
 
-            if(CurrentTrackIndex - 1 < _image.Tracks[CurrentTrackNumber].Indexes.Keys.Min())
+            // Cache the current track for easy access
+            Track track = GetTrack(CurrentTrackNumber);
+
+            // If the index is less than the lowest index, change tracks if needed
+            if(CurrentTrackIndex - 1 < track.Indexes.Keys.Min())
             {
                 if(changeTrack)
                 {
-                    PreviousTrack(playHiddenTrack);
-                    CurrentSector = (ulong)_image.Tracks[CurrentTrackNumber].Indexes.Values.Max();
+                    PreviousTrack();
+                    CurrentSector = (ulong)GetTrack(CurrentTrackNumber).Indexes.Values.Max();
                     return true;
                 }
             }
+
+            // If the previous index has an invalid offset, change tracks if needed
+            else if (track.Indexes[(ushort)(CurrentTrackIndex - 1)] < 0)
+            {
+                if(changeTrack)
+                {
+                    PreviousTrack();
+                    CurrentSector = (ulong)GetTrack(CurrentTrackNumber).Indexes.Values.Max();
+                    return true;
+                }
+            }
+            
+            // Otherwise, just move to the previous index
             else
             {
-                CurrentSector = (ulong)_image.Tracks[CurrentTrackNumber].Indexes[--CurrentTrackIndex];
+                CurrentSector = (ulong)track.Indexes[--CurrentTrackIndex];
             }
 
             return false;
@@ -310,7 +388,7 @@ namespace RedBookPlayer.Common.Discs
         /// <inheritdoc/>
         public override void LoadFirstTrack()
         {
-            CurrentTrackNumber = 0;
+            CurrentTrackNumber = 1;
             LoadTrack(CurrentTrackNumber);
         }
 
@@ -319,6 +397,12 @@ namespace RedBookPlayer.Common.Discs
         /// </summary>
         /// <param name="load">True to enable loading data tracks, false otherwise</param>
         public void SetLoadDataTracks(bool load) => _loadDataTracks = load;
+
+        /// <summary>
+        /// Set the value for loading hidden tracks
+        /// </summary>
+        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
+        public void SetLoadHiddenTracks(bool load) => _loadHiddenTracks = load;
 
         /// <inheritdoc/>
         public override void SetTotalIndexes()
@@ -330,17 +414,37 @@ namespace RedBookPlayer.Common.Discs
         }
 
         /// <inheritdoc/>
-        protected override void LoadTrack(int track)
+        protected override void LoadTrack(int trackNumber)
         {
             if(_image == null)
                 return;
 
-            if(track < 0 || track >= _image.Tracks.Count)
+            // If the track number is invalid, just return
+            if(trackNumber < _image.Tracks.Min(t => t.TrackSequence) || trackNumber > _image.Tracks.Max(t => t.TrackSequence))
                 return;
 
-            ushort firstIndex = _image.Tracks[track].Indexes.Keys.Min();
-            int firstSector = _image.Tracks[track].Indexes[firstIndex];
-            CurrentSector = (ulong)(firstSector >= 0 ? firstSector : _image.Tracks[track].Indexes[1]);
+            // Cache the current track for easy access
+            Track track = GetTrack(trackNumber);
+
+            // Select the first index that has a sector offset greater than or equal to 0
+            CurrentSector = (ulong)(track?.Indexes.OrderBy(kvp => kvp.Key).First(kvp => kvp.Value >= 0).Value ?? 0);
+        }
+
+        /// <summary>
+        /// Get the track with the given sequence value, if possible
+        /// </summary>
+        /// <param name="trackNumber">Track number to retrieve</param>
+        /// <returns>Track object for the requested sequence, null on error</returns>
+        private Track GetTrack(int trackNumber)
+        {
+            try
+            {
+                return _image.Tracks.FirstOrDefault(t => t.TrackSequence == trackNumber);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>

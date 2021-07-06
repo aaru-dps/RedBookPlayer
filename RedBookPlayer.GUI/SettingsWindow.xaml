@@ -17,8 +17,8 @@
                             <TextBlock VerticalAlignment="Center">Index navigation can change track</TextBlock>
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
-                            <CheckBox IsChecked="{Binding AllowSkipHiddenTrack}" Margin="0,0,8,0" />
-                            <TextBlock VerticalAlignment="Center">Treat index 0 of track 1 as track 0 (hidden track)</TextBlock>
+                            <CheckBox IsChecked="{Binding PlayHiddenTracks}" Margin="0,0,8,0" />
+                            <TextBlock VerticalAlignment="Center">Play hidden tracks</TextBlock>
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
                             <CheckBox IsChecked="{Binding PlayDataTracks}" Margin="0,0,8,0"/>

@@ -40,7 +40,7 @@ namespace RedBookPlayer.Common.Discs
         /// <summary>
         /// Number of bytes per sector for the current track
         /// </summary>
-        public int BytesPerSector => _image.Tracks[CurrentTrackNumber].TrackRawBytesPerSector;
+        public abstract int BytesPerSector { get; }
 
         /// <summary>
         /// Represents the track type
@@ -97,36 +97,12 @@ namespace RedBookPlayer.Common.Discs
         /// <summary>
         /// Try to move to the next track, wrapping around if necessary
         /// </summary>
-        public void NextTrack()
-        {
-            if(_image == null)
-                return;
-
-            CurrentTrackNumber++;
-            LoadTrack(CurrentTrackNumber);
-        }
+        public abstract void NextTrack();
 
         /// <summary>
         /// Try to move to the previous track, wrapping around if necessary
         /// </summary>
-        /// <param name="playHiddenTrack">True to play the hidden track, if it exists</param>
-        public void PreviousTrack(bool playHiddenTrack)
-        {
-            if(_image == null)
-                return;
-
-            if(CurrentSector < (ulong)_image.Tracks[CurrentTrackNumber].Indexes[1] + 75)
-            {
-                if(playHiddenTrack && CurrentTrackNumber == 0 && CurrentSector >= 75)
-                    CurrentSector = 0;
-                else
-                    CurrentTrackNumber--;
-            }
-            else
-                CurrentTrackNumber--;
-
-            LoadTrack(CurrentTrackNumber);
-        }
+        public abstract void PreviousTrack();
 
         /// <summary>
         /// Try to move to the next track index
@@ -139,9 +115,8 @@ namespace RedBookPlayer.Common.Discs
         /// Try to move to the previous track index
         /// </summary>
         /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
-        /// <param name="playHiddenTrack">True to play the hidden track, if it exists</param>
         /// <returns>True if the track was changed, false otherwise</returns>
-        public abstract bool PreviousIndex(bool changeTrack, bool playHiddenTrack);
+        public abstract bool PreviousIndex(bool changeTrack);
 
         #endregion
 

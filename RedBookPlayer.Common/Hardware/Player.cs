@@ -188,10 +188,11 @@ namespace RedBookPlayer.Common.Hardware
         /// </summary>
         /// <param name="path">Path to the disc image</param>
         /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
+        /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
         /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
         /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public Player(string path, bool generateMissingToc, bool loadDataTracks, bool autoPlay, int defaultVolume)
+        public Player(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay, int defaultVolume)
         {
             // Set the internal state for initialization
             Initialized = false;
@@ -199,7 +200,7 @@ namespace RedBookPlayer.Common.Hardware
             _soundOutput.SetDeEmphasis(false);
 
             // Initalize the disc
-            _opticalDisc = OpticalDiscFactory.GenerateFromPath(path, generateMissingToc, loadDataTracks, autoPlay);
+            _opticalDisc = OpticalDiscFactory.GenerateFromPath(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay);
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
@@ -295,8 +296,7 @@ namespace RedBookPlayer.Common.Hardware
         /// <summary>
         /// Move to the previous playable track
         /// </summary>
-        /// <param name="playHiddenTrack">True to play the hidden track, if it exists</param>
-        public void PreviousTrack(bool playHiddenTrack)
+        public void PreviousTrack()
         {
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
@@ -304,7 +304,7 @@ namespace RedBookPlayer.Common.Hardware
             bool? wasPlaying = Playing;
             if(wasPlaying == true) Pause();
 
-            _opticalDisc.PreviousTrack(playHiddenTrack);
+            _opticalDisc.PreviousTrack();
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.SetDeEmphasis(compactDisc.TrackHasEmphasis);
 
@@ -334,8 +334,7 @@ namespace RedBookPlayer.Common.Hardware
         /// Move to the previous index
         /// </summary>
         /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
-        /// <param name="playHiddenTrack">True to play the hidden track, if it exists</param>
-        public void PreviousIndex(bool changeTrack, bool playHiddenTrack)
+        public void PreviousIndex(bool changeTrack)
         {
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
@@ -343,7 +342,7 @@ namespace RedBookPlayer.Common.Hardware
             bool? wasPlaying = Playing;
             if(wasPlaying == true) Pause();
 
-            _opticalDisc.PreviousIndex(changeTrack, playHiddenTrack);
+            _opticalDisc.PreviousIndex(changeTrack);
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.SetDeEmphasis(compactDisc.TrackHasEmphasis);
 
@@ -388,6 +387,12 @@ namespace RedBookPlayer.Common.Hardware
         /// </summary>
         /// <param name="load">True to enable loading data tracks, false otherwise</param>
         public void SetLoadDataTracks(bool load) => (_opticalDisc as CompactDisc)?.SetLoadDataTracks(load);
+
+        /// <summary>
+        /// Set the value for loading hidden tracks [CompactDisc only]
+        /// </summary>
+        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
+        public void SetLoadHiddenTracks(bool load) => (_opticalDisc as CompactDisc)?.SetLoadHiddenTracks(load);
 
         /// <summary>
         /// Set the value for the volume
