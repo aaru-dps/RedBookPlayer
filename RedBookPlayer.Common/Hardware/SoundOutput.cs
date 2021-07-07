@@ -236,20 +236,7 @@ namespace RedBookPlayer.Common.Hardware
 
             // Apply de-emphasis filtering, only if enabled
             if(ApplyDeEmphasis)
-            {
-                float[][] floatAudioData = new float[2][];
-                floatAudioData[0] = new float[audioDataSegment.Length / 4];
-                floatAudioData[1] = new float[audioDataSegment.Length / 4];
-                ByteConverter.ToFloats16Bit(audioDataSegment, floatAudioData);
-
-                for(int i = 0; i < floatAudioData[0].Length; i++)
-                {
-                    floatAudioData[0][i] = _deEmphasisFilterLeft.Process(floatAudioData[0][i]);
-                    floatAudioData[1][i] = _deEmphasisFilterRight.Process(floatAudioData[1][i]);
-                }
-
-                ByteConverter.FromFloats16Bit(floatAudioData, audioDataSegment);
-            }
+                ProcessDeEmphasis(audioDataSegment);
 
             // Write out the audio data to the buffer
             Array.Copy(audioDataSegment, 0, buffer, offset, count);
@@ -315,6 +302,26 @@ namespace RedBookPlayer.Common.Hardware
         /// </summary>
         /// <param name="volume">New volume value</param>
         public void SetVolume(int volume) => Volume = volume;
+
+        /// <summary>
+        /// Process de-emphasis of audio data
+        /// </summary>
+        /// <param name="audioData">Audio data to process</param>
+        private void ProcessDeEmphasis(byte[] audioData)
+        {
+            float[][] floatAudioData = new float[2][];
+            floatAudioData[0] = new float[audioData.Length / 4];
+            floatAudioData[1] = new float[audioData.Length / 4];
+            ByteConverter.ToFloats16Bit(audioData, floatAudioData);
+
+            for(int i = 0; i < floatAudioData[0].Length; i++)
+            {
+                floatAudioData[0][i] = _deEmphasisFilterLeft.Process(floatAudioData[0][i]);
+                floatAudioData[1][i] = _deEmphasisFilterRight.Process(floatAudioData[1][i]);
+            }
+
+            ByteConverter.FromFloats16Bit(floatAudioData, audioData);
+        }
 
         /// <summary>
         /// Sets or resets the de-emphasis filters
