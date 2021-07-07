@@ -154,38 +154,14 @@ namespace RedBookPlayer.Common.Hardware
             _soundOut.Volume = (float)Volume / 100;
 
             // If we have an unreadable track, just return
-            if (_opticalDisc.BytesPerSector <= 0)
+            if(_opticalDisc.BytesPerSector <= 0)
             {
                 Array.Clear(buffer, offset, count);
                 return count;
             }
 
             // Determine how many sectors we can read
-            ulong sectorsToRead;
-            ulong zeroSectorsAmount;
-            do
-            {
-                // Attempt to read 2 more sectors than requested
-                sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 2;
-                zeroSectorsAmount = 0;
-
-                // Avoid overreads by padding with 0-byte data at the end
-                if(_opticalDisc.CurrentSector + sectorsToRead > _opticalDisc.TotalSectors)
-                {
-                    ulong oldSectorsToRead = sectorsToRead;
-                    sectorsToRead = _opticalDisc.TotalSectors - _opticalDisc.CurrentSector;
-
-                    int tempZeroSectorCount = (int)(oldSectorsToRead - sectorsToRead);
-                    zeroSectorsAmount = (ulong)(tempZeroSectorCount < 0 ? 0 : tempZeroSectorCount);
-                }
-
-                // TODO: Figure out when this value could be negative
-                if(sectorsToRead <= 0)
-                {
-                    _opticalDisc.LoadFirstTrack();
-                    _currentSectorReadPosition = 0;
-                }
-            } while(sectorsToRead <= 0);
+            DetermineReadAmount(count, out ulong sectorsToRead, out ulong zeroSectorsAmount);
 
             // Create padding data for overreads
             byte[] zeroSectors = new byte[(int)zeroSectorsAmount * _opticalDisc.BytesPerSector];
@@ -302,6 +278,40 @@ namespace RedBookPlayer.Common.Hardware
         /// </summary>
         /// <param name="volume">New volume value</param>
         public void SetVolume(int volume) => Volume = volume;
+
+        /// <summary>
+        /// Determine the number of real and zero sectors to read
+        /// </summary>
+        /// <param name="count">Number of requested bytes to read</param>
+        /// <param name="sectorsToRead">Number of sectors to read</param>
+        /// <param name="zeroSectorsAmount">Number of zeroed sectors to concatenate</param>
+        private void DetermineReadAmount(int count, out ulong sectorsToRead, out ulong zeroSectorsAmount)
+        {
+            do
+            {
+                // Attempt to read 2 more sectors than requested
+                sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 2;
+                zeroSectorsAmount = 0;
+
+                // Avoid overreads by padding with 0-byte data at the end
+                if(_opticalDisc.CurrentSector + sectorsToRead > _opticalDisc.TotalSectors)
+                {
+                    ulong oldSectorsToRead = sectorsToRead;
+                    sectorsToRead = _opticalDisc.TotalSectors - _opticalDisc.CurrentSector;
+
+                    int tempZeroSectorCount = (int)(oldSectorsToRead - sectorsToRead);
+                    zeroSectorsAmount = (ulong)(tempZeroSectorCount < 0 ? 0 : tempZeroSectorCount);
+                }
+
+                // If we're reading past the last sector of the disc, wrap around
+                // TODO: Have past-end reads looping back controlled by a flag instead (Repeat? Repeat All?)
+                if(sectorsToRead <= 0)
+                {
+                    _opticalDisc.LoadFirstTrack();
+                    _currentSectorReadPosition = 0;
+                }
+            } while(sectorsToRead <= 0);
+        }
 
         /// <summary>
         /// Process de-emphasis of audio data
