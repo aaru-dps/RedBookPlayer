@@ -2,7 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using RedBookPlayer.GUI.ViewModels;
 
-namespace RedBookPlayer.GUI
+namespace RedBookPlayer.GUI.Views
 {
     public class PlayerView : UserControl
     {

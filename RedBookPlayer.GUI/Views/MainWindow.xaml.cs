@@ -7,7 +7,7 @@ using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using RedBookPlayer.GUI.ViewModels;
 
-namespace RedBookPlayer.GUI
+namespace RedBookPlayer.GUI.Views
 {
     public class MainWindow : Window
     {
