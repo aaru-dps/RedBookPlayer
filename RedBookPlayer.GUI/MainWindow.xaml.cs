@@ -5,7 +5,7 @@ using System.Xml;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
-using RedBookPlayer.Common;
+using RedBookPlayer.GUI.ViewModels;
 
 namespace RedBookPlayer.GUI
 {
@@ -94,7 +94,7 @@ namespace RedBookPlayer.GUI
 
             Closing += (e, f) =>
             {
-                ((PlayerView)ContentControl.Content).StopButton_Click(this, null);
+                ((PlayerView)ContentControl.Content).PlayerViewModel.ExecuteStop();
             };
 
             AddHandler(DragDrop.DropEvent, MainWindow_Drop);
@@ -138,49 +138,49 @@ namespace RedBookPlayer.GUI
             // Toggle playback
             else if(e.Key == App.Settings.TogglePlaybackKey || e.Key == Key.MediaPlayPause)
             {
-                playerView?.PlayPauseButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecuteTogglePlayPause();
             }
 
             // Stop playback
             else if(e.Key == App.Settings.StopPlaybackKey || e.Key == Key.MediaStop)
             {
-                playerView?.StopButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecuteStop();
             }
 
             // Next Track
             else if(e.Key == App.Settings.NextTrackKey || e.Key == Key.MediaNextTrack)
             {
-                playerView?.NextTrackButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecuteNextTrack();
             }
 
             // Previous Track
             else if(e.Key == App.Settings.PreviousTrackKey || e.Key == Key.MediaPreviousTrack)
             {
-                playerView?.PreviousTrackButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecutePreviousTrack();
             }
 
             // Next Index
             else if(e.Key == App.Settings.NextIndexKey)
             {
-                playerView?.NextIndexButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecuteNextIndex();
             }
 
             // Previous Index
             else if(e.Key == App.Settings.PreviousIndexKey)
             {
-                playerView?.PreviousIndexButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecutePreviousIndex();
             }
 
             // Fast Foward
             else if(e.Key == App.Settings.FastForwardPlaybackKey)
             {
-                playerView?.FastForwardButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecuteFastForward();
             }
 
             // Rewind
             else if(e.Key == App.Settings.RewindPlaybackKey)
             {
-                playerView?.RewindButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecuteRewind();
             }
 
             // Volume Up
@@ -193,7 +193,7 @@ namespace RedBookPlayer.GUI
                     increment *= 5;
 
                 if(playerView?.PlayerViewModel?.Volume != null)
-                    playerView.PlayerViewModel.SetVolume(playerView.PlayerViewModel.Volume + increment);
+                    playerView.PlayerViewModel.ExecuteSetVolume(playerView.PlayerViewModel.Volume + increment);
             }
 
             // Volume Down
@@ -206,19 +206,19 @@ namespace RedBookPlayer.GUI
                     decrement *= 5;
 
                 if (playerView?.PlayerViewModel?.Volume != null)
-                    playerView.PlayerViewModel.SetVolume(playerView.PlayerViewModel.Volume - decrement);
+                    playerView.PlayerViewModel.ExecuteSetVolume(playerView.PlayerViewModel.Volume - decrement);
             }
 
             // Mute Toggle
             else if(e.Key == App.Settings.ToggleMuteKey || e.Key == Key.VolumeMute)
             {
-                playerView?.MuteToggleButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecuteToggleMute();
             }
 
             // Emphasis Toggle
             else if(e.Key == App.Settings.ToggleDeEmphasisKey)
             {
-                playerView?.EnableDisableDeEmphasisButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecuteToggleDeEmphasis();
             }
         }
 

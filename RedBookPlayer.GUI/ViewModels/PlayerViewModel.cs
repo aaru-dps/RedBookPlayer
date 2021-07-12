@@ -1,8 +1,9 @@
 using System.ComponentModel;
+using System.Reactive;
 using ReactiveUI;
 using RedBookPlayer.Common.Hardware;
 
-namespace RedBookPlayer.Common
+namespace RedBookPlayer.GUI.ViewModels
 {
     public class PlayerViewModel : ReactiveObject
     {
@@ -10,11 +11,6 @@ namespace RedBookPlayer.Common
         /// Player representing the internal state
         /// </summary>
         private Player _player;
-
-        /// <summary>
-        /// Last volume for mute toggling
-        /// </summary>
-        private int? _lastVolume = null;
 
         #region Player Passthrough
 
@@ -181,6 +177,127 @@ namespace RedBookPlayer.Common
 
         #endregion
 
+        #region Commands
+
+        #region Playback
+
+        /// <summary>
+        /// Command for beginning playback
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> PlayCommand { get; }
+
+        /// <summary>
+        /// Command for pausing playback
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> PauseCommand { get; }
+
+        /// <summary>
+        /// Command for pausing playback
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> TogglePlayPauseCommand { get; }
+
+        /// <summary>
+        /// Command for stopping playback
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> StopCommand { get; }
+
+        /// <summary>
+        /// Command for moving to the next track
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> NextTrackCommand { get; }
+
+        /// <summary>
+        /// Command for moving to the previous track
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> PreviousTrackCommand { get; }
+
+        /// <summary>
+        /// Command for moving to the next index
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> NextIndexCommand { get; }
+
+        /// <summary>
+        /// Command for moving to the previous index
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> PreviousIndexCommand { get; }
+
+        /// <summary>
+        /// Command for fast forwarding
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> FastForwardCommand { get; }
+
+        /// <summary>
+        /// Command for rewinding
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> RewindCommand { get; }
+
+        #endregion
+
+        #region Volume
+
+        /// <summary>
+        /// Command for incrementing volume
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> VolumeUpCommand { get; }
+
+        /// <summary>
+        /// Command for decrementing volume
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> VolumeDownCommand { get; }
+
+        /// <summary>
+        /// Command for toggling mute
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> ToggleMuteCommand { get; }
+
+        #endregion
+
+        #region Emphasis
+
+        /// <summary>
+        /// Command for enabling de-emphasis
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> EnableDeEmphasisCommand { get; }
+
+        /// <summary>
+        /// Command for disabling de-emphasis
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> DisableDeEmphasisCommand { get; }
+
+        /// <summary>
+        /// Command for toggling de-emphasis
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> ToggleDeEmphasisCommand { get; }
+
+        #endregion
+
+        #endregion
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public PlayerViewModel()
+        {
+            PlayCommand = ReactiveCommand.Create(ExecutePlay);
+            PauseCommand = ReactiveCommand.Create(ExecutePause);
+            TogglePlayPauseCommand = ReactiveCommand.Create(ExecuteTogglePlayPause);
+            StopCommand = ReactiveCommand.Create(ExecuteStop);
+            NextTrackCommand = ReactiveCommand.Create(ExecuteNextTrack);
+            PreviousTrackCommand = ReactiveCommand.Create(ExecutePreviousTrack);
+            NextIndexCommand = ReactiveCommand.Create(ExecuteNextIndex);
+            PreviousIndexCommand = ReactiveCommand.Create(ExecutePreviousIndex);
+            FastForwardCommand = ReactiveCommand.Create(ExecuteFastForward);
+            RewindCommand = ReactiveCommand.Create(ExecuteRewind);
+
+            VolumeUpCommand = ReactiveCommand.Create(ExecuteVolumeUp);
+            VolumeDownCommand = ReactiveCommand.Create(ExecuteVolumeDown);
+            ToggleMuteCommand = ReactiveCommand.Create(ExecuteToggleMute);
+
+            EnableDeEmphasisCommand = ReactiveCommand.Create(ExecuteEnableDeEmphasis);
+            DisableDeEmphasisCommand = ReactiveCommand.Create(ExecuteDisableDeEmphasis);
+            ToggleDeEmphasisCommand = ReactiveCommand.Create(ExecuteToggleDeEmphasis);
+        }
+
         /// <summary>
         /// Initialize the view model with a given image path
         /// </summary>
@@ -193,7 +310,7 @@ namespace RedBookPlayer.Common
         public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay, int defaultVolume)
         {
             // Stop current playback, if necessary
-            if(Playing != null) Stop();
+            if(Playing != null) ExecuteStop();
 
             // Create and attempt to initialize new Player
             _player = new Player(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay, defaultVolume);
@@ -209,59 +326,100 @@ namespace RedBookPlayer.Common
         /// <summary>
         /// Begin playback
         /// </summary>
-        public void Play() => _player?.Play();
+        public void ExecutePlay() => _player?.Play();
 
         /// <summary>
         /// Pause current playback
         /// </summary>
-        public void Pause() => _player?.Pause();
+        public void ExecutePause() => _player?.Pause();
+
+        /// <summary>
+        /// Toggle playback
+        /// </summary>
+        public void ExecuteTogglePlayPause() => _player?.TogglePlayback();
 
         /// <summary>
         /// Stop current playback
         /// </summary>
-        public void Stop() => _player?.Stop();
+        public void ExecuteStop() => _player?.Stop();
 
         /// <summary>
         /// Move to the next playable track
         /// </summary>
-        public void NextTrack() => _player?.NextTrack();
+        public void ExecuteNextTrack() => _player?.NextTrack();
 
         /// <summary>
         /// Move to the previous playable track
         /// </summary>
-        public void PreviousTrack() => _player?.PreviousTrack();
+        public void ExecutePreviousTrack() => _player?.PreviousTrack();
 
         /// <summary>
         /// Move to the next index
         /// </summary>
-        /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
-        public void NextIndex(bool changeTrack) => _player?.NextIndex(changeTrack);
+        public void ExecuteNextIndex() => _player?.NextIndex(App.Settings.IndexButtonChangeTrack);
 
         /// <summary>
         /// Move to the previous index
         /// </summary>
-        /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
-        public void PreviousIndex(bool changeTrack) => _player?.PreviousIndex(changeTrack);
+        public void ExecutePreviousIndex() => _player?.PreviousIndex(App.Settings.IndexButtonChangeTrack);
 
         /// <summary>
         /// Fast-forward playback by 75 sectors, if possible
         /// </summary>
-        public void FastForward() => _player?.FastForward();
+        public void ExecuteFastForward() => _player?.FastForward();
 
         /// <summary>
         /// Rewind playback by 75 sectors, if possible
         /// </summary>
-        public void Rewind() => _player?.Rewind();
+        public void ExecuteRewind() => _player?.Rewind();
+
+        #endregion
+
+        #region Volume
+
+        /// <summary>
+        /// Increment the volume value
+        /// </summary>
+        public void ExecuteVolumeUp() => _player?.VolumeUp();
+
+        /// <summary>
+        /// Decrement the volume value
+        /// </summary>
+        public void ExecuteVolumeDown() => _player?.VolumeDown();
+
+        /// <summary>
+        /// Set the value for the volume
+        /// </summary>
+        /// <param name="volume">New volume value</param>
+        public void ExecuteSetVolume(int volume) => _player?.SetVolume(volume);
+
+        /// <summary>
+        /// Temporarily mute playback
+        /// </summary>
+        public void ExecuteToggleMute() => _player?.ToggleMute();
+
+        #endregion
+
+        #region Emphasis
+
+        /// <summary>
+        /// Enable de-emphasis
+        /// </summary>
+        public void ExecuteEnableDeEmphasis() => _player?.EnableDeEmphasis();
+
+        /// <summary>
+        /// Disable de-emphasis
+        /// </summary>
+        public void ExecuteDisableDeEmphasis() => _player?.DisableDeEmphasis();
+
+        /// <summary>
+        /// Toggle de-emphasis
+        /// </summary>
+        public void ExecuteToggleDeEmphasis() => _player?.ToggleDeEmphasis();
 
         #endregion
 
         #region Helpers
-
-        /// <summary>
-        /// Set de-emphasis status
-        /// </summary>
-        /// <param name="apply"></param>
-        public void SetDeEmphasis(bool apply) => _player?.SetDeEmphasis(apply);
 
         /// <summary>
         /// Set the value for loading data tracks [CompactDisc only]
@@ -274,29 +432,6 @@ namespace RedBookPlayer.Common
         /// </summary>
         /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
         public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
-
-        /// <summary>
-        /// Set the value for the volume
-        /// </summary>
-        /// <param name="volume">New volume value</param>
-        public void SetVolume(int volume) => _player?.SetVolume(volume);
-
-        /// <summary>
-        /// Temporarily mute playback
-        /// </summary>
-        public void ToggleMute()
-        {
-            if(_lastVolume == null)
-            {
-                _lastVolume = Volume;
-                _player?.SetVolume(0);
-            }
-            else
-            {
-                _player?.SetVolume(_lastVolume.Value);
-                _lastVolume = null;
-            }
-        }
 
         /// <summary>
         /// Update the view-model from the Player

@@ -11,7 +11,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using RedBookPlayer.Common;
+using RedBookPlayer.GUI.ViewModels;
 
 namespace RedBookPlayer.GUI
 {
@@ -266,44 +266,6 @@ namespace RedBookPlayer.GUI
 
             await LoadImage(path);
         }
-
-        public void PlayButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Play();
-
-        public void PauseButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Pause();
-
-        public void PlayPauseButton_Click(object sender, RoutedEventArgs e)
-        {
-            if(PlayerViewModel.Playing == true)
-                PlayerViewModel.Pause();
-            else
-                PlayerViewModel.Play();
-        }
-
-        public void StopButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Stop();
-
-        public void NextTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.NextTrack();
-
-        public void PreviousTrackButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousTrack();
-
-        public void NextIndexButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.NextIndex(App.Settings.IndexButtonChangeTrack);
-
-        public void PreviousIndexButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.PreviousIndex(App.Settings.IndexButtonChangeTrack);
-
-        public void FastForwardButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.FastForward();
-
-        public void RewindButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.Rewind();
-
-        public void VolumeUpButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.SetVolume(PlayerViewModel.Volume + 1);
-
-        public void VolumeDownButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.SetVolume(PlayerViewModel.Volume - 1);
-
-        public void MuteToggleButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.ToggleMute();
-
-        public void EnableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.SetDeEmphasis(true);
-
-        public void DisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.SetDeEmphasis(false);
-
-        public void EnableDisableDeEmphasisButton_Click(object sender, RoutedEventArgs e) => PlayerViewModel.SetDeEmphasis(!PlayerViewModel.ApplyDeEmphasis);
 
         #endregion
     }

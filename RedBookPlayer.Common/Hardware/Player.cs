@@ -181,6 +181,11 @@ namespace RedBookPlayer.Common.Hardware
         /// </summary>
         private readonly OpticalDisc _opticalDisc;
 
+        /// <summary>
+        /// Last volume for mute toggling
+        /// </summary>
+        private int? _lastVolume = null;
+
         #endregion
 
         /// <summary>
@@ -256,6 +261,17 @@ namespace RedBookPlayer.Common.Hardware
 
             _soundOutput?.Stop();
             Playing = false;
+        }
+
+        /// <summary>
+        /// Toggle current playback
+        /// </summary>
+        public void TogglePlayback()
+        {
+            if(Playing == true)
+                Pause();
+            else
+                Play();
         }
 
         /// <summary>
@@ -374,13 +390,69 @@ namespace RedBookPlayer.Common.Hardware
 
         #endregion
 
-        #region Helpers
+        #region Volume
+
+        /// <summary>
+        /// Increment the volume value
+        /// </summary>
+        public void VolumeUp() => SetVolume(Volume + 1);
+
+        /// <summary>
+        /// Decrement the volume value
+        /// </summary>
+        public void VolumeDown() => SetVolume(Volume + 1);
+
+        /// <summary>
+        /// Set the value for the volume
+        /// </summary>
+        /// <param name="volume">New volume value</param>
+        public void SetVolume(int volume) => _soundOutput?.SetVolume(volume);
+
+        /// <summary>
+        /// Temporarily mute playback
+        /// </summary>
+        public void ToggleMute()
+        {
+            if(_lastVolume == null)
+            {
+                _lastVolume = Volume;
+                SetVolume(0);
+            }
+            else
+            {
+                SetVolume(_lastVolume.Value);
+                _lastVolume = null;
+            }
+        }
+
+        #endregion
+
+        #region Emphasis
+
+        /// <summary>
+        /// Enable de-emphasis
+        /// </summary>
+        public void EnableDeEmphasis() => SetDeEmphasis(true);
+
+        /// <summary>
+        /// Disable de-emphasis
+        /// </summary>
+        public void DisableDeEmphasis() => SetDeEmphasis(false);
+
+        /// <summary>
+        /// Toggle de-emphasis
+        /// </summary>
+        public void ToggleDeEmphasis() => SetDeEmphasis(!ApplyDeEmphasis);
 
         /// <summary>
         /// Set de-emphasis status
         /// </summary>
         /// <param name="apply"></param>
-        public void SetDeEmphasis(bool apply) => _soundOutput?.SetDeEmphasis(apply);
+        private void SetDeEmphasis(bool apply) => _soundOutput?.SetDeEmphasis(apply);
+
+        #endregion
+
+        #region Helpers
 
         /// <summary>
         /// Set the value for loading data tracks [CompactDisc only]
@@ -393,12 +465,6 @@ namespace RedBookPlayer.Common.Hardware
         /// </summary>
         /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
         public void SetLoadHiddenTracks(bool load) => (_opticalDisc as CompactDisc)?.SetLoadHiddenTracks(load);
-
-        /// <summary>
-        /// Set the value for the volume
-        /// </summary>
-        /// <param name="volume">New volume value</param>
-        public void SetVolume(int volume) => _soundOutput?.SetVolume(volume);
 
         /// <summary>
         /// Update the player from the current OpticalDisc
