@@ -11,6 +11,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using ReactiveUI;
+using RedBookPlayer.GUI.Views;
 using RedBookPlayer.Models.Hardware;
 
 namespace RedBookPlayer.GUI.ViewModels

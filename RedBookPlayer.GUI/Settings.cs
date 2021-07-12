@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using Avalonia.Input;
-using RedBookPlayer.GUI;
+using RedBookPlayer.GUI.Views;
 
 namespace RedBookPlayer.GUI
 {
