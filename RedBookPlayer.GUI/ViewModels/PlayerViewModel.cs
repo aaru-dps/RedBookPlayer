@@ -647,7 +647,15 @@ namespace RedBookPlayer.GUI.ViewModels
             ApplyDeEmphasis = _player.ApplyDeEmphasis;
             Volume = _player.Volume;
 
-            Dispatcher.UIThread.InvokeAsync(() =>
+            UpdateDigits();
+        }
+
+        /// <summary>
+        /// Update UI 
+        /// </summary>
+        private void UpdateDigits()
+        {
+            Dispatcher.UIThread.Post(() =>
             {
                 string digitString = GenerateDigitString() ?? string.Empty.PadLeft(20, '-');
                 for(int i = 0; i < _digits.Length; i++)
