@@ -65,6 +65,8 @@ namespace RedBookPlayer.GUI
 
             Instance.Width  = ((PlayerView)Instance.ContentControl.Content).Width;
             Instance.Height = ((PlayerView)Instance.ContentControl.Content).Height;
+
+            pvm.InitializeDigits();
         }
 
         /// <summary>
@@ -81,6 +83,8 @@ namespace RedBookPlayer.GUI
             Instance.MaxHeight = ((PlayerView)Instance.ContentControl.Content).Height;
 
             ContentControl.Content = new PlayerView();
+
+            ((PlayerView)ContentControl.Content).PlayerViewModel.InitializeDigits();
 
             CanResize = false;
 

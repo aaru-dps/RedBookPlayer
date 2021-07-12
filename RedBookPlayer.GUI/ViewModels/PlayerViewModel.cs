@@ -1,12 +1,17 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using ReactiveUI;
-using RedBookPlayer.Common.Hardware;
+using RedBookPlayer.Models.Hardware;
 
 namespace RedBookPlayer.GUI.ViewModels
 {
@@ -16,6 +21,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Player representing the internal state
         /// </summary>
         private Player _player;
+
+        /// <summary>
+        /// Set of images representing the digits for the UI
+        /// </summary>
+        private Image[] _digits;
 
         #region Player Passthrough
 
@@ -434,10 +444,87 @@ namespace RedBookPlayer.GUI.ViewModels
         #region Helpers
 
         /// <summary>
+        /// Load a disc image from a selection box
+        /// </summary>
+        public async void ExecuteLoad()
+        {
+            string path = await GetPath();
+            if(path == null)
+                return;
+
+            await LoadImage(path);
+        }
+
+        /// <summary>
+        /// Initialize the displayed digits array
+        /// </summary>
+        public void InitializeDigits()
+        {
+            PlayerView playerView = MainWindow.Instance.ContentControl.Content as PlayerView;
+
+            _digits = new Image[]
+            {
+                playerView.FindControl<Image>("TrackDigit1"),
+                playerView.FindControl<Image>("TrackDigit2"),
+
+                playerView.FindControl<Image>("IndexDigit1"),
+                playerView.FindControl<Image>("IndexDigit2"),
+
+                playerView.FindControl<Image>("TimeDigit1"),
+                playerView.FindControl<Image>("TimeDigit2"),
+                playerView.FindControl<Image>("TimeDigit3"),
+                playerView.FindControl<Image>("TimeDigit4"),
+                playerView.FindControl<Image>("TimeDigit5"),
+                playerView.FindControl<Image>("TimeDigit6"),
+
+                playerView.FindControl<Image>("TotalTracksDigit1"),
+                playerView.FindControl<Image>("TotalTracksDigit2"),
+
+                playerView.FindControl<Image>("TotalIndexesDigit1"),
+                playerView.FindControl<Image>("TotalIndexesDigit2"),
+
+                playerView.FindControl<Image>("TotalTimeDigit1"),
+                playerView.FindControl<Image>("TotalTimeDigit2"),
+                playerView.FindControl<Image>("TotalTimeDigit3"),
+                playerView.FindControl<Image>("TotalTimeDigit4"),
+                playerView.FindControl<Image>("TotalTimeDigit5"),
+                playerView.FindControl<Image>("TotalTimeDigit6"),
+            };
+        }
+
+        /// <summary>
+        /// Load an image from the path
+        /// </summary>
+        /// <param name="path">Path to the image to load</param>
+        public async Task<bool> LoadImage(string path)
+        {
+            return await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.PlayDataTracks, App.Settings.AutoPlay, App.Settings.Volume);
+                if(Initialized)
+                    MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
+
+                return Initialized;
+            });
+        }
+
+        /// <summary>
+        /// Set the value for loading data tracks [CompactDisc only]
+        /// </summary>
+        /// <param name="load">True to enable loading data tracks, false otherwise</param>
+        public void SetLoadDataTracks(bool load) => _player?.SetLoadDataTracks(load);
+
+        /// <summary>
+        /// Set the value for loading hidden tracks [CompactDisc only]
+        /// </summary>
+        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
+        public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
+
+        /// <summary>
         /// Generate the digit string to be interpreted by the frontend
         /// </summary>
         /// <returns>String representing the digits for the frontend</returns>
-        public string GenerateDigitString()
+        private string GenerateDigitString()
         {
             // If the disc isn't initialized, return all '-' characters
             if(Initialized != true)
@@ -473,44 +560,32 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
-        /// Load a disc image from a selection box
+        /// Load the png image for a given character based on the theme
         /// </summary>
-        public async void ExecuteLoad()
+        /// <param name="character">Character to load the image for</param>
+        /// <returns>Bitmap representing the loaded image</returns>
+        private Bitmap GetBitmap(char character)
         {
-            string path = await GetPath();
-            if(path == null)
-                return;
-
-            await LoadImage(path);
-        }
-
-        /// <summary>
-        /// Load an image from the path
-        /// </summary>
-        /// <param name="path">Path to the image to load</param>
-        public async Task<bool> LoadImage(string path)
-        {
-            return await Dispatcher.UIThread.InvokeAsync(() =>
+            try
             {
-                Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.PlayDataTracks, App.Settings.AutoPlay, App.Settings.Volume);
-                if(Initialized)
-                    MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
+                if(App.Settings.SelectedTheme == "default")
+                {
+                    IAssetLoader assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
 
-                return Initialized;
-            });
+                    return new Bitmap(assets.Open(new Uri($"avares://RedBookPlayer/Assets/{character}.png")));
+                }
+                else
+                {
+                    string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{App.Settings.SelectedTheme}";
+                    using FileStream stream = File.Open($"{themeDirectory}/{character}.png", FileMode.Open);
+                    return new Bitmap(stream);
+                }
+            }
+            catch
+            {
+                return null;
+            }
         }
-
-        /// <summary>
-        /// Set the value for loading data tracks [CompactDisc only]
-        /// </summary>
-        /// <param name="load">True to enable loading data tracks, false otherwise</param>
-        public void SetLoadDataTracks(bool load) => _player?.SetLoadDataTracks(load);
-
-        /// <summary>
-        /// Set the value for loading hidden tracks [CompactDisc only]
-        /// </summary>
-        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
-        public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
 
         /// <summary>
         /// Get current sector time, accounting for offsets
@@ -533,15 +608,18 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <returns>User-selected path, if possible</returns>
         private async Task<string> GetPath()
         {
-            var dialog = new OpenFileDialog { AllowMultiple = false };
-            List<string> knownExtensions = new Aaru.DiscImages.AaruFormat().KnownExtensions.ToList();
-            dialog.Filters.Add(new FileDialogFilter()
+            return await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                Name = "Aaru Image Format (*" + string.Join(", *", knownExtensions) + ")",
-                Extensions = knownExtensions.ConvertAll(e => e.TrimStart('.'))
-            });
+                var dialog = new OpenFileDialog { AllowMultiple = false };
+                List<string> knownExtensions = new Aaru.DiscImages.AaruFormat().KnownExtensions.ToList();
+                dialog.Filters.Add(new FileDialogFilter()
+                {
+                    Name = "Aaru Image Format (*" + string.Join(", *", knownExtensions) + ")",
+                    Extensions = knownExtensions.ConvertAll(e => e.TrimStart('.'))
+                });
 
-            return (await dialog.ShowAsync(MainWindow.Instance))?.FirstOrDefault();
+                return (await dialog.ShowAsync(MainWindow.Instance))?.FirstOrDefault();
+            });
         }
 
         /// <summary>
@@ -567,6 +645,17 @@ namespace RedBookPlayer.GUI.ViewModels
             Playing = _player.Playing;
             ApplyDeEmphasis = _player.ApplyDeEmphasis;
             Volume = _player.Volume;
+
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                string digitString = GenerateDigitString() ?? string.Empty.PadLeft(20, '-');
+                for(int i = 0; i < _digits.Length; i++)
+                {
+                    Bitmap digitImage = GetBitmap(digitString[i]);
+                    if(_digits[i] != null && digitImage != null)
+                        _digits[i].Source = digitImage;
+                }
+            });
         }
 
         #endregion

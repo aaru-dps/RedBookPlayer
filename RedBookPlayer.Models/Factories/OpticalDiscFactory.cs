@@ -3,9 +3,9 @@ using Aaru.CommonTypes.Interfaces;
 using Aaru.CommonTypes.Metadata;
 using Aaru.DiscImages;
 using Aaru.Filters;
-using RedBookPlayer.Common.Discs;
+using RedBookPlayer.Models.Discs;
 
-namespace RedBookPlayer.Common.Factories
+namespace RedBookPlayer.Models.Factories
 {
     public static class OpticalDiscFactory
     {

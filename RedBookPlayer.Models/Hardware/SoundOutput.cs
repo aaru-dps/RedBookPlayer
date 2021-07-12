@@ -5,9 +5,9 @@ using CSCore.SoundOut;
 using NWaves.Audio;
 using NWaves.Filters.BiQuad;
 using ReactiveUI;
-using RedBookPlayer.Common.Discs;
+using RedBookPlayer.Models.Discs;
 
-namespace RedBookPlayer.Common.Hardware
+namespace RedBookPlayer.Models.Hardware
 {
     public class SoundOutput : ReactiveObject
     {

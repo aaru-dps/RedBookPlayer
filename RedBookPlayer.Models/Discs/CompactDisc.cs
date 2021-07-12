@@ -9,7 +9,7 @@ using Aaru.Helpers;
 using ReactiveUI;
 using static Aaru.Decoders.CD.FullTOC;
 
-namespace RedBookPlayer.Common.Discs
+namespace RedBookPlayer.Models.Discs
 {
     public class CompactDisc : OpticalDiscBase, IReactiveObject
     {
