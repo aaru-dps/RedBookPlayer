@@ -3,8 +3,9 @@ using Aaru.CommonTypes.Interfaces;
 using Aaru.CommonTypes.Metadata;
 using Aaru.DiscImages;
 using Aaru.Filters;
+using RedBookPlayer.Common.Discs;
 
-namespace RedBookPlayer.Common.Discs
+namespace RedBookPlayer.Common.Factories
 {
     public static class OpticalDiscFactory
     {
@@ -17,7 +18,7 @@ namespace RedBookPlayer.Common.Discs
         /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
         /// <param name="autoPlay">True if the image should be playable immediately, false otherwise</param>
         /// <returns>Instantiated OpticalDisc, if possible</returns>
-        public static OpticalDisc GenerateFromPath(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
+        public static OpticalDiscBase GenerateFromPath(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
         {
             try
             {
@@ -51,14 +52,14 @@ namespace RedBookPlayer.Common.Discs
         /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
         /// <param name="autoPlay">True if the image should be playable immediately, false otherwise</param>
         /// <returns>Instantiated OpticalDisc, if possible</returns>
-        public static OpticalDisc GenerateFromImage(IOpticalMediaImage image, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
+        public static OpticalDiscBase GenerateFromImage(IOpticalMediaImage image, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
         {
             // If the image is not usable, we don't do anything
             if(!IsUsableImage(image))
                 return null;
 
             // Create the output object
-            OpticalDisc opticalDisc;
+            OpticalDiscBase opticalDisc;
 
             // Create the proper disc type
             switch(GetMediaType(image))

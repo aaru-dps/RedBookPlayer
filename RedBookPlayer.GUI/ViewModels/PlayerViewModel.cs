@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Linq;
 using System.Reactive;
 using ReactiveUI;
 using RedBookPlayer.Common.Hardware;
@@ -422,6 +423,45 @@ namespace RedBookPlayer.GUI.ViewModels
         #region Helpers
 
         /// <summary>
+        /// Generate the digit string to be interpreted by the frontend
+        /// </summary>
+        /// <returns>String representing the digits for the frontend</returns>
+        public string GenerateDigitString()
+        {
+            // If the disc isn't initialized, return all '-' characters
+            if(Initialized != true)
+                return string.Empty.PadLeft(20, '-');
+
+            int usableTrackNumber = CurrentTrackNumber;
+            if(usableTrackNumber < 0)
+                usableTrackNumber = 0;
+            else if(usableTrackNumber > 99)
+                usableTrackNumber = 99;
+
+            // Otherwise, take the current time into account
+            ulong sectorTime = GetCurrentSectorTime();
+
+            int[] numbers = new int[]
+            {
+                usableTrackNumber,
+                CurrentTrackIndex,
+
+                (int)(sectorTime / (75 * 60)),
+                (int)(sectorTime / 75 % 60),
+                (int)(sectorTime % 75),
+
+                TotalTracks,
+                TotalIndexes,
+
+                (int)(TotalTime / (75 * 60)),
+                (int)(TotalTime / 75 % 60),
+                (int)(TotalTime % 75),
+            };
+
+            return string.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
+        }
+
+        /// <summary>
         /// Set the value for loading data tracks [CompactDisc only]
         /// </summary>
         /// <param name="load">True to enable loading data tracks, false otherwise</param>
@@ -432,6 +472,21 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
         public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
+
+        /// <summary>
+        /// Get current sector time, accounting for offsets
+        /// </summary>
+        /// <returns>ulong representing the current sector time</returns>
+        private ulong GetCurrentSectorTime()
+        {
+            ulong sectorTime = CurrentSector;
+            if(SectionStartSector != 0)
+                sectorTime -= SectionStartSector;
+            else if(CurrentTrackNumber > 0)
+                sectorTime += TimeOffset;
+
+            return sectorTime;
+        }
 
         /// <summary>
         /// Update the view-model from the Player

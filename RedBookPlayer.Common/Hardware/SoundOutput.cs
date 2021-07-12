@@ -68,7 +68,7 @@ namespace RedBookPlayer.Common.Hardware
         /// <remarks>
         /// TODO: Can we remove the need for a local reference to OpticalDisc?
         /// </remarks>
-        private OpticalDisc _opticalDisc;
+        private OpticalDiscBase _opticalDisc;
 
         /// <summary>
         /// Data provider for sound output
@@ -108,7 +108,7 @@ namespace RedBookPlayer.Common.Hardware
         /// <param name="opticalDisc">OpticalDisc to load from</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
         /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public void Init(OpticalDisc opticalDisc, bool autoPlay = false, int defaultVolume = 100)
+        public void Init(OpticalDiscBase opticalDisc, bool autoPlay = false, int defaultVolume = 100)
         {
             // If we have an unusable disc, just return
             if(opticalDisc == null || !opticalDisc.Initialized)

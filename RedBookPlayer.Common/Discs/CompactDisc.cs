@@ -11,7 +11,7 @@ using static Aaru.Decoders.CD.FullTOC;
 
 namespace RedBookPlayer.Common.Discs
 {
-    public class CompactDisc : OpticalDisc, IReactiveObject
+    public class CompactDisc : OpticalDiscBase, IReactiveObject
     {
         #region Public Fields
 

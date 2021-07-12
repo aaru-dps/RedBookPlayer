@@ -3,6 +3,7 @@ using System.ComponentModel;
 using Aaru.CommonTypes.Enums;
 using ReactiveUI;
 using RedBookPlayer.Common.Discs;
+using RedBookPlayer.Common.Factories;
 
 namespace RedBookPlayer.Common.Hardware
 {
@@ -179,7 +180,7 @@ namespace RedBookPlayer.Common.Hardware
         /// <summary>
         /// OpticalDisc object
         /// </summary>
-        private readonly OpticalDisc _opticalDisc;
+        private readonly OpticalDiscBase _opticalDisc;
 
         /// <summary>
         /// Last volume for mute toggling

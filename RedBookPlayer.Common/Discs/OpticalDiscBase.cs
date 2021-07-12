@@ -4,7 +4,7 @@ using ReactiveUI;
 
 namespace RedBookPlayer.Common.Discs
 {
-    public abstract class OpticalDisc : ReactiveObject
+    public abstract class OpticalDiscBase : ReactiveObject
     {
         #region Public Fields
 

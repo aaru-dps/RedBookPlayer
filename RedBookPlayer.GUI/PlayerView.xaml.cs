@@ -85,45 +85,6 @@ namespace RedBookPlayer.GUI
         }
 
         /// <summary>
-        /// Generate the digit string to be interpreted by the frontend
-        /// </summary>
-        /// <returns>String representing the digits for the frontend</returns>
-        private string GenerateDigitString()
-        {
-            // If the disc isn't initialized, return all '-' characters
-            if(PlayerViewModel?.Initialized != true)
-                return string.Empty.PadLeft(20, '-');
-
-            int usableTrackNumber = PlayerViewModel.CurrentTrackNumber;
-            if(usableTrackNumber < 0)
-                usableTrackNumber = 0;
-            else if(usableTrackNumber > 99)
-                usableTrackNumber = 99;
-
-            // Otherwise, take the current time into account
-            ulong sectorTime = GetCurrentSectorTime();
-
-            int[] numbers = new int[]
-            {
-                usableTrackNumber,
-                PlayerViewModel.CurrentTrackIndex,
-
-                (int)(sectorTime / (75 * 60)),
-                (int)(sectorTime / 75 % 60),
-                (int)(sectorTime % 75),
-
-                PlayerViewModel.TotalTracks,
-                PlayerViewModel.TotalIndexes,
-
-                (int)(PlayerViewModel.TotalTime / (75 * 60)),
-                (int)(PlayerViewModel.TotalTime / 75 % 60),
-                (int)(PlayerViewModel.TotalTime % 75),
-            };
-
-            return string.Join("", numbers.Select(i => i.ToString().PadLeft(2, '0').Substring(0, 2)));
-        }
-
-        /// <summary>
         /// Load the png image for a given character based on the theme
         /// </summary>
         /// <param name="character">Character to load the image for</param>
@@ -149,21 +110,6 @@ namespace RedBookPlayer.GUI
             {
                 return null;
             }
-        }
-
-        /// <summary>
-        /// Get current sector time, accounting for offsets
-        /// </summary>
-        /// <returns>ulong representing the current sector time</returns>
-        private ulong GetCurrentSectorTime()
-        {
-            ulong sectorTime = PlayerViewModel.CurrentSector;
-            if(PlayerViewModel.SectionStartSector != 0)
-                sectorTime -= PlayerViewModel.SectionStartSector;
-            else if (PlayerViewModel.CurrentTrackNumber > 0)
-                sectorTime += PlayerViewModel.TimeOffset;
-
-            return sectorTime;
         }
 
         /// <summary>
@@ -244,7 +190,7 @@ namespace RedBookPlayer.GUI
         {
             Dispatcher.UIThread.InvokeAsync(() =>
             {
-                string digitString = GenerateDigitString();
+                string digitString = PlayerViewModel?.GenerateDigitString() ?? string.Empty.PadLeft(20, '-');
                 for(int i = 0; i < _digits.Length; i++)
                 {
                     Bitmap digitImage = GetBitmap(digitString[i]);
