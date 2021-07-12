@@ -459,13 +459,21 @@ namespace RedBookPlayer.Common.Hardware
         /// Set the value for loading data tracks [CompactDisc only]
         /// </summary>
         /// <param name="load">True to enable loading data tracks, false otherwise</param>
-        public void SetLoadDataTracks(bool load) => (_opticalDisc as CompactDisc)?.SetLoadDataTracks(load);
+        public void SetLoadDataTracks(bool load)
+        {
+            if(_opticalDisc is CompactDisc compactDisc)
+                compactDisc.LoadDataTracks = load;
+        }
 
         /// <summary>
         /// Set the value for loading hidden tracks [CompactDisc only]
         /// </summary>
         /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
-        public void SetLoadHiddenTracks(bool load) => (_opticalDisc as CompactDisc)?.SetLoadHiddenTracks(load);
+        public void SetLoadHiddenTracks(bool load)
+        {
+            if(_opticalDisc is CompactDisc compactDisc)
+                compactDisc.LoadHiddenTracks = load;
+        }
 
         /// <summary>
         /// Update the player from the current OpticalDisc

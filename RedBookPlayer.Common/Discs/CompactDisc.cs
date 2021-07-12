@@ -26,7 +26,7 @@ namespace RedBookPlayer.Common.Discs
                     return;
 
                 // Data tracks only and flag disabled means we can't do anything
-                if(_image.Tracks.All(t => t.TrackType != TrackType.Audio) && !_loadDataTracks)
+                if(_image.Tracks.All(t => t.TrackType != TrackType.Audio) && !LoadDataTracks)
                     return;
 
                 // Cache the value and the current track number
@@ -42,12 +42,12 @@ namespace RedBookPlayer.Common.Discs
                     if(cachedValue > _image.Tracks.Max(t => t.TrackSequence))
                     {
                         cachedValue = (int)_image.Tracks.Min(t => t.TrackSequence);
-                        if(cachedValue == 0 && !_loadHiddenTracks)
+                        if(cachedValue == 0 && !LoadHiddenTracks)
                             cachedValue++;
                     }
 
                     // If we're under the first track and we're not loading hidden tracks, wrap around
-                    else if(cachedValue < 1 && !_loadHiddenTracks)
+                    else if(cachedValue < 1 && !LoadHiddenTracks)
                     {
                         cachedValue = (int)_image.Tracks.Max(t => t.TrackSequence);
                     }
@@ -69,7 +69,7 @@ namespace RedBookPlayer.Common.Discs
                     SetTrackFlags(track);
 
                     // If the track is playable, just return
-                    if(TrackType == TrackType.Audio || _loadDataTracks)
+                    if(TrackType == TrackType.Audio || LoadDataTracks)
                         break;
 
                     // If we're not playing the track, skip
@@ -215,6 +215,16 @@ namespace RedBookPlayer.Common.Discs
             private set => this.RaiseAndSetIfChanged(ref _trackHasEmphasis, value);
         }
 
+        /// <summary>
+        /// Indicate if data tracks should be loaded
+        /// </summary>
+        public bool LoadDataTracks { get; set; } = false;
+
+        /// <summary>
+        /// Indicate if hidden tracks should be loaded
+        /// </summary>
+        public bool LoadHiddenTracks { get; set; } = false;
+
         private bool _quadChannel;
         private bool _isDataTrack;
         private bool _copyAllowed;
@@ -245,16 +255,6 @@ namespace RedBookPlayer.Common.Discs
         private readonly bool _generateMissingToc = false;
 
         /// <summary>
-        /// Indicate if data tracks should be loaded
-        /// </summary>
-        private bool _loadDataTracks = false;
-
-        /// <summary>
-        /// Indicate if hidden tracks should be loaded
-        /// </summary>
-        private bool _loadHiddenTracks = false;
-
-        /// <summary>
         /// Current disc table of contents
         /// </summary>
         private CDFullTOC _toc;
@@ -270,8 +270,8 @@ namespace RedBookPlayer.Common.Discs
         public CompactDisc(bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks)
         {
             _generateMissingToc = generateMissingToc;
-            _loadHiddenTracks = loadHiddenTracks;
-            _loadDataTracks = loadDataTracks;
+            LoadHiddenTracks = loadHiddenTracks;
+            LoadDataTracks = loadDataTracks;
         }
 
         /// <inheritdoc/>
@@ -421,18 +421,6 @@ namespace RedBookPlayer.Common.Discs
             CurrentTrackNumber = 1;
             LoadTrack(CurrentTrackNumber);
         }
-
-        /// <summary>
-        /// Set the value for loading data tracks
-        /// </summary>
-        /// <param name="load">True to enable loading data tracks, false otherwise</param>
-        public void SetLoadDataTracks(bool load) => _loadDataTracks = load;
-
-        /// <summary>
-        /// Set the value for loading hidden tracks
-        /// </summary>
-        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
-        public void SetLoadHiddenTracks(bool load) => _loadHiddenTracks = load;
 
         /// <inheritdoc/>
         public override void SetTotalIndexes()
