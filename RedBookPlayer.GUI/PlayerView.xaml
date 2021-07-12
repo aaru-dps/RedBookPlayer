@@ -3,7 +3,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
              x:Class="RedBookPlayer.GUI.PlayerView" Width="900" Height="400">
     <StackPanel Margin="16" VerticalAlignment="Center">
-        <Button Click="LoadButton_Click" Margin="32,0,32,16">Load</Button>
+        <Button Command="{Binding LoadCommand}" Margin="32,0,32,16">Load</Button>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
             <Button Command="{Binding PlayCommand}" Width="100" Margin="0,0,16,0">Play</Button>
             <Button Command="{Binding PauseCommand}" Width="100" Margin="0,0,16,0">Pause</Button>

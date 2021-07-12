@@ -111,7 +111,7 @@ namespace RedBookPlayer.GUI
             IEnumerable<string> fileNames = e.Data.GetFileNames();
             foreach(string filename in fileNames)
             {
-                bool loaded = await playerView.LoadImage(filename);
+                bool loaded = await playerView?.PlayerViewModel?.LoadImage(filename);
                 if(loaded)
                     break;
             }
@@ -132,7 +132,7 @@ namespace RedBookPlayer.GUI
             // Load image
             else if (e.Key == App.Settings.LoadImageKey)
             {
-                playerView?.LoadButton_Click(this, null);
+                playerView?.PlayerViewModel?.ExecuteLoad();
             }
 
             // Toggle playback

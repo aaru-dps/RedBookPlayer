@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -60,22 +56,6 @@ namespace RedBookPlayer.GUI
         #region Helpers
 
         /// <summary>
-        /// Load an image from the path
-        /// </summary>
-        /// <param name="path">Path to the image to load</param>
-        public async Task<bool> LoadImage(string path)
-        {
-            return await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                PlayerViewModel.Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.PlayDataTracks, App.Settings.AutoPlay, App.Settings.Volume);
-                if (PlayerViewModel.Initialized)
-                    MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
-
-                return PlayerViewModel.Initialized;
-            });
-        }
-
-        /// <summary>
         /// Update the view model with new settings
         /// </summary>
         public void UpdateViewModel()
@@ -110,23 +90,6 @@ namespace RedBookPlayer.GUI
             {
                 return null;
             }
-        }
-
-        /// <summary>
-        /// Generate a path selection dialog box
-        /// </summary>
-        /// <returns>User-selected path, if possible</returns>
-        private async Task<string> GetPath()
-        {
-            var dialog = new OpenFileDialog { AllowMultiple = false };
-            List<string> knownExtensions = new Aaru.DiscImages.AaruFormat().KnownExtensions.ToList();
-            dialog.Filters.Add(new FileDialogFilter()
-            {
-                Name = "Aaru Image Format (*" + string.Join(", *", knownExtensions) + ")",
-                Extensions = knownExtensions.ConvertAll(e => e.TrimStart('.'))
-            });
-
-            return (await dialog.ShowAsync((Window)Parent.Parent))?.FirstOrDefault();
         }
 
         /// <summary>
@@ -198,19 +161,6 @@ namespace RedBookPlayer.GUI
                         _digits[i].Source = digitImage;
                 }
             });
-        }
-
-        #endregion
-
-        #region Event Handlers
-
-        public async void LoadButton_Click(object sender, RoutedEventArgs e)
-        {
-            string path = await GetPath();
-            if (path == null)
-                return;
-
-            await LoadImage(path);
         }
 
         #endregion

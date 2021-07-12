@@ -1,6 +1,10 @@
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
+using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Threading;
 using ReactiveUI;
 using RedBookPlayer.Common.Hardware;
 
@@ -180,6 +184,11 @@ namespace RedBookPlayer.GUI.ViewModels
 
         #region Commands
 
+        /// <summary>
+        /// Command for loading a disc
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> LoadCommand { get; }
+
         #region Playback
 
         /// <summary>
@@ -279,6 +288,8 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public PlayerViewModel()
         {
+            LoadCommand = ReactiveCommand.Create(ExecuteLoad);
+
             PlayCommand = ReactiveCommand.Create(ExecutePlay);
             PauseCommand = ReactiveCommand.Create(ExecutePause);
             TogglePlayPauseCommand = ReactiveCommand.Create(ExecuteTogglePlayPause);
@@ -462,6 +473,34 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
+        /// Load a disc image from a selection box
+        /// </summary>
+        public async void ExecuteLoad()
+        {
+            string path = await GetPath();
+            if(path == null)
+                return;
+
+            await LoadImage(path);
+        }
+
+        /// <summary>
+        /// Load an image from the path
+        /// </summary>
+        /// <param name="path">Path to the image to load</param>
+        public async Task<bool> LoadImage(string path)
+        {
+            return await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.PlayDataTracks, App.Settings.AutoPlay, App.Settings.Volume);
+                if(Initialized)
+                    MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
+
+                return Initialized;
+            });
+        }
+
+        /// <summary>
         /// Set the value for loading data tracks [CompactDisc only]
         /// </summary>
         /// <param name="load">True to enable loading data tracks, false otherwise</param>
@@ -486,6 +525,23 @@ namespace RedBookPlayer.GUI.ViewModels
                 sectorTime += TimeOffset;
 
             return sectorTime;
+        }
+
+        /// <summary>
+        /// Generate a path selection dialog box
+        /// </summary>
+        /// <returns>User-selected path, if possible</returns>
+        private async Task<string> GetPath()
+        {
+            var dialog = new OpenFileDialog { AllowMultiple = false };
+            List<string> knownExtensions = new Aaru.DiscImages.AaruFormat().KnownExtensions.ToList();
+            dialog.Filters.Add(new FileDialogFilter()
+            {
+                Name = "Aaru Image Format (*" + string.Join(", *", knownExtensions) + ")",
+                Extensions = knownExtensions.ConvertAll(e => e.TrimStart('.'))
+            });
+
+            return (await dialog.ShowAsync(MainWindow.Instance))?.FirstOrDefault();
         }
 
         /// <summary>
