@@ -2,8 +2,8 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)|$(Configuration)' == 'win-x64|Debug'">
@@ -21,17 +21,9 @@
     <PackageReference Include="Avalonia" Version="0.9.12" />
     <PackageReference Include="Avalonia.Desktop" Version="0.9.12" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.12" />
-    <PackageReference Include="NWaves" Version="0.9.4" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="1.68.3" />
-    <PackageReference Include="Avalonia.Skia.Linux.Natives" Version="1.68.0.2" ExcludeAssets="all" />
-    <PackageReference Include="SkiaSharp" Version="1.68.3" />
-    <PackageReference Include="OpenTK.NetStandard" Version="1.0.5.12" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Aaru\Aaru.Images\Aaru.Images.csproj" />
-    <ProjectReference Include="..\Aaru\Aaru.CommonTypes\Aaru.CommonTypes.csproj" />
-    <ProjectReference Include="..\Aaru\Aaru.Decoders\Aaru.Decoders.csproj" />
-    <ProjectReference Include="..\cscore\CSCore\CSCore.csproj" />
+    <ProjectReference Include="..\RedBookPlayer.Models\RedBookPlayer.Models.csproj" />
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\*" />

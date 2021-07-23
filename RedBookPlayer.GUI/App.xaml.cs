@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using RedBookPlayer.GUI;
+using RedBookPlayer.GUI.Views;
 
 namespace RedBookPlayer
 {

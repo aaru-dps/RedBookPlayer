@@ -1,21 +1,21 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
-             x:Class="RedBookPlayer.GUI.PlayerView" Width="900" Height="400">
+             x:Class="RedBookPlayer.GUI.Views.PlayerView" Width="900" Height="400">
     <StackPanel Margin="16" VerticalAlignment="Center">
-        <Button Click="LoadButton_Click" Margin="32,0,32,16">Load</Button>
+        <Button Command="{Binding LoadCommand}" Margin="32,0,32,16">Load</Button>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-            <Button Click="PlayButton_Click" Width="100" Margin="0,0,16,0">Play</Button>
-            <Button Click="PauseButton_Click" Width="100" Margin="0,0,16,0">Pause</Button>
-            <Button Click="StopButton_Click" Width="100" Margin="0,0,16,0">Stop</Button>
+            <Button Command="{Binding PlayCommand}" Width="100" Margin="0,0,16,0">Play</Button>
+            <Button Command="{Binding PauseCommand}" Width="100" Margin="0,0,16,0">Pause</Button>
+            <Button Command="{Binding StopCommand}" Width="100" Margin="0,0,16,0">Stop</Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-            <Button Click="PreviousTrackButton_Click" Width="100" Margin="0,0,16,0">Previous Track</Button>
-            <Button Click="NextTrackButton_Click" Width="100" Margin="0,0,16,0">Next Track</Button>
-            <Button Click="PreviousIndexButton_Click" Width="100" Margin="0,0,16,0">Previous Index</Button>
-            <Button Click="NextIndexButton_Click" Width="100" Margin="0,0,16,0">Next Index</Button>
-            <RepeatButton Click="RewindButton_Click" Width="100" Margin="0,0,16,0">Rewind</RepeatButton>
-            <RepeatButton Click="FastForwardButton_Click" Width="100">Fast Forward</RepeatButton>
+            <Button Command="{Binding PreviousTrackCommand}" Width="100" Margin="0,0,16,0">Previous Track</Button>
+            <Button Command="{Binding NextTrackCommand}" Width="100" Margin="0,0,16,0">Next Track</Button>
+            <Button Command="{Binding PreviousIndexCommand}" Width="100" Margin="0,0,16,0">Previous Index</Button>
+            <Button Command="{Binding NextIndexCommand}" Width="100" Margin="0,0,16,0">Next Index</Button>
+            <RepeatButton Command="{Binding RewindCommand}" Width="100" Margin="0,0,16,0">Rewind</RepeatButton>
+            <RepeatButton Command="{Binding FastForwardCommand}" Width="100">Fast Forward</RepeatButton>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
             <StackPanel Margin="0,0,32,0">
@@ -76,11 +76,11 @@
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-            <Button Click="EnableDeEmphasisButton_Click" IsVisible="{Binding !ApplyDeEmphasis}" Width="200"
+            <Button Command="{Binding EnableDeEmphasisCommand}" IsVisible="{Binding !ApplyDeEmphasis}" Width="200"
                     Margin="0,0,16,0">
                 Enable De-Emphasis
             </Button>
-            <Button Click="DisableDeEmphasisButton_Click" IsVisible="{Binding ApplyDeEmphasis}" Width="200"
+            <Button Command="{Binding DisableDeEmphasisCommand}" IsVisible="{Binding ApplyDeEmphasis}" Width="200"
                     Margin="0,0,16,0">
                 Disable De-Emphasis
             </Button>
@@ -98,6 +98,7 @@
             <TextBlock Margin="0,0,16,0" IsVisible="{Binding QuadChannel}">4CH</TextBlock>
             <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !HiddenTrack}">HIDDEN</TextBlock>
             <TextBlock Margin="0,0,16,0" IsVisible="{Binding HiddenTrack}">HIDDEN</TextBlock>
+            <TextBlock Margin="0,0,16,0" Text="{Binding Volume}"/>
         </StackPanel>
     </StackPanel>
 </UserControl>

@@ -1,9 +1,10 @@
 using Aaru.CommonTypes.Enums;
 using Aaru.CommonTypes.Interfaces;
+using ReactiveUI;
 
-namespace RedBookPlayer.Discs
+namespace RedBookPlayer.Models.Discs
 {
-    public abstract class OpticalDisc
+    public abstract class OpticalDiscBase : ReactiveObject
     {
         #region Public Fields
 
@@ -25,17 +26,21 @@ namespace RedBookPlayer.Discs
         /// <summary>
         /// Current sector number
         /// </summary>
-        public abstract ulong CurrentSector { get; set; }
+        public abstract ulong CurrentSector { get; protected set; }
 
         /// <summary>
         /// Represents the sector starting the section
         /// </summary>
-        public ulong SectionStartSector { get; protected set; }
+        public ulong SectionStartSector
+        {
+            get => _sectionStartSector;
+            protected set => this.RaiseAndSetIfChanged(ref _sectionStartSector, value);
+        }
 
         /// <summary>
         /// Number of bytes per sector for the current track
         /// </summary>
-        public int BytesPerSector => _image.Tracks[CurrentTrackNumber].TrackBytesPerSector;
+        public abstract int BytesPerSector { get; }
 
         /// <summary>
         /// Represents the track type
@@ -55,7 +60,7 @@ namespace RedBookPlayer.Discs
         /// <summary>
         /// Total sectors in the image
         /// </summary>
-        public ulong TotalSectors => _image.Info.Sectors;
+        public ulong TotalSectors => _image?.Info.Sectors ?? 0;
 
         /// <summary>
         /// Represents the time adjustment offset for the disc
@@ -66,6 +71,8 @@ namespace RedBookPlayer.Discs
         /// Represents the total playing time for the disc
         /// </summary>
         public ulong TotalTime { get; protected set; } = 0;
+
+        private ulong _sectionStartSector;
 
         #endregion
 
@@ -83,42 +90,19 @@ namespace RedBookPlayer.Discs
         /// </summary>
         /// <param name="image">Aaruformat image to load</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public abstract void Init(IOpticalMediaImage image, bool autoPlay = false);
+        public abstract void Init(IOpticalMediaImage image, bool autoPlay);
 
         #region Seeking
 
         /// <summary>
         /// Try to move to the next track, wrapping around if necessary
         /// </summary>
-        public void NextTrack()
-        {
-            if(_image == null)
-                return;
-
-            CurrentTrackNumber++;
-            LoadTrack(CurrentTrackNumber);
-        }
+        public abstract void NextTrack();
 
         /// <summary>
         /// Try to move to the previous track, wrapping around if necessary
         /// </summary>
-        public void PreviousTrack()
-        {
-            if(_image == null)
-                return;
-
-            if(CurrentSector < (ulong)_image.Tracks[CurrentTrackNumber].Indexes[1] + 75)
-            {
-                if(App.Settings.AllowSkipHiddenTrack && CurrentTrackNumber == 0 && CurrentSector >= 75)
-                    CurrentSector = 0;
-                else
-                    CurrentTrackNumber--;
-            }
-            else
-                CurrentTrackNumber--;
-
-            LoadTrack(CurrentTrackNumber);
-        }
+        public abstract void PreviousTrack();
 
         /// <summary>
         /// Try to move to the next track index
@@ -154,6 +138,12 @@ namespace RedBookPlayer.Discs
         /// Set the total indexes from the current track
         /// </summary>
         public abstract void SetTotalIndexes();
+
+        /// <summary>
+        /// Set the current sector
+        /// </summary>
+        /// <param name="sector">New sector number to use</param>
+        public void SetCurrentSector(ulong sector) => CurrentSector = sector;
 
         /// <summary>
         /// Load the desired track, if possible

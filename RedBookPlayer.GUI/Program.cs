@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Logging.Serilog;
 
-namespace RedBookPlayer
+namespace RedBookPlayer.GUI
 {
     internal class Program
     {

@@ -1,31 +1,72 @@
+using System.IO;
 using Aaru.CommonTypes.Interfaces;
 using Aaru.CommonTypes.Metadata;
+using Aaru.DiscImages;
+using Aaru.Filters;
+using RedBookPlayer.Models.Discs;
 
-namespace RedBookPlayer.Discs
+namespace RedBookPlayer.Models.Factories
 {
     public static class OpticalDiscFactory
     {
         /// <summary>
+        /// Generate an OpticalDisc from an input path
+        /// </summary>
+        /// <param name="path">Path to load the image from</param>
+        /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
+        /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
+        /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
+        /// <param name="autoPlay">True if the image should be playable immediately, false otherwise</param>
+        /// <returns>Instantiated OpticalDisc, if possible</returns>
+        public static OpticalDiscBase GenerateFromPath(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
+        {
+            try
+            {
+                // Validate the image exists
+                if(string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                    return null;
+
+                // Load the disc image to memory
+                // TODO: Assumes Aaruformat right now for all
+                var image = new AaruFormat();
+                var filter = new ZZZNoFilter();
+                filter.Open(path);
+                image.Open(filter);
+
+                // Generate and instantiate the disc
+                return GenerateFromImage(image, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay);
+            }
+            catch
+            {
+                // All errors mean an invalid image in some way
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Generate an OpticalDisc from an input IOpticalMediaImage
         /// </summary>
         /// <param name="image">IOpticalMediaImage to create from</param>
+        /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
+        /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
+        /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
         /// <param name="autoPlay">True if the image should be playable immediately, false otherwise</param>
         /// <returns>Instantiated OpticalDisc, if possible</returns>
-        public static OpticalDisc GenerateFromImage(IOpticalMediaImage image, bool autoPlay)
+        public static OpticalDiscBase GenerateFromImage(IOpticalMediaImage image, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
         {
             // If the image is not usable, we don't do anything
             if(!IsUsableImage(image))
                 return null;
 
             // Create the output object
-            OpticalDisc opticalDisc;
+            OpticalDiscBase opticalDisc;
 
             // Create the proper disc type
             switch(GetMediaType(image))
             {
                 case "Compact Disc":
                 case "GD":
-                    opticalDisc = new CompactDisc();
+                    opticalDisc = new CompactDisc(generateMissingToc, loadHiddenTracks, loadDataTracks);
                     break;
                 default:
                     opticalDisc = null;
