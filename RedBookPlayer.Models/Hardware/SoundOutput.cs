@@ -19,12 +19,12 @@ namespace RedBookPlayer.Models.Hardware
         public bool Initialized { get; private set; } = false;
 
         /// <summary>
-        /// Indicate if the output is playing
+        /// Indicates the current player state
         /// </summary>
-        public bool Playing
+        public PlayerState PlayerState
         {
-            get => _playing;
-            private set => this.RaiseAndSetIfChanged(ref _playing, value);
+            get => _playerState;
+            private set => this.RaiseAndSetIfChanged(ref _playerState, value);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace RedBookPlayer.Models.Hardware
             }
         }
 
-        private bool _playing;
+        private PlayerState _playerState;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -136,6 +136,7 @@ namespace RedBookPlayer.Models.Hardware
 
             // Mark the output as ready
             Initialized = true;
+            PlayerState = PlayerState.Stopped;
 
             // Begin loading data
             _source.Start();
@@ -238,7 +239,7 @@ namespace RedBookPlayer.Models.Hardware
             if (_soundOut.PlaybackState != PlaybackState.Playing)
                 _soundOut.Play();
 
-            Playing = _soundOut.PlaybackState == PlaybackState.Playing;
+            PlayerState = PlayerState.Playing;
         }
 
         /// <summary>
@@ -249,7 +250,7 @@ namespace RedBookPlayer.Models.Hardware
             if(_soundOut.PlaybackState != PlaybackState.Paused)
                 _soundOut.Pause();
 
-            Playing = _soundOut.PlaybackState == PlaybackState.Playing;
+            PlayerState = PlayerState.Paused;
         }
 
         /// <summary>
@@ -260,7 +261,7 @@ namespace RedBookPlayer.Models.Hardware
             if(_soundOut.PlaybackState != PlaybackState.Stopped)
                 _soundOut.Stop();
 
-            Playing = _soundOut.PlaybackState == PlaybackState.Playing;
+            PlayerState = PlayerState.Stopped;
         }
 
         /// <summary>
@@ -271,7 +272,7 @@ namespace RedBookPlayer.Models.Hardware
             Stop();
 
             Initialized = false;
-            Playing = false;
+            PlayerState = PlayerState.NoDisc;
         }
 
         #endregion

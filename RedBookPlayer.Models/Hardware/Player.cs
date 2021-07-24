@@ -144,12 +144,12 @@ namespace RedBookPlayer.Models.Hardware
         #region SoundOutput Passthrough
 
         /// <summary>
-        /// Indicate if the output is playing
+        /// Indicates the current player state
         /// </summary>
-        public bool? Playing
+        public PlayerState PlayerState
         {
-            get => _playing;
-            private set => this.RaiseAndSetIfChanged(ref _playing, value);
+            get => _playerState;
+            private set => this.RaiseAndSetIfChanged(ref _playerState, value);
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace RedBookPlayer.Models.Hardware
             private set => this.RaiseAndSetIfChanged(ref _volume, value);
         }
 
-        private bool? _playing;
+        private PlayerState _playerState;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -246,12 +246,12 @@ namespace RedBookPlayer.Models.Hardware
                 return;
             else if(_soundOutput == null)
                 return;
-            else if(_soundOutput.Playing)
+            else if(_soundOutput.PlayerState != PlayerState.Paused && _soundOutput.PlayerState != PlayerState.Stopped)
                 return;
 
             _soundOutput.Play();
             _opticalDisc.SetTotalIndexes();
-            Playing = true;
+            PlayerState = PlayerState.Playing;
         }
 
         /// <summary>
@@ -263,11 +263,11 @@ namespace RedBookPlayer.Models.Hardware
                 return;
             else if(_soundOutput == null)
                 return;
-            else if(!_soundOutput.Playing)
+            else if(_soundOutput.PlayerState != PlayerState.Playing)
                 return;
 
-            _soundOutput?.Stop();
-            Playing = false;
+            _soundOutput?.Pause();
+            PlayerState = PlayerState.Paused;
         }
 
         /// <summary>
@@ -275,10 +275,20 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         public void TogglePlayback()
         {
-            if(Playing == true)
-                Pause();
-            else
-                Play();
+            switch(PlayerState)
+            {
+                case PlayerState.NoDisc:
+                    break;
+                case PlayerState.Stopped:
+                    Play();
+                    break;
+                case PlayerState.Paused:
+                    Play();
+                    break;
+                case PlayerState.Playing:
+                    Pause();
+                    break;
+            }
         }
 
         /// <summary>
@@ -290,12 +300,12 @@ namespace RedBookPlayer.Models.Hardware
                 return;
             else if(_soundOutput == null)
                 return;
-            else if(!_soundOutput.Playing)
+            else if(_soundOutput.PlayerState != PlayerState.Playing && _soundOutput.PlayerState != PlayerState.Paused)
                 return;
 
             _soundOutput.Stop();
             _opticalDisc.LoadFirstTrack();
-            Playing = null;
+            PlayerState = PlayerState.Stopped;
         }
 
         /// <summary>
@@ -311,6 +321,7 @@ namespace RedBookPlayer.Models.Hardware
             Stop();
             _soundOutput.Eject();
             _opticalDisc = null;
+            PlayerState = PlayerState.NoDisc;
             Initialized = false;
         }
 
@@ -322,14 +333,14 @@ namespace RedBookPlayer.Models.Hardware
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
-            bool? wasPlaying = Playing;
-            if(wasPlaying == true) Pause();
+            PlayerState wasPlaying = PlayerState;
+            if(wasPlaying == PlayerState.Playing) Pause();
 
             _opticalDisc.NextTrack();
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.SetDeEmphasis(compactDisc.TrackHasEmphasis);
 
-            if(wasPlaying == true) Play();
+            if(wasPlaying == PlayerState.Playing) Play();
         }
 
         /// <summary>
@@ -340,14 +351,14 @@ namespace RedBookPlayer.Models.Hardware
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
-            bool? wasPlaying = Playing;
-            if(wasPlaying == true) Pause();
+            PlayerState wasPlaying = PlayerState;
+            if(wasPlaying == PlayerState.Playing) Pause();
 
             _opticalDisc.PreviousTrack();
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.SetDeEmphasis(compactDisc.TrackHasEmphasis);
 
-            if(wasPlaying == true) Play();
+            if(wasPlaying == PlayerState.Playing) Play();
         }
 
         /// <summary>
@@ -359,14 +370,14 @@ namespace RedBookPlayer.Models.Hardware
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
-            bool? wasPlaying = Playing;
-            if(wasPlaying == true) Pause();
+            PlayerState wasPlaying = PlayerState;
+            if(wasPlaying == PlayerState.Playing) Pause();
 
             _opticalDisc.NextIndex(changeTrack);
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.SetDeEmphasis(compactDisc.TrackHasEmphasis);
 
-            if(wasPlaying == true) Play();
+            if(wasPlaying == PlayerState.Playing) Play();
         }
 
         /// <summary>
@@ -378,14 +389,14 @@ namespace RedBookPlayer.Models.Hardware
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
-            bool? wasPlaying = Playing;
-            if(wasPlaying == true) Pause();
+            PlayerState wasPlaying = PlayerState;
+            if(wasPlaying == PlayerState.Playing) Pause();
 
             _opticalDisc.PreviousIndex(changeTrack);
             if(_opticalDisc is CompactDisc compactDisc)
                 _soundOutput.SetDeEmphasis(compactDisc.TrackHasEmphasis);
 
-            if(wasPlaying == true) Play();
+            if(wasPlaying == PlayerState.Playing) Play();
         }
 
         /// <summary>
@@ -530,7 +541,7 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         private void SoundOutputStateChanged(object sender, PropertyChangedEventArgs e)
         {
-            Playing = _soundOutput.Playing;
+            PlayerState = _soundOutput.PlayerState;
             ApplyDeEmphasis = _soundOutput.ApplyDeEmphasis;
             Volume = _soundOutput.Volume;
         }

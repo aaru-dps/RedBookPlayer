@@ -12,6 +12,7 @@ using Avalonia.Platform;
 using Avalonia.Threading;
 using ReactiveUI;
 using RedBookPlayer.GUI.Views;
+using RedBookPlayer.Models;
 using RedBookPlayer.Models.Hardware;
 
 namespace RedBookPlayer.GUI.ViewModels
@@ -165,10 +166,10 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Indicate if the output is playing
         /// </summary>
-        public bool? Playing
+        public PlayerState PlayerState
         {
-            get => _playing;
-            private set => this.RaiseAndSetIfChanged(ref _playing, value);
+            get => _playerState;
+            private set => this.RaiseAndSetIfChanged(ref _playerState, value);
         }
 
         /// <summary>
@@ -190,7 +191,7 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         private bool _initialized;
-        private bool? _playing;
+        private PlayerState _playerState;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -344,7 +345,7 @@ namespace RedBookPlayer.GUI.ViewModels
         public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay, int defaultVolume)
         {
             // Stop current playback, if necessary
-            if(Playing != null) ExecuteStop();
+            if(PlayerState != null) ExecuteStop();
 
             // Create and attempt to initialize new Player
             _player = new Player(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay, defaultVolume);
@@ -671,7 +672,7 @@ namespace RedBookPlayer.GUI.ViewModels
             CopyAllowed = _player.CopyAllowed;
             TrackHasEmphasis = _player.TrackHasEmphasis;
 
-            Playing = _player.Playing;
+            PlayerState = _player.PlayerState;
             ApplyDeEmphasis = _player.ApplyDeEmphasis;
             Volume = _player.Volume;
 
