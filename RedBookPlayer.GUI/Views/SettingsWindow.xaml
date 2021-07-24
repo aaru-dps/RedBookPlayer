@@ -61,6 +61,7 @@
                         <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
 
                     <!-- Load Image-->
@@ -75,45 +76,49 @@
                     <TextBlock Grid.Row="2" Grid.Column="0" Width="120">Stop Playback</TextBlock>
                     <ComboBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Name="StopPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
 
+                    <!-- Eject Disc-->
+                    <TextBlock Grid.Row="3" Grid.Column="0" Width="120">Eject Disc</TextBlock>
+                    <ComboBox Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" Name="EjectKeyBind" Margin="8,0,0,0" Width="120"/>
+
                     <!-- Next Track -->
-                    <TextBlock Grid.Row="3" Grid.Column="0" Width="120">Next Track</TextBlock>
-                    <ComboBox Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" Name="NextTrackKeyBind" Margin="8,0,0,0" Width="120"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Width="120">Next Track</TextBlock>
+                    <ComboBox Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right" Name="NextTrackKeyBind" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Previous Track -->
-                    <TextBlock Grid.Row="4" Grid.Column="0" Width="120">Previous Track</TextBlock>
-                    <ComboBox Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right" Name="PreviousTrackKeyBind" Margin="8,0,0,0" Width="120"/>
+                    <TextBlock Grid.Row="5" Grid.Column="0" Width="120">Previous Track</TextBlock>
+                    <ComboBox Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right" Name="PreviousTrackKeyBind" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Next Index -->
-                    <TextBlock Grid.Row="5" Grid.Column="0" Width="120">Next Index</TextBlock>
-                    <ComboBox Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right" Name="NextIndexKeyBind" Margin="8,0,0,0" Width="120"/>
+                    <TextBlock Grid.Row="6" Grid.Column="0" Width="120">Next Index</TextBlock>
+                    <ComboBox Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right" Name="NextIndexKeyBind" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Previous Index -->
-                    <TextBlock Grid.Row="6" Grid.Column="0" Width="120">Previous Index</TextBlock>
-                    <ComboBox Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right" Name="PreviousIndexKeyBind" Margin="8,0,0,0" Width="120"/>
+                    <TextBlock Grid.Row="7" Grid.Column="0" Width="120">Previous Index</TextBlock>
+                    <ComboBox Grid.Row="7" Grid.Column="1" HorizontalAlignment="Right" Name="PreviousIndexKeyBind" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Fast Forward -->
-                    <TextBlock Grid.Row="7" Grid.Column="0" Width="120">Fast-Forward</TextBlock>
-                    <ComboBox Grid.Row="7" Grid.Column="1" HorizontalAlignment="Right" Name="FastForwardPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
+                    <TextBlock Grid.Row="8" Grid.Column="0" Width="120">Fast-Forward</TextBlock>
+                    <ComboBox Grid.Row="8" Grid.Column="1" HorizontalAlignment="Right" Name="FastForwardPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Rewind -->
-                    <TextBlock Grid.Row="8" Grid.Column="0" Width="120">Rewind</TextBlock>
-                    <ComboBox Grid.Row="8" Grid.Column="1" HorizontalAlignment="Right" Name="RewindPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
+                    <TextBlock Grid.Row="9" Grid.Column="0" Width="120">Rewind</TextBlock>
+                    <ComboBox Grid.Row="9" Grid.Column="1" HorizontalAlignment="Right" Name="RewindPlaybackKeyBind" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Volume Up -->
-                    <TextBlock Grid.Row="9" Grid.Column="0" Width="120">Volume Up</TextBlock>
-                    <ComboBox Grid.Row="9" Grid.Column="1" HorizontalAlignment="Right" Name="VolumeUpKeyBind" Margin="8,0,0,0" Width="120"/>
+                    <TextBlock Grid.Row="10" Grid.Column="0" Width="120">Volume Up</TextBlock>
+                    <ComboBox Grid.Row="10" Grid.Column="1" HorizontalAlignment="Right" Name="VolumeUpKeyBind" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Volume Down -->
-                    <TextBlock Grid.Row="10" Grid.Column="0" Width="120">Volume Down</TextBlock>
-                    <ComboBox Grid.Row="10" Grid.Column="1" HorizontalAlignment="Right" Name="VolumeDownKeyBind" Margin="8,0,0,0" Width="120"/>
+                    <TextBlock Grid.Row="11" Grid.Column="0" Width="120">Volume Down</TextBlock>
+                    <ComboBox Grid.Row="11" Grid.Column="1" HorizontalAlignment="Right" Name="VolumeDownKeyBind" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Mute Toggle -->
-                    <TextBlock Grid.Row="11" Grid.Column="0" Width="120">Toggle Mute</TextBlock>
-                    <ComboBox Grid.Row="11" Grid.Column="1" HorizontalAlignment="Right" Name="ToggleMuteKeyBind" Margin="8,0,0,0" Width="120"/>
+                    <TextBlock Grid.Row="12" Grid.Column="0" Width="120">Toggle Mute</TextBlock>
+                    <ComboBox Grid.Row="12" Grid.Column="1" HorizontalAlignment="Right" Name="ToggleMuteKeyBind" Margin="8,0,0,0" Width="120"/>
 
                     <!-- De-Emphasis Toggle -->
-                    <TextBlock Grid.Row="12" Grid.Column="0" Width="120">Toggle De-Emphasis</TextBlock>
-                    <ComboBox Grid.Row="12" Grid.Column="1" HorizontalAlignment="Right" Name="ToggleDeEmphasisKeyBind" Margin="8,0,0,0" Width="120"/>
+                    <TextBlock Grid.Row="13" Grid.Column="0" Width="120">Toggle De-Emphasis</TextBlock>
+                    <ComboBox Grid.Row="13" Grid.Column="1" HorizontalAlignment="Right" Name="ToggleDeEmphasisKeyBind" Margin="8,0,0,0" Width="120"/>
                 </Grid>
             </TabItem>
         </TabControl>

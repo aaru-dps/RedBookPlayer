@@ -12,7 +12,13 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Indicate if the player is ready to be used
         /// </summary>
-        public bool Initialized { get; private set; } = false;
+        public bool Initialized
+        {
+            get => _initialized;
+            private set => this.RaiseAndSetIfChanged(ref _initialized, value);
+        }
+
+        private bool _initialized;
 
         #region OpticalDisc Passthrough
 
@@ -100,27 +106,27 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Represents the total tracks on the disc
         /// </summary>
-        public int TotalTracks => _opticalDisc.TotalTracks;
+        public int TotalTracks => _opticalDisc?.TotalTracks ?? 0;
 
         /// <summary>
         /// Represents the total indices on the disc
         /// </summary>
-        public int TotalIndexes => _opticalDisc.TotalIndexes;
+        public int TotalIndexes => _opticalDisc?.TotalIndexes ?? 0;
 
         /// <summary>
         /// Total sectors in the image
         /// </summary>
-        public ulong TotalSectors => _opticalDisc.TotalSectors;
+        public ulong TotalSectors => _opticalDisc?.TotalSectors ?? 0;
 
         /// <summary>
         /// Represents the time adjustment offset for the disc
         /// </summary>
-        public ulong TimeOffset => _opticalDisc.TimeOffset;
+        public ulong TimeOffset => _opticalDisc?.TimeOffset ?? 0;
 
         /// <summary>
         /// Represents the total playing time for the disc
         /// </summary>
-        public ulong TotalTime => _opticalDisc.TotalTime;
+        public ulong TotalTime => _opticalDisc?.TotalTime ?? 0;
 
         private int _currentTrackNumber;
         private ushort _currentTrackIndex;
@@ -180,7 +186,7 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// OpticalDisc object
         /// </summary>
-        private readonly OpticalDiscBase _opticalDisc;
+        private OpticalDiscBase _opticalDisc;
 
         /// <summary>
         /// Last volume for mute toggling
@@ -287,9 +293,25 @@ namespace RedBookPlayer.Models.Hardware
             else if(!_soundOutput.Playing)
                 return;
 
-            _soundOutput?.Stop();
+            _soundOutput.Stop();
             _opticalDisc.LoadFirstTrack();
             Playing = null;
+        }
+
+        /// <summary>
+        /// Eject the currently loaded disc
+        /// </summary>
+        public void Eject()
+        {
+            if(_opticalDisc == null || !_opticalDisc.Initialized)
+                return;
+            else if(_soundOutput == null)
+                return;
+
+            Stop();
+            _soundOutput.Eject();
+            _opticalDisc = null;
+            Initialized = false;
         }
 
         /// <summary>

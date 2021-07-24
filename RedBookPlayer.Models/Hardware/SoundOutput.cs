@@ -263,6 +263,17 @@ namespace RedBookPlayer.Models.Hardware
             Playing = _soundOut.PlaybackState == PlaybackState.Playing;
         }
 
+        /// <summary>
+        /// Eject the currently loaded disc
+        /// </summary>
+        public void Eject()
+        {
+            Stop();
+
+            Initialized = false;
+            Playing = false;
+        }
+
         #endregion
 
         #region Helpers

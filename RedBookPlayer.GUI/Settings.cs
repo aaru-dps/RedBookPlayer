@@ -87,6 +87,11 @@ namespace RedBookPlayer.GUI
         public Key StopPlaybackKey { get; set; } = Key.Escape;
 
         /// <summary>
+        /// Key assigned to eject the disc
+        /// </summary>
+        public Key EjectKey { get; set; } = Key.OemTilde;
+
+        /// <summary>
         /// Key assigned to move to the next track
         /// </summary>
         public Key NextTrackKey { get; set; } = Key.Right;

@@ -156,7 +156,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Indicate if the model is ready to be used
         /// </summary>
-        public bool Initialized => _player?.Initialized ?? false;
+        public bool Initialized
+        {
+            get => _initialized;
+            private set => this.RaiseAndSetIfChanged(ref _initialized, value);
+        }
 
         /// <summary>
         /// Indicate if the output is playing
@@ -185,6 +189,7 @@ namespace RedBookPlayer.GUI.ViewModels
             private set => this.RaiseAndSetIfChanged(ref _volume, value);
         }
 
+        private bool _initialized;
         private bool? _playing;
         private bool _applyDeEmphasis;
         private int _volume;
@@ -221,6 +226,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Command for stopping playback
         /// </summary>
         public ReactiveCommand<Unit, Unit> StopCommand { get; }
+
+        /// <summary>
+        /// Command for ejecting the current disc
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> EjectCommand { get; }
 
         /// <summary>
         /// Command for moving to the next track
@@ -305,6 +315,7 @@ namespace RedBookPlayer.GUI.ViewModels
             PauseCommand = ReactiveCommand.Create(ExecutePause);
             TogglePlayPauseCommand = ReactiveCommand.Create(ExecuteTogglePlayPause);
             StopCommand = ReactiveCommand.Create(ExecuteStop);
+            EjectCommand = ReactiveCommand.Create(ExecuteEject);
             NextTrackCommand = ReactiveCommand.Create(ExecuteNextTrack);
             PreviousTrackCommand = ReactiveCommand.Create(ExecutePreviousTrack);
             NextIndexCommand = ReactiveCommand.Create(ExecuteNextIndex);
@@ -337,6 +348,8 @@ namespace RedBookPlayer.GUI.ViewModels
 
             // Create and attempt to initialize new Player
             _player = new Player(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay, defaultVolume);
+            Initialized = _player.Initialized;
+
             if(Initialized)
             {
                 _player.PropertyChanged += PlayerStateChanged;
@@ -365,6 +378,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Stop current playback
         /// </summary>
         public void ExecuteStop() => _player?.Stop();
+
+        /// <summary>
+        /// Eject the currently loaded disc
+        /// </summary>
+        public void ExecuteEject() => _player?.Eject();
 
         /// <summary>
         /// Move to the next playable track
@@ -628,8 +646,18 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         private void PlayerStateChanged(object sender, PropertyChangedEventArgs e)
         {
-            if(_player?.Initialized != true)
+            if(_player == null)
                 return;
+
+            if(!_player.Initialized)
+            {
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    MainWindow.Instance.Title = "RedBookPlayer";
+                });
+            }
+
+            Initialized = _player.Initialized;
 
             CurrentTrackNumber = _player.CurrentTrackNumber;
             CurrentTrackIndex = _player.CurrentTrackIndex;

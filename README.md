@@ -12,6 +12,7 @@
 | **F2** | Load New Image |
 | **Space** | Toggle Play / Pause |
 | **Esc** | Stop Playback |
+| **~** | Eject |
 | **&#8594;** | Next Track |
 | **&#8592;** | Previous Track |
 | **]** | Next Index |

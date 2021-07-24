@@ -95,6 +95,7 @@ namespace RedBookPlayer.GUI.Views
             ComboBox loadImageKeyBind = this.FindControl<ComboBox>("LoadImageKeyBind");
             ComboBox togglePlaybackKeyBind = this.FindControl<ComboBox>("TogglePlaybackKeyBind");
             ComboBox stopPlaybackKeyBind = this.FindControl<ComboBox>("StopPlaybackKeyBind");
+            ComboBox ejectKeyBind = this.FindControl<ComboBox>("EjectKeyBind");
             ComboBox nextTrackKeyBind = this.FindControl<ComboBox>("NextTrackKeyBind");
             ComboBox previousTrackKeyBind = this.FindControl<ComboBox>("PreviousTrackKeyBind");
             ComboBox nextIndexKeyBind = this.FindControl<ComboBox>("NextIndexKeyBind");
@@ -111,6 +112,7 @@ namespace RedBookPlayer.GUI.Views
             loadImageKeyBind.Items = keyboardList;
             togglePlaybackKeyBind.Items = keyboardList;
             stopPlaybackKeyBind.Items = keyboardList;
+            ejectKeyBind.Items = keyboardList;
             nextTrackKeyBind.Items = keyboardList;
             previousTrackKeyBind.Items = keyboardList;
             nextIndexKeyBind.Items = keyboardList;
@@ -126,6 +128,7 @@ namespace RedBookPlayer.GUI.Views
             loadImageKeyBind.SelectedItem = _settings.LoadImageKey;
             togglePlaybackKeyBind.SelectedItem = _settings.TogglePlaybackKey;
             stopPlaybackKeyBind.SelectedItem = _settings.StopPlaybackKey;
+            ejectKeyBind.SelectedItem = _settings.EjectKey;
             nextTrackKeyBind.SelectedItem = _settings.NextTrackKey;
             previousTrackKeyBind.SelectedItem = _settings.PreviousTrackKey;
             nextIndexKeyBind.SelectedItem = _settings.NextIndexKey;
@@ -147,6 +150,7 @@ namespace RedBookPlayer.GUI.Views
             ComboBox loadImageKeyBind = this.FindControl<ComboBox>("LoadImageKeyBind");
             ComboBox togglePlaybackKeyBind = this.FindControl<ComboBox>("TogglePlaybackKeyBind");
             ComboBox stopPlaybackKeyBind = this.FindControl<ComboBox>("StopPlaybackKeyBind");
+            ComboBox ejectKeyBind = this.FindControl<ComboBox>("EjectKeyBind");
             ComboBox nextTrackKeyBind = this.FindControl<ComboBox>("NextTrackKeyBind");
             ComboBox previousTrackKeyBind = this.FindControl<ComboBox>("PreviousTrackKeyBind");
             ComboBox nextIndexKeyBind = this.FindControl<ComboBox>("NextIndexKeyBind");
@@ -162,6 +166,7 @@ namespace RedBookPlayer.GUI.Views
             _settings.LoadImageKey = (Key)loadImageKeyBind.SelectedItem;
             _settings.TogglePlaybackKey = (Key)togglePlaybackKeyBind.SelectedItem;
             _settings.StopPlaybackKey = (Key)stopPlaybackKeyBind.SelectedItem;
+            _settings.EjectKey = (Key)ejectKeyBind.SelectedItem;
             _settings.NextTrackKey = (Key)nextTrackKeyBind.SelectedItem;
             _settings.PreviousTrackKey = (Key)previousTrackKeyBind.SelectedItem;
             _settings.NextIndexKey = (Key)nextIndexKeyBind.SelectedItem;

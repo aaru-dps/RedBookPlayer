@@ -151,6 +151,12 @@ namespace RedBookPlayer.GUI.Views
                 playerView?.PlayerViewModel?.ExecuteStop();
             }
 
+            // Eject
+            else if(e.Key == App.Settings.EjectKey)
+            {
+                playerView?.PlayerViewModel?.ExecuteEject();
+            }
+
             // Next Track
             else if(e.Key == App.Settings.NextTrackKey || e.Key == Key.MediaNextTrack)
             {
