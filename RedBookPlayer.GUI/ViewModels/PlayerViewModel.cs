@@ -174,6 +174,24 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
+        /// Indicates how to handle playback of data tracks
+        /// </summary>
+        public DataPlayback DataPlayback
+        {
+            get => _dataPlayback;
+            private set => this.RaiseAndSetIfChanged(ref _dataPlayback, value);
+        }
+
+        /// <summary>
+        /// Indicates the repeat mode
+        /// </summary>
+        public RepeatMode RepeatMode
+        {
+            get => _repeatMode;
+            private set => this.RaiseAndSetIfChanged(ref _repeatMode, value);
+        }
+
+        /// <summary>
         /// Indicates if de-emphasis should be applied
         /// </summary>
         public bool ApplyDeEmphasis
@@ -193,6 +211,8 @@ namespace RedBookPlayer.GUI.ViewModels
 
         private bool _initialized;
         private PlayerState _playerState;
+        private DataPlayback _dataPlayback;
+        private RepeatMode _repeatMode;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -581,6 +601,18 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
+        /// Set data playback method
+        /// </summary>
+        /// <param name="dataPlayback">New playback value</param>
+        public void SetDataPlayback(DataPlayback dataPlayback) => _player?.SetDataPlayback(dataPlayback);
+
+        /// <summary>
+        /// Set repeat mode
+        /// </summary>
+        /// <param name="repeatMode">New repeat mode value</param>
+        public void SetRepeatMode(RepeatMode repeatMode) => _player?.SetRepeatMode(repeatMode);
+
+        /// <summary>
         /// Set the value for loading data tracks [CompactDisc only]
         /// </summary>
         /// <param name="load">True to enable loading data tracks, false otherwise</param>
@@ -725,6 +757,8 @@ namespace RedBookPlayer.GUI.ViewModels
             TrackHasEmphasis = _player.TrackHasEmphasis;
 
             PlayerState = _player.PlayerState;
+            DataPlayback = _player.DataPlayback;
+            RepeatMode = _player.RepeatMode;
             ApplyDeEmphasis = _player.ApplyDeEmphasis;
             Volume = _player.Volume;
 

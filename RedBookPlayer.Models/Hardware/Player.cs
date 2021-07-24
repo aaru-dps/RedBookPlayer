@@ -162,6 +162,15 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Indicates the repeat mode
+        /// </summary>
+        public RepeatMode RepeatMode
+        {
+            get => _repeatMode;
+            private set => this.RaiseAndSetIfChanged(ref _repeatMode, value);
+        }
+
+        /// <summary>
         /// Indicates if de-emphasis should be applied
         /// </summary>
         public bool ApplyDeEmphasis
@@ -181,6 +190,7 @@ namespace RedBookPlayer.Models.Hardware
 
         private PlayerState _playerState;
         private DataPlayback _dataPlayback;
+        private RepeatMode _repeatMode;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -507,6 +517,18 @@ namespace RedBookPlayer.Models.Hardware
         #region Helpers
 
         /// <summary>
+        /// Set data playback method
+        /// </summary>
+        /// <param name="dataPlayback">New playback value</param>
+        public void SetDataPlayback(DataPlayback dataPlayback) => _soundOutput?.SetDataPlayback(dataPlayback);
+
+        /// <summary>
+        /// Set repeat mode
+        /// </summary>
+        /// <param name="repeatMode">New repeat mode value</param>
+        public void SetRepeatMode(RepeatMode repeatMode) => _soundOutput?.SetRepeatMode(repeatMode);
+
+        /// <summary>
         /// Set the value for loading data tracks [CompactDisc only]
         /// </summary>
         /// <param name="load">True to enable loading data tracks, false otherwise</param>
@@ -561,6 +583,7 @@ namespace RedBookPlayer.Models.Hardware
         {
             PlayerState = _soundOutput.PlayerState;
             DataPlayback = _soundOutput.DataPlayback;
+            RepeatMode = _soundOutput.RepeatMode;
             ApplyDeEmphasis = _soundOutput.ApplyDeEmphasis;
             Volume = _soundOutput.Volume;
         }

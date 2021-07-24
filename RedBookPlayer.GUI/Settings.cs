@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using Avalonia.Input;
-using RedBookPlayer.GUI.Views;
+using RedBookPlayer.Models;
 
 namespace RedBookPlayer.GUI
 {
@@ -39,6 +39,19 @@ namespace RedBookPlayer.GUI
         /// Generate a TOC if the disc is missing one
         /// </summary>
         public bool GenerateMissingTOC { get; set; } = true;
+
+        /// <summary>
+        /// Indicates how to deal with data tracks
+        /// </summary>
+        /// TODO: Add to settings UI
+        /// TODO: Replace PlayDataTracks with this value
+        public DataPlayback DataPlayback { get; set; } = DataPlayback.Skip;
+
+        /// <summary>
+        /// Indicates how to repeat tracks
+        /// </summary>
+        /// TODO: Add to settings UI
+        public RepeatMode RepeatMode { get; set; } = RepeatMode.All;
 
         /// <summary>
         /// Indicates the default playback volume

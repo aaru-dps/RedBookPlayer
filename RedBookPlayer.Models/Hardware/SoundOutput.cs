@@ -41,6 +41,15 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Indicates the repeat mode
+        /// </summary>
+        public RepeatMode RepeatMode
+        {
+            get => _repeatMode;
+            private set => this.RaiseAndSetIfChanged(ref _repeatMode, value);
+        }
+
+        /// <summary>
         /// Indicates if de-emphasis should be applied
         /// </summary>
         public bool ApplyDeEmphasis
@@ -70,6 +79,7 @@ namespace RedBookPlayer.Models.Hardware
         private bool _initialized;
         private PlayerState _playerState;
         private DataPlayback _dataPlayback;
+        private RepeatMode _repeatMode;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -269,6 +279,12 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         /// <param name="apply">New de-emphasis status</param>
         public void SetDeEmphasis(bool apply) => ApplyDeEmphasis = apply;
+
+        /// <summary>
+        /// Set repeat mode
+        /// </summary>
+        /// <param name="repeatMode">New repeat mode value</param>
+        public void SetRepeatMode(RepeatMode repeatMode) => RepeatMode = repeatMode;
 
         /// <summary>
         /// Set the value for the volume
