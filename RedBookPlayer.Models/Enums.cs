@@ -3,7 +3,6 @@ namespace RedBookPlayer.Models
     /// <summary>
     /// Determine how to handle data tracks
     /// </summary>
-    /// TODO: Add extra flags/options for sessions (only first session, all sessions)
     public enum DataPlayback
     {
         /// <summary>
@@ -51,6 +50,7 @@ namespace RedBookPlayer.Models
     /// <summary>
     /// Playback repeat mode
     /// </summary>
+    /// TODO: Wire this up to Player or OpticalDisc
     public enum RepeatMode
     {
         /// <summary>
@@ -67,5 +67,22 @@ namespace RedBookPlayer.Models
         /// Repeat all tracks
         /// </summary>
         All,
+    }
+
+    /// <summary>
+    /// Determine how to handle different sessions
+    /// </summary>
+    /// TODO: Wire this up to Player or OpticalDisc
+    public enum SessionHandling
+    {
+        /// <summary>
+        /// Allow playing tracks from all sessions
+        /// </summary>
+        AllSessions = 0,
+
+        /// <summary>
+        /// Only play tracks from the first session
+        /// </summary>
+        FirstSessionOnly = 1,
     }
 }
