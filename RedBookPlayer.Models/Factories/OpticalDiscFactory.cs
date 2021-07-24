@@ -15,10 +15,10 @@ namespace RedBookPlayer.Models.Factories
         /// <param name="path">Path to load the image from</param>
         /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
         /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
-        /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
+        /// <param name="dataPlayback">How to handle data tracks [CompactDisc only]</param>
         /// <param name="autoPlay">True if the image should be playable immediately, false otherwise</param>
         /// <returns>Instantiated OpticalDisc, if possible</returns>
-        public static OpticalDiscBase GenerateFromPath(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
+        public static OpticalDiscBase GenerateFromPath(string path, bool generateMissingToc, bool loadHiddenTracks, DataPlayback dataPlayback, bool autoPlay)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace RedBookPlayer.Models.Factories
                 image.Open(filter);
 
                 // Generate and instantiate the disc
-                return GenerateFromImage(image, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay);
+                return GenerateFromImage(image, generateMissingToc, loadHiddenTracks, dataPlayback, autoPlay);
             }
             catch
             {
@@ -49,10 +49,10 @@ namespace RedBookPlayer.Models.Factories
         /// <param name="image">IOpticalMediaImage to create from</param>
         /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
         /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
-        /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
+        /// <param name="dataPlayback">How to handle data tracks [CompactDisc only]</param>
         /// <param name="autoPlay">True if the image should be playable immediately, false otherwise</param>
         /// <returns>Instantiated OpticalDisc, if possible</returns>
-        public static OpticalDiscBase GenerateFromImage(IOpticalMediaImage image, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
+        public static OpticalDiscBase GenerateFromImage(IOpticalMediaImage image, bool generateMissingToc, bool loadHiddenTracks, DataPlayback dataPlayback, bool autoPlay)
         {
             // If the image is not usable, we don't do anything
             if(!IsUsableImage(image))
@@ -66,7 +66,7 @@ namespace RedBookPlayer.Models.Factories
             {
                 case "Compact Disc":
                 case "GD":
-                    opticalDisc = new CompactDisc(generateMissingToc, loadHiddenTracks, loadDataTracks);
+                    opticalDisc = new CompactDisc(generateMissingToc, loadHiddenTracks, dataPlayback);
                     break;
                 default:
                     opticalDisc = null;

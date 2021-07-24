@@ -26,7 +26,7 @@ namespace RedBookPlayer.Models.Discs
                     return;
 
                 // Data tracks only and flag disabled means we can't do anything
-                if(_image.Tracks.All(t => t.TrackType != TrackType.Audio) && !LoadDataTracks)
+                if(_image.Tracks.All(t => t.TrackType != TrackType.Audio) && DataPlayback == DataPlayback.Skip)
                     return;
 
                 // Cache the value and the current track number
@@ -69,7 +69,7 @@ namespace RedBookPlayer.Models.Discs
                     SetTrackFlags(track);
 
                     // If the track is playable, just return
-                    if(TrackType == TrackType.Audio || LoadDataTracks)
+                    if(TrackType == TrackType.Audio || DataPlayback != DataPlayback.Skip)
                         break;
 
                     // If we're not playing the track, skip
@@ -216,9 +216,9 @@ namespace RedBookPlayer.Models.Discs
         }
 
         /// <summary>
-        /// Indicate if data tracks should be loaded
+        /// Indicate how data tracks should be handled
         /// </summary>
-        public bool LoadDataTracks { get; set; } = false;
+        public DataPlayback DataPlayback { get; set; } = DataPlayback.Skip;
 
         /// <summary>
         /// Indicate if hidden tracks should be loaded
@@ -266,12 +266,12 @@ namespace RedBookPlayer.Models.Discs
         /// </summary>
         /// <param name="generateMissingToc">Generate a TOC if the disc is missing one</param>
         /// <param name="loadHiddenTracks">Load hidden tracks for playback</param>
-        /// <param name="loadDataTracks">Load data tracks for playback</param>
-        public CompactDisc(bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks)
+        /// <param name="dataPlayback">How to handle data tracks</param>
+        public CompactDisc(bool generateMissingToc, bool loadHiddenTracks, DataPlayback dataPlayback)
         {
             _generateMissingToc = generateMissingToc;
             LoadHiddenTracks = loadHiddenTracks;
-            LoadDataTracks = loadDataTracks;
+            DataPlayback = dataPlayback;
         }
 
         /// <inheritdoc/>
@@ -420,6 +420,17 @@ namespace RedBookPlayer.Models.Discs
         {
             CurrentTrackNumber = 1;
             LoadTrack(CurrentTrackNumber);
+        }
+
+        /// <inheritdoc/>
+        public override byte[] ReadSectors(uint sectorsToRead)
+        {
+            if(TrackType == TrackType.Audio || DataPlayback == DataPlayback.Play)
+                return base.ReadSectors(sectorsToRead);
+            else if(DataPlayback == DataPlayback.Blank)
+                return new byte[sectorsToRead * BytesPerSector];
+            else
+                return new byte[0];
         }
 
         /// <inheritdoc/>

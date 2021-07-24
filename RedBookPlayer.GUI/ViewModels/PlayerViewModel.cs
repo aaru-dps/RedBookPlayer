@@ -368,15 +368,15 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <param name="path">Path to the disc image</param>
         /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
         /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
-        /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
+        /// <param name="dataPlayback">How to handle data tracks [CompactDisc only]</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
+        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, DataPlayback dataPlayback, bool autoPlay)
         {
             // Stop current playback, if necessary
             if(PlayerState != PlayerState.NoDisc) ExecuteStop();
 
             // Attempt to initialize Player
-            _player.Init(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay);
+            _player.Init(path, generateMissingToc, loadHiddenTracks, dataPlayback, autoPlay);
             if(_player.Initialized)
             {
                 _player.PropertyChanged += PlayerStateChanged;
@@ -592,7 +592,7 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             return await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.PlayDataTracks, App.Settings.AutoPlay);
+                Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.DataPlayback, App.Settings.AutoPlay);
                 if(Initialized)
                     MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
 
@@ -601,7 +601,7 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
-        /// Set data playback method
+        /// Set data playback method [CompactDisc only]
         /// </summary>
         /// <param name="dataPlayback">New playback value</param>
         public void SetDataPlayback(DataPlayback dataPlayback) => _player?.SetDataPlayback(dataPlayback);
@@ -611,12 +611,6 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         /// <param name="repeatMode">New repeat mode value</param>
         public void SetRepeatMode(RepeatMode repeatMode) => _player?.SetRepeatMode(repeatMode);
-
-        /// <summary>
-        /// Set the value for loading data tracks [CompactDisc only]
-        /// </summary>
-        /// <param name="load">True to enable loading data tracks, false otherwise</param>
-        public void SetLoadDataTracks(bool load) => _player?.SetLoadDataTracks(load);
 
         /// <summary>
         /// Set the value for loading hidden tracks [CompactDisc only]

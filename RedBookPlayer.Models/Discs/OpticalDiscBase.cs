@@ -132,7 +132,7 @@ namespace RedBookPlayer.Models.Discs
         /// </summary>
         /// <param name="sectorsToRead">Current number of sectors to read</param>
         /// <returns>Byte array representing the read sectors, if possible</returns>
-        public byte[] ReadSectors(uint sectorsToRead) => _image.ReadSectors(CurrentSector, sectorsToRead);
+        public virtual byte[] ReadSectors(uint sectorsToRead) => _image.ReadSectors(CurrentSector, sectorsToRead);
 
         /// <summary>
         /// Set the total indexes from the current track

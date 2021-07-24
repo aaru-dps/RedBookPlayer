@@ -32,15 +32,6 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
-        /// Indicates how to handle playback of data tracks
-        /// </summary>
-        public DataPlayback DataPlayback
-        {
-            get => _dataPlayback;
-            private set => this.RaiseAndSetIfChanged(ref _dataPlayback, value);
-        }
-
-        /// <summary>
         /// Indicates the repeat mode
         /// </summary>
         public RepeatMode RepeatMode
@@ -267,12 +258,6 @@ namespace RedBookPlayer.Models.Hardware
         #endregion
 
         #region Helpers
-
-        /// <summary>
-        /// Set data playback method
-        /// </summary>
-        /// <param name="dataPlayback">New playback value</param>
-        public void SetDataPlayback(DataPlayback dataPlayback) => DataPlayback = dataPlayback;
 
         /// <summary>
         /// Set de-emphasis status

@@ -21,8 +21,8 @@
                             <TextBlock VerticalAlignment="Center">Play hidden tracks</TextBlock>
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
-                            <CheckBox IsChecked="{Binding PlayDataTracks}" Margin="0,0,8,0"/>
-                            <TextBlock VerticalAlignment="Center">Play data tracks like old, non-compliant players</TextBlock>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Width="120">Data Track Playback</TextBlock>
+                            <ComboBox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Name="DataPlayback" Margin="8,0,0,0" Width="120"/>
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
                             <CheckBox IsChecked="{Binding GenerateMissingTOC}" Margin="0,0,8,0"/>

@@ -31,11 +31,6 @@ namespace RedBookPlayer.GUI
         public bool PlayHiddenTracks { get; set; } = false;
 
         /// <summary>
-        /// Indicates if data tracks should be played like old, non-compliant players
-        /// </summary>
-        public bool PlayDataTracks { get; set; } = false;
-
-        /// <summary>
         /// Generate a TOC if the disc is missing one
         /// </summary>
         public bool GenerateMissingTOC { get; set; } = true;
@@ -43,8 +38,6 @@ namespace RedBookPlayer.GUI
         /// <summary>
         /// Indicates how to deal with data tracks
         /// </summary>
-        /// TODO: Add to settings UI
-        /// TODO: Replace PlayDataTracks with this value
         public DataPlayback DataPlayback { get; set; } = DataPlayback.Skip;
 
         /// <summary>

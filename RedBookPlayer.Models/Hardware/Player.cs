@@ -232,15 +232,15 @@ namespace RedBookPlayer.Models.Hardware
         /// <param name="path">Path to the disc image</param>
         /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
         /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
-        /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
+        /// <param name="dataPlayback">How to handle data tracks [CompactDisc only]</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
+        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, DataPlayback dataPlayback, bool autoPlay)
         {
             // Reset initialization
             Initialized = false;
 
             // Initalize the disc
-            _opticalDisc = OpticalDiscFactory.GenerateFromPath(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay);
+            _opticalDisc = OpticalDiscFactory.GenerateFromPath(path, generateMissingToc, loadHiddenTracks, dataPlayback, autoPlay);
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
@@ -517,26 +517,20 @@ namespace RedBookPlayer.Models.Hardware
         #region Helpers
 
         /// <summary>
-        /// Set data playback method
+        /// Set data playback method [CompactDisc only]
         /// </summary>
         /// <param name="dataPlayback">New playback value</param>
-        public void SetDataPlayback(DataPlayback dataPlayback) => _soundOutput?.SetDataPlayback(dataPlayback);
+        public void SetDataPlayback(DataPlayback dataPlayback)
+        {
+            if(_opticalDisc is CompactDisc compactDisc)
+                compactDisc.DataPlayback = dataPlayback;
+        }
 
         /// <summary>
         /// Set repeat mode
         /// </summary>
         /// <param name="repeatMode">New repeat mode value</param>
         public void SetRepeatMode(RepeatMode repeatMode) => _soundOutput?.SetRepeatMode(repeatMode);
-
-        /// <summary>
-        /// Set the value for loading data tracks [CompactDisc only]
-        /// </summary>
-        /// <param name="load">True to enable loading data tracks, false otherwise</param>
-        public void SetLoadDataTracks(bool load)
-        {
-            if(_opticalDisc is CompactDisc compactDisc)
-                compactDisc.LoadDataTracks = load;
-        }
 
         /// <summary>
         /// Set the value for loading hidden tracks [CompactDisc only]
@@ -582,7 +576,6 @@ namespace RedBookPlayer.Models.Hardware
         private void SoundOutputStateChanged(object sender, PropertyChangedEventArgs e)
         {
             PlayerState = _soundOutput.PlayerState;
-            DataPlayback = _soundOutput.DataPlayback;
             RepeatMode = _soundOutput.RepeatMode;
             ApplyDeEmphasis = _soundOutput.ApplyDeEmphasis;
             Volume = _soundOutput.Volume;

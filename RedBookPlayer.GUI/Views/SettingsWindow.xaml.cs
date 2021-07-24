@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using RedBookPlayer.Models;
 
 namespace RedBookPlayer.GUI.Views
 {
@@ -38,6 +39,7 @@ namespace RedBookPlayer.GUI.Views
                 ((PlayerView)MainWindow.Instance.DataContext).PlayerViewModel.ApplyTheme(_selectedTheme);
             }
 
+            SaveDataPlayback();
             SaveKeyboardList();
             _settings.Save();
         }
@@ -49,6 +51,7 @@ namespace RedBookPlayer.GUI.Views
             AvaloniaXamlLoader.Load(this);
             
             PopulateThemes();
+            PopulateDataPlayback();
             PopulateKeyboardList();
 
             this.FindControl<Button>("ApplyButton").Click            += ApplySettings;
@@ -84,6 +87,16 @@ namespace RedBookPlayer.GUI.Views
             }
 
             _themeList.Items = items;
+        }
+
+        /// <summary>
+        /// Populate the list of Data Playback values
+        /// </summary>
+        private void PopulateDataPlayback()
+        {
+            ComboBox dataPlayback = this.FindControl<ComboBox>("DataPlayback");
+            dataPlayback.Items = Enum.GetValues(typeof(DataPlayback));
+            dataPlayback.SelectedItem = _settings.DataPlayback;
         }
 
         /// <summary>
@@ -139,6 +152,15 @@ namespace RedBookPlayer.GUI.Views
             volumeDownKeyBind.SelectedItem = _settings.VolumeDownKey;
             toggleMuteKeyBind.SelectedItem = _settings.ToggleMuteKey;
             toggleDeEmphasisKeyBind.SelectedItem = _settings.ToggleDeEmphasisKey;
+        }
+
+        /// <summary>
+        /// Save back the Data Playback value
+        /// </summary>
+        private void SaveDataPlayback()
+        {
+            ComboBox dataPlayback = this.FindControl<ComboBox>("DataPlayback");
+            _settings.DataPlayback = (DataPlayback)dataPlayback.SelectedItem;
         }
 
         /// <summary>
