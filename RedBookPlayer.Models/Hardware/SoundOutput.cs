@@ -183,8 +183,8 @@ namespace RedBookPlayer.Models.Hardware
             DetermineReadAmount(count, out ulong sectorsToRead, out ulong zeroSectorsAmount);
 
             // Get data to return
-            (byte[] audioDataSegment, bool success) = ReadData(count, sectorsToRead, zeroSectorsAmount);
-            if (!success)
+            byte[] audioDataSegment = ReadData(count, sectorsToRead, zeroSectorsAmount);
+            if (audioDataSegment == null)
             {
                 Array.Clear(buffer, offset, count);
                 return count;
@@ -320,8 +320,8 @@ namespace RedBookPlayer.Models.Hardware
         /// <param name="count">Number of bytes to load</param>
         /// <param name="sectorsToRead">Number of sectors to read</param>
         /// <param name="zeroSectorsAmount">Number of zeroed sectors to concatenate</param>
-        /// <returns></returns>
-        private (byte[], bool) ReadData(int count, ulong sectorsToRead, ulong zeroSectorsAmount)
+        /// <returns>The requested amount of data, if possible</returns>
+        private byte[] ReadData(int count, ulong sectorsToRead, ulong zeroSectorsAmount)
         {
             // Create padding data for overreads
             byte[] zeroSectors = new byte[(int)zeroSectorsAmount * _opticalDisc.BytesPerSector];
@@ -352,13 +352,13 @@ namespace RedBookPlayer.Models.Hardware
             if(readSectorTask.Wait(TimeSpan.FromMilliseconds(100)))
                 audioData = readSectorTask.Result;
             else
-                return (null, false);
+                return null;
 
             // Load only the requested audio segment
             byte[] audioDataSegment = new byte[count];
             int copyAmount = Math.Min(count, audioData.Length - _currentSectorReadPosition);
             if(Math.Max(0, copyAmount) == 0)
-                return (null, false);
+                return null;
 
             Array.Copy(audioData, _currentSectorReadPosition, audioDataSegment, 0, copyAmount);
 
@@ -366,7 +366,7 @@ namespace RedBookPlayer.Models.Hardware
             if(ApplyDeEmphasis)
                 ProcessDeEmphasis(audioDataSegment);
 
-            return (audioDataSegment, true);
+            return audioDataSegment;
         }
 
         /// <summary>
