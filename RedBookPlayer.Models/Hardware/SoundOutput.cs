@@ -69,7 +69,6 @@ namespace RedBookPlayer.Models.Hardware
 
         private bool _initialized;
         private PlayerState _playerState;
-        private DataPlayback _dataPlayback;
         private RepeatMode _repeatMode;
         private bool _applyDeEmphasis;
         private int _volume;

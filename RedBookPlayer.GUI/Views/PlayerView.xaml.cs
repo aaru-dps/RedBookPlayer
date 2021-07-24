@@ -46,8 +46,9 @@ namespace RedBookPlayer.GUI.Views
         public void UpdateViewModel()
         {
             PlayerViewModel.SetDataPlayback(App.Settings.DataPlayback);
-            PlayerViewModel.SetRepeatMode(App.Settings.RepeatMode);
             PlayerViewModel.SetLoadHiddenTracks(App.Settings.PlayHiddenTracks);
+            PlayerViewModel.SetRepeatMode(App.Settings.RepeatMode);
+            PlayerViewModel.SetSessionHandling(App.Settings.SessionHandling);
         }
 
         /// <summary>

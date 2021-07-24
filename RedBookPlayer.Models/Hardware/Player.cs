@@ -230,17 +230,15 @@ namespace RedBookPlayer.Models.Hardware
         /// Initializes player from a given image path
         /// </summary>
         /// <param name="path">Path to the disc image</param>
-        /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
-        /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
-        /// <param name="dataPlayback">How to handle data tracks [CompactDisc only]</param>
+        /// <param name="options">Options to pass to the optical disc factory</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, DataPlayback dataPlayback, bool autoPlay)
+        public void Init(string path, OpticalDiscOptions options, bool autoPlay)
         {
             // Reset initialization
             Initialized = false;
 
             // Initalize the disc
-            _opticalDisc = OpticalDiscFactory.GenerateFromPath(path, generateMissingToc, loadHiddenTracks, dataPlayback, autoPlay);
+            _opticalDisc = OpticalDiscFactory.GenerateFromPath(path, options, autoPlay);
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
@@ -527,12 +525,6 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
-        /// Set repeat mode
-        /// </summary>
-        /// <param name="repeatMode">New repeat mode value</param>
-        public void SetRepeatMode(RepeatMode repeatMode) => _soundOutput?.SetRepeatMode(repeatMode);
-
-        /// <summary>
         /// Set the value for loading hidden tracks [CompactDisc only]
         /// </summary>
         /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
@@ -540,6 +532,22 @@ namespace RedBookPlayer.Models.Hardware
         {
             if(_opticalDisc is CompactDisc compactDisc)
                 compactDisc.LoadHiddenTracks = load;
+        }
+
+        /// <summary>
+        /// Set repeat mode
+        /// </summary>
+        /// <param name="repeatMode">New repeat mode value</param>
+        public void SetRepeatMode(RepeatMode repeatMode) => _soundOutput?.SetRepeatMode(repeatMode);
+
+        /// <summary>
+        /// Set the value for session handling [CompactDisc only]
+        /// </summary>
+        /// <param name="sessionHandling">New session handling value</param>
+        public void SetSessionHandling(SessionHandling sessionHandling)
+        {
+            if(_opticalDisc is CompactDisc compactDisc)
+                compactDisc.SessionHandling = sessionHandling;
         }
 
         /// <summary>

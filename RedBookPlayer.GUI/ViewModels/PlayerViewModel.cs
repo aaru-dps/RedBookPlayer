@@ -14,6 +14,7 @@ using Avalonia.Threading;
 using ReactiveUI;
 using RedBookPlayer.GUI.Views;
 using RedBookPlayer.Models;
+using RedBookPlayer.Models.Discs;
 using RedBookPlayer.Models.Hardware;
 
 namespace RedBookPlayer.GUI.ViewModels
@@ -366,17 +367,15 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Initialize the view model with a given image path
         /// </summary>
         /// <param name="path">Path to the disc image</param>
-        /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
-        /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
-        /// <param name="dataPlayback">How to handle data tracks [CompactDisc only]</param>
+        /// <param name="options">Options to pass to the optical disc factory</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, DataPlayback dataPlayback, bool autoPlay)
+        public void Init(string path, OpticalDiscOptions options, bool autoPlay)
         {
             // Stop current playback, if necessary
             if(PlayerState != PlayerState.NoDisc) ExecuteStop();
 
             // Attempt to initialize Player
-            _player.Init(path, generateMissingToc, loadHiddenTracks, dataPlayback, autoPlay);
+            _player.Init(path, options, autoPlay);
             if(_player.Initialized)
             {
                 _player.PropertyChanged += PlayerStateChanged;
@@ -592,7 +591,15 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             return await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.DataPlayback, App.Settings.AutoPlay);
+                OpticalDiscOptions options = new OpticalDiscOptions
+                {
+                    DataPlayback = App.Settings.DataPlayback,
+                    GenerateMissingToc = App.Settings.GenerateMissingTOC,
+                    LoadHiddenTracks = App.Settings.PlayHiddenTracks,
+                    SessionHandling = App.Settings.SessionHandling,
+                };
+
+                Init(path, options, App.Settings.AutoPlay);
                 if(Initialized)
                     MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
 
@@ -607,16 +614,22 @@ namespace RedBookPlayer.GUI.ViewModels
         public void SetDataPlayback(DataPlayback dataPlayback) => _player?.SetDataPlayback(dataPlayback);
 
         /// <summary>
+        /// Set the value for loading hidden tracks [CompactDisc only]
+        /// </summary>
+        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
+        public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
+
+        /// <summary>
         /// Set repeat mode
         /// </summary>
         /// <param name="repeatMode">New repeat mode value</param>
         public void SetRepeatMode(RepeatMode repeatMode) => _player?.SetRepeatMode(repeatMode);
 
         /// <summary>
-        /// Set the value for loading hidden tracks [CompactDisc only]
+        /// Set session handling
         /// </summary>
-        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
-        public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
+        /// <param name="sessionHandling">New session handling value</param>
+        public void SetSessionHandling(SessionHandling sessionHandling) => _player?.SetSessionHandling(sessionHandling);
 
         /// <summary>
         /// Generate the digit string to be interpreted by the frontend

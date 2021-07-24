@@ -25,6 +25,10 @@
                             <ComboBox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Name="DataPlayback" Margin="8,0,0,0" Width="120"/>
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Width="120">Session Handling</TextBlock>
+                            <ComboBox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Name="SessionHandling" Margin="8,0,0,0" Width="120"/>
+                        </WrapPanel>
+                        <WrapPanel Margin="0,0,0,16">
                             <CheckBox IsChecked="{Binding GenerateMissingTOC}" Margin="0,0,8,0"/>
                             <TextBlock VerticalAlignment="Center">Generate a TOC if the disc is missing one</TextBlock>
                         </WrapPanel>

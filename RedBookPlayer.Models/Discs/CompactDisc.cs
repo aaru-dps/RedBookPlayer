@@ -69,8 +69,11 @@ namespace RedBookPlayer.Models.Discs
                     SetTrackFlags(track);
 
                     // If the track is playable, just return
-                    if(TrackType == TrackType.Audio || DataPlayback != DataPlayback.Skip)
+                    if((TrackType == TrackType.Audio || DataPlayback != DataPlayback.Skip)
+                        && (SessionHandling == SessionHandling.AllSessions || track.TrackSession == 1))
+                    {
                         break;
+                    }
 
                     // If we're not playing the track, skip
                     if(increment)
@@ -225,6 +228,11 @@ namespace RedBookPlayer.Models.Discs
         /// </summary>
         public bool LoadHiddenTracks { get; set; } = false;
 
+        /// <summary>
+        /// Indicates how tracks on different session should be handled
+        /// </summary>
+        public SessionHandling SessionHandling { get; set; } = SessionHandling.AllSessions;
+
         private bool _quadChannel;
         private bool _isDataTrack;
         private bool _copyAllowed;
@@ -264,14 +272,13 @@ namespace RedBookPlayer.Models.Discs
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="generateMissingToc">Generate a TOC if the disc is missing one</param>
-        /// <param name="loadHiddenTracks">Load hidden tracks for playback</param>
-        /// <param name="dataPlayback">How to handle data tracks</param>
-        public CompactDisc(bool generateMissingToc, bool loadHiddenTracks, DataPlayback dataPlayback)
+        /// <param name="options">Set of options for a new disc</param>
+        public CompactDisc(OpticalDiscOptions options)
         {
-            _generateMissingToc = generateMissingToc;
-            LoadHiddenTracks = loadHiddenTracks;
-            DataPlayback = dataPlayback;
+            DataPlayback = options.DataPlayback;
+            _generateMissingToc = options.GenerateMissingToc;
+            LoadHiddenTracks = options.LoadHiddenTracks;
+            SessionHandling = options.SessionHandling;
         }
 
         /// <inheritdoc/>

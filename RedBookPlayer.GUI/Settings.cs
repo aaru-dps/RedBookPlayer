@@ -47,6 +47,11 @@ namespace RedBookPlayer.GUI
         public RepeatMode RepeatMode { get; set; } = RepeatMode.All;
 
         /// <summary>
+        /// Indicates how to handle tracks on different sessions
+        /// </summary>
+        public SessionHandling SessionHandling { get; set; } = SessionHandling.AllSessions;
+
+        /// <summary>
         /// Indicates the default playback volume
         /// </summary>
         public int Volume

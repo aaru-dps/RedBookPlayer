@@ -39,7 +39,7 @@ namespace RedBookPlayer.GUI.Views
                 ((PlayerView)MainWindow.Instance.DataContext).PlayerViewModel.ApplyTheme(_selectedTheme);
             }
 
-            SaveDataPlayback();
+            SaveDiscValues();
             SaveKeyboardList();
             _settings.Save();
         }
@@ -51,7 +51,7 @@ namespace RedBookPlayer.GUI.Views
             AvaloniaXamlLoader.Load(this);
             
             PopulateThemes();
-            PopulateDataPlayback();
+            PopulateDiscValues();
             PopulateKeyboardList();
 
             this.FindControl<Button>("ApplyButton").Click            += ApplySettings;
@@ -90,13 +90,18 @@ namespace RedBookPlayer.GUI.Views
         }
 
         /// <summary>
-        /// Populate the list of Data Playback values
+        /// Populate the list of disc enum values
         /// </summary>
-        private void PopulateDataPlayback()
+        private void PopulateDiscValues()
         {
             ComboBox dataPlayback = this.FindControl<ComboBox>("DataPlayback");
+            ComboBox sessionHandling = this.FindControl<ComboBox>("SessionHandling");
+
             dataPlayback.Items = Enum.GetValues(typeof(DataPlayback));
+            sessionHandling.Items = Enum.GetValues(typeof(SessionHandling));
+
             dataPlayback.SelectedItem = _settings.DataPlayback;
+            sessionHandling.SelectedItem = _settings.SessionHandling;
         }
 
         /// <summary>
@@ -155,12 +160,15 @@ namespace RedBookPlayer.GUI.Views
         }
 
         /// <summary>
-        /// Save back the Data Playback value
+        /// Save back the disc enum values
         /// </summary>
-        private void SaveDataPlayback()
+        private void SaveDiscValues()
         {
             ComboBox dataPlayback = this.FindControl<ComboBox>("DataPlayback");
+            ComboBox sessionHandling = this.FindControl<ComboBox>("SessionHandling");
+
             _settings.DataPlayback = (DataPlayback)dataPlayback.SelectedItem;
+            _settings.SessionHandling = (SessionHandling)sessionHandling.SelectedItem;
         }
 
         /// <summary>
