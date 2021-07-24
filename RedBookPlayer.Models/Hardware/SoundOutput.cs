@@ -182,56 +182,13 @@ namespace RedBookPlayer.Models.Hardware
             // Determine how many sectors we can read
             DetermineReadAmount(count, out ulong sectorsToRead, out ulong zeroSectorsAmount);
 
-            // Create padding data for overreads
-            byte[] zeroSectors = new byte[(int)zeroSectorsAmount * _opticalDisc.BytesPerSector];
-            byte[] audioData;
-
-            // Attempt to read the required number of sectors
-            var readSectorTask = Task.Run(() =>
-            {
-                lock(_readingImage)
-                {
-                    for(int i = 0; i < 4; i++)
-                    {
-                        try
-                        {
-                            return _opticalDisc.ReadSectors((uint)sectorsToRead).Concat(zeroSectors).ToArray();
-                        }
-                        catch(ArgumentOutOfRangeException)
-                        {
-                            _opticalDisc.LoadFirstTrack();
-                        }
-                    }
-
-                    return zeroSectors;
-                }
-            });
-
-            // Wait 100ms at longest for the read to occur
-            if(readSectorTask.Wait(TimeSpan.FromMilliseconds(100)))
-            {
-                audioData = readSectorTask.Result;
-            }
-            else
+            // Get data to return
+            (byte[] audioDataSegment, bool success) = ReadData(count, sectorsToRead, zeroSectorsAmount);
+            if (!success)
             {
                 Array.Clear(buffer, offset, count);
                 return count;
             }
-
-            // Load only the requested audio segment
-            byte[] audioDataSegment = new byte[count];
-            int copyAmount = Math.Min(count, audioData.Length - _currentSectorReadPosition);
-            if(Math.Max(0, copyAmount) == 0)
-            {
-                Array.Clear(buffer, offset, count);
-                return count;
-            }
-
-            Array.Copy(audioData, _currentSectorReadPosition, audioDataSegment, 0, copyAmount);
-
-            // Apply de-emphasis filtering, only if enabled
-            if(ApplyDeEmphasis)
-                ProcessDeEmphasis(audioDataSegment);
 
             // Write out the audio data to the buffer
             Array.Copy(audioDataSegment, 0, buffer, offset, count);
@@ -355,6 +312,61 @@ namespace RedBookPlayer.Models.Hardware
             }
 
             ByteConverter.FromFloats16Bit(floatAudioData, audioData);
+        }
+
+        /// <summary>
+        /// Read the requested amount of data from an input
+        /// </summary>
+        /// <param name="count">Number of bytes to load</param>
+        /// <param name="sectorsToRead">Number of sectors to read</param>
+        /// <param name="zeroSectorsAmount">Number of zeroed sectors to concatenate</param>
+        /// <returns></returns>
+        private (byte[], bool) ReadData(int count, ulong sectorsToRead, ulong zeroSectorsAmount)
+        {
+            // Create padding data for overreads
+            byte[] zeroSectors = new byte[(int)zeroSectorsAmount * _opticalDisc.BytesPerSector];
+            byte[] audioData;
+
+            // Attempt to read the required number of sectors
+            var readSectorTask = Task.Run(() =>
+            {
+                lock(_readingImage)
+                {
+                    for(int i = 0; i < 4; i++)
+                    {
+                        try
+                        {
+                            return _opticalDisc.ReadSectors((uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                        }
+                        catch(ArgumentOutOfRangeException)
+                        {
+                            _opticalDisc.LoadFirstTrack();
+                        }
+                    }
+
+                    return zeroSectors;
+                }
+            });
+
+            // Wait 100ms at longest for the read to occur
+            if(readSectorTask.Wait(TimeSpan.FromMilliseconds(100)))
+                audioData = readSectorTask.Result;
+            else
+                return (null, false);
+
+            // Load only the requested audio segment
+            byte[] audioDataSegment = new byte[count];
+            int copyAmount = Math.Min(count, audioData.Length - _currentSectorReadPosition);
+            if(Math.Max(0, copyAmount) == 0)
+                return (null, false);
+
+            Array.Copy(audioData, _currentSectorReadPosition, audioDataSegment, 0, copyAmount);
+
+            // Apply de-emphasis filtering, only if enabled
+            if(ApplyDeEmphasis)
+                ProcessDeEmphasis(audioDataSegment);
+
+            return (audioDataSegment, true);
         }
 
         /// <summary>
