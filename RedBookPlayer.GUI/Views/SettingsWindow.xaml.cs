@@ -35,7 +35,7 @@ namespace RedBookPlayer.GUI.Views
             if (!string.IsNullOrWhiteSpace(_selectedTheme))
             {
                 _settings.SelectedTheme = _selectedTheme;
-                MainWindow.ApplyTheme(_selectedTheme);
+                ((PlayerView)MainWindow.Instance.DataContext).PlayerViewModel.ApplyTheme(_selectedTheme);
             }
 
             SaveKeyboardList();

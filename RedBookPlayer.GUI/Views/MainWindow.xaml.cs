@@ -22,54 +22,6 @@ namespace RedBookPlayer.GUI.Views
         }
 
         /// <summary>
-        /// Apply a custom theme to the player
-        /// </summary>
-        /// <param name="theme">Path to the theme under the themes directory</param>
-        public static void ApplyTheme(string theme)
-        {
-            // If no theme path is provided, we can ignore
-            if(string.IsNullOrWhiteSpace(theme))
-                return;
-
-            // If we already have a view, cache the view model
-            PlayerViewModel pvm = ((PlayerView)Instance.ContentControl.Content).PlayerViewModel;
-
-            // If the theme name is "default", we assume the internal theme is used
-            if(theme.Equals("default", StringComparison.CurrentCultureIgnoreCase))
-            {
-                Instance.ContentControl.Content = new PlayerView(pvm);
-            }
-            else
-            {
-                string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{theme}";
-                string xamlPath       = $"{themeDirectory}/view.xaml";
-
-                if(!File.Exists(xamlPath))
-                {
-                    Console.WriteLine("Warning: specified theme doesn't exist, reverting to default");
-                    return;
-                }
-
-                try
-                {
-                    string xaml = File.ReadAllText(xamlPath);
-                    xaml = xaml.Replace("Source=\"", $"Source=\"file://{themeDirectory}/");
-                    Instance.ContentControl.Content = new PlayerView(xaml, pvm);
-                }
-                catch(XmlException ex)
-                {
-                    Console.WriteLine($"Error: invalid theme XAML ({ex.Message}), reverting to default");
-                    Instance.ContentControl.Content = new PlayerView(pvm);
-                }
-            }
-
-            Instance.Width  = ((PlayerView)Instance.ContentControl.Content).Width;
-            Instance.Height = ((PlayerView)Instance.ContentControl.Content).Height;
-
-            pvm.InitializeDigits();
-        }
-
-        /// <summary>
         /// Initialize the main window
         /// </summary>
         void InitializeComponent()
@@ -83,8 +35,7 @@ namespace RedBookPlayer.GUI.Views
             Instance.MaxHeight = ((PlayerView)Instance.ContentControl.Content).Height;
 
             ContentControl.Content = new PlayerView();
-
-            ((PlayerView)ContentControl.Content).PlayerViewModel.InitializeDigits();
+            ((PlayerView)Instance.ContentControl.Content).PlayerViewModel.ApplyTheme(App.Settings.SelectedTheme);
 
             CanResize = false;
 

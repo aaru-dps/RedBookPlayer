@@ -171,8 +171,6 @@ namespace RedBookPlayer.GUI
                     Settings settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(filePath));
                     settings._filePath = filePath;
 
-                    MainWindow.ApplyTheme(settings.SelectedTheme);
-
                     return settings;
                 }
                 catch(JsonException)

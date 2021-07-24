@@ -24,6 +24,7 @@ namespace RedBookPlayer
                 Console.WriteLine(((Exception)f.ExceptionObject).ToString());
             };
 
+            Settings = Settings.Load("settings.json");
             AvaloniaXamlLoader.Load(this);
         }
 
@@ -33,8 +34,6 @@ namespace RedBookPlayer
             {
                 desktop.MainWindow   = new MainWindow();
                 desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
-
-                Settings = Settings.Load("settings.json");
             }
 
             base.OnFrameworkInitializationCompleted();

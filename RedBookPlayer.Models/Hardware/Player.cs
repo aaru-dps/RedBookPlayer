@@ -196,20 +196,28 @@ namespace RedBookPlayer.Models.Hardware
         #endregion
 
         /// <summary>
-        /// Create a new Player from a given image path
+        /// Constructor
+        /// </summary>
+        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
+        public Player(int defaultVolume)
+        {
+            Initialized = false;
+            _soundOutput = new SoundOutput(defaultVolume);
+            _soundOutput.SetDeEmphasis(false);
+        }
+
+        /// <summary>
+        /// Initializes player from a given image path
         /// </summary>
         /// <param name="path">Path to the disc image</param>
         /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
         /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
         /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public Player(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay, int defaultVolume)
+        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
         {
-            // Set the internal state for initialization
+            // Reset initialization
             Initialized = false;
-            _soundOutput = new SoundOutput();
-            _soundOutput.SetDeEmphasis(false);
 
             // Initalize the disc
             _opticalDisc = OpticalDiscFactory.GenerateFromPath(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay);
@@ -220,7 +228,7 @@ namespace RedBookPlayer.Models.Hardware
             _opticalDisc.PropertyChanged += OpticalDiscStateChanged;
 
             // Initialize the sound output
-            _soundOutput.Init(_opticalDisc, autoPlay, defaultVolume);
+            _soundOutput.Init(_opticalDisc, autoPlay);
             if(_soundOutput == null || !_soundOutput.Initialized)
                 return;
 

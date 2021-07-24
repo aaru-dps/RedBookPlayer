@@ -16,7 +16,11 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Indicate if the output is ready to be used
         /// </summary>
-        public bool Initialized { get; private set; } = false;
+        public bool Initialized
+        {
+            get => _initialized;
+            private set => this.RaiseAndSetIfChanged(ref _initialized, value);
+        }
 
         /// <summary>
         /// Indicates the current player state
@@ -54,6 +58,7 @@ namespace RedBookPlayer.Models.Hardware
             }
         }
 
+        private bool _initialized;
         private PlayerState _playerState;
         private bool _applyDeEmphasis;
         private int _volume;
@@ -103,12 +108,17 @@ namespace RedBookPlayer.Models.Hardware
         #endregion
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
+        public SoundOutput(int defaultVolume = 100) => Volume = defaultVolume;
+
+        /// <summary>
         /// Initialize the output with a given image
         /// </summary>
         /// <param name="opticalDisc">OpticalDisc to load from</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public void Init(OpticalDiscBase opticalDisc, bool autoPlay = false, int defaultVolume = 100)
+        public void Init(OpticalDiscBase opticalDisc, bool autoPlay = false)
         {
             // If we have an unusable disc, just return
             if(opticalDisc == null || !opticalDisc.Initialized)
@@ -116,9 +126,6 @@ namespace RedBookPlayer.Models.Hardware
 
             // Save a reference to the disc
             _opticalDisc = opticalDisc;
-
-            // Set the initial playback volume
-            Volume = defaultVolume;
 
             // Enable de-emphasis for CDs, if necessary
             if(opticalDisc is CompactDisc compactDisc)
@@ -140,6 +147,17 @@ namespace RedBookPlayer.Models.Hardware
 
             // Begin loading data
             _source.Start();
+        }
+
+        /// <summary>
+        /// Reset the current internal state
+        /// </summary>
+        public void Reset()
+        {
+            _soundOut.Stop();
+            _opticalDisc = null;
+            Initialized = false;
+            PlayerState = PlayerState.NoDisc;
         }
 
         /// <summary>
@@ -267,13 +285,7 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Eject the currently loaded disc
         /// </summary>
-        public void Eject()
-        {
-            Stop();
-
-            Initialized = false;
-            PlayerState = PlayerState.NoDisc;
-        }
+        public void Eject() => Reset();
 
         #endregion
 

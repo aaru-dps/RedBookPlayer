@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using System.Xml;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
@@ -22,7 +23,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Player representing the internal state
         /// </summary>
-        private Player _player;
+        private readonly Player _player;
 
         /// <summary>
         /// Set of images representing the digits for the UI
@@ -310,6 +311,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public PlayerViewModel()
         {
+            // Initialize commands
             LoadCommand = ReactiveCommand.Create(ExecuteLoad);
 
             PlayCommand = ReactiveCommand.Create(ExecutePlay);
@@ -331,6 +333,13 @@ namespace RedBookPlayer.GUI.ViewModels
             EnableDeEmphasisCommand = ReactiveCommand.Create(ExecuteEnableDeEmphasis);
             DisableDeEmphasisCommand = ReactiveCommand.Create(ExecuteDisableDeEmphasis);
             ToggleDeEmphasisCommand = ReactiveCommand.Create(ExecuteToggleDeEmphasis);
+
+            // Initialize Player
+            _player = new Player(App.Settings.Volume);
+            PlayerState = PlayerState.NoDisc;
+
+            // Initialize UI
+            ApplyTheme(App.Settings.SelectedTheme);
         }
 
         /// <summary>
@@ -341,17 +350,14 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
         /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay, int defaultVolume)
+        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay)
         {
             // Stop current playback, if necessary
-            if(PlayerState != null) ExecuteStop();
+            if(PlayerState != PlayerState.NoDisc) ExecuteStop();
 
-            // Create and attempt to initialize new Player
-            _player = new Player(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay, defaultVolume);
-            Initialized = _player.Initialized;
-
-            if(Initialized)
+            // Attempt to initialize Player
+            _player.Init(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay);
+            if(_player.Initialized)
             {
                 _player.PropertyChanged += PlayerStateChanged;
                 PlayerStateChanged(this, null);
@@ -464,6 +470,50 @@ namespace RedBookPlayer.GUI.ViewModels
         #region Helpers
 
         /// <summary>
+        /// Apply a custom theme to the player
+        /// </summary>
+        /// <param name="theme">Path to the theme under the themes directory</param>
+        public void ApplyTheme(string theme)
+        {
+            // If no theme path is provided, we can ignore
+            if(string.IsNullOrWhiteSpace(theme))
+                return;
+
+            // If the theme name is "default", we assume the internal theme is used
+            if(theme.Equals("default", StringComparison.CurrentCultureIgnoreCase))
+            {
+                MainWindow.Instance.ContentControl.Content = new PlayerView(this);
+            }
+            else
+            {
+                string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{theme}";
+                string xamlPath = $"{themeDirectory}/view.xaml";
+
+                if(!File.Exists(xamlPath))
+                {
+                    Console.WriteLine("Warning: specified theme doesn't exist, reverting to default");
+                    return;
+                }
+
+                try
+                {
+                    string xaml = File.ReadAllText(xamlPath);
+                    xaml = xaml.Replace("Source=\"", $"Source=\"file://{themeDirectory}/");
+                    MainWindow.Instance.ContentControl.Content = new PlayerView(xaml, this);
+                }
+                catch(XmlException ex)
+                {
+                    Console.WriteLine($"Error: invalid theme XAML ({ex.Message}), reverting to default");
+                    MainWindow.Instance.ContentControl.Content = new PlayerView(this);
+                }
+            }
+
+            MainWindow.Instance.Width = ((PlayerView)MainWindow.Instance.ContentControl.Content).Width;
+            MainWindow.Instance.Height = ((PlayerView)MainWindow.Instance.ContentControl.Content).Height;
+            InitializeDigits();
+        }
+
+        /// <summary>
         /// Load a disc image from a selection box
         /// </summary>
         public async void ExecuteLoad()
@@ -481,6 +531,8 @@ namespace RedBookPlayer.GUI.ViewModels
         public void InitializeDigits()
         {
             PlayerView playerView = MainWindow.Instance.ContentControl.Content as PlayerView;
+            if(playerView == null)
+                return;
 
             _digits = new Image[]
             {
@@ -520,7 +572,7 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             return await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.PlayDataTracks, App.Settings.AutoPlay, App.Settings.Volume);
+                Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.PlayDataTracks, App.Settings.AutoPlay);
                 if(Initialized)
                     MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
 
