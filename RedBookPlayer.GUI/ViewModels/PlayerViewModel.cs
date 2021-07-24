@@ -608,6 +608,17 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
+        /// Refresh the view model from the current settings
+        /// </summary>
+        public void RefreshFromSettings()
+        {
+            SetDataPlayback(App.Settings.DataPlayback);
+            SetLoadHiddenTracks(App.Settings.PlayHiddenTracks);
+            SetRepeatMode(App.Settings.RepeatMode);
+            SetSessionHandling(App.Settings.SessionHandling);
+        }
+
+        /// <summary>
         /// Set data playback method [CompactDisc only]
         /// </summary>
         /// <param name="dataPlayback">New playback value</param>

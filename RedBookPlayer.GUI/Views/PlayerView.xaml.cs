@@ -41,17 +41,6 @@ namespace RedBookPlayer.GUI.Views
         #region Helpers
 
         /// <summary>
-        /// Update the view model with new settings
-        /// </summary>
-        public void UpdateViewModel()
-        {
-            PlayerViewModel.SetDataPlayback(App.Settings.DataPlayback);
-            PlayerViewModel.SetLoadHiddenTracks(App.Settings.PlayHiddenTracks);
-            PlayerViewModel.SetRepeatMode(App.Settings.RepeatMode);
-            PlayerViewModel.SetSessionHandling(App.Settings.SessionHandling);
-        }
-
-        /// <summary>
         /// Load the theme from a XAML, if possible
         /// </summary>
         /// <param name="xaml">XAML data representing the theme, null for default</param>

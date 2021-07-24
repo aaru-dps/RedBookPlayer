@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Xml;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
-using RedBookPlayer.GUI.ViewModels;
 
 namespace RedBookPlayer.GUI.Views
 {
@@ -183,11 +180,7 @@ namespace RedBookPlayer.GUI.Views
             }
         }
 
-        public void OnSettingsClosed(object sender, EventArgs e)
-        {
-            PlayerView playerView = ContentControl.Content as PlayerView;
-            playerView?.UpdateViewModel();
-        }
+        public void OnSettingsClosed(object sender, EventArgs e) => ((PlayerView)ContentControl.Content)?.PlayerViewModel?.RefreshFromSettings();
 
         #endregion
     }
