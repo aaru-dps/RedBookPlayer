@@ -153,6 +153,15 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Indicates how to handle playback of data tracks
+        /// </summary>
+        public DataPlayback DataPlayback
+        {
+            get => _dataPlayback;
+            private set => this.RaiseAndSetIfChanged(ref _dataPlayback, value);
+        }
+
+        /// <summary>
         /// Indicates if de-emphasis should be applied
         /// </summary>
         public bool ApplyDeEmphasis
@@ -171,6 +180,7 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         private PlayerState _playerState;
+        private DataPlayback _dataPlayback;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -550,6 +560,7 @@ namespace RedBookPlayer.Models.Hardware
         private void SoundOutputStateChanged(object sender, PropertyChangedEventArgs e)
         {
             PlayerState = _soundOutput.PlayerState;
+            DataPlayback = _soundOutput.DataPlayback;
             ApplyDeEmphasis = _soundOutput.ApplyDeEmphasis;
             Volume = _soundOutput.Volume;
         }

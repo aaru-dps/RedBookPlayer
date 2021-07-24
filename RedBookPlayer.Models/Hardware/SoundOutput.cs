@@ -32,6 +32,15 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Indicates how to handle playback of data tracks
+        /// </summary>
+        public DataPlayback DataPlayback
+        {
+            get => _dataPlayback;
+            private set => this.RaiseAndSetIfChanged(ref _dataPlayback, value);
+        }
+
+        /// <summary>
         /// Indicates if de-emphasis should be applied
         /// </summary>
         public bool ApplyDeEmphasis
@@ -60,6 +69,7 @@ namespace RedBookPlayer.Models.Hardware
 
         private bool _initialized;
         private PlayerState _playerState;
+        private DataPlayback _dataPlayback;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -249,9 +259,15 @@ namespace RedBookPlayer.Models.Hardware
         #region Helpers
 
         /// <summary>
+        /// Set data playback method
+        /// </summary>
+        /// <param name="dataPlayback">New playback value</param>
+        public void SetDataPlayback(DataPlayback dataPlayback) => DataPlayback = dataPlayback;
+
+        /// <summary>
         /// Set de-emphasis status
         /// </summary>
-        /// <param name="apply"></param>
+        /// <param name="apply">New de-emphasis status</param>
         public void SetDeEmphasis(bool apply) => ApplyDeEmphasis = apply;
 
         /// <summary>
