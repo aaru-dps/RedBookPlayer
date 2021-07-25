@@ -7,13 +7,17 @@ namespace RedBookPlayer.GUI.Views
     public class MainWindow : Window
     {
         public static MainWindow     Instance;
-        public        ContentControl ContentControl;
         public        Window         SettingsWindow;
+
+        /// <summary>
+        /// Read-only access to the control
+        /// </summary>
+        public ContentControl ContentControl => this.FindControl<ContentControl>("Content");
 
         /// <summary>
         /// Read-only access to the view
         /// </summary>
-        public PlayerView PlayerView => Instance.ContentControl.Content as PlayerView;
+        public PlayerView PlayerView => Instance?.ContentControl?.Content as PlayerView;
 
         public MainWindow()
         {
@@ -28,17 +32,11 @@ namespace RedBookPlayer.GUI.Views
         {
             AvaloniaXamlLoader.Load(this);
 
-            ContentControl         = this.FindControl<ContentControl>("Content");
-            ContentControl.Content = new PlayerView();
-
-            Instance.MaxWidth  = PlayerView.Width;
-            Instance.MaxHeight = PlayerView.Height;
-
-            ContentControl.Content = new PlayerView();
             PlayerView.PlayerViewModel.ApplyTheme(App.Settings.SelectedTheme);
 
             CanResize = false;
 
+            // Add handlers
             KeyDown += OnKeyDown;
 
             Closing += (s, e) =>
@@ -49,7 +47,7 @@ namespace RedBookPlayer.GUI.Views
 
             Closing += (e, f) =>
             {
-                ((PlayerView)ContentControl.Content).PlayerViewModel.ExecuteStop();
+                PlayerView?.PlayerViewModel?.ExecuteStop();
             };
 
             AddHandler(DragDrop.DropEvent, MainWindow_Drop);

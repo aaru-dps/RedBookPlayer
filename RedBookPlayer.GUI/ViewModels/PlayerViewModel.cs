@@ -955,6 +955,10 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         private void UpdateDigits()
         {
+            // Ensure the digits
+            if(_digits == null)
+                InitializeDigits();
+
             Dispatcher.UIThread.Post(() =>
             {
                 string digitString = GenerateDigitString() ?? string.Empty.PadLeft(20, '-');
