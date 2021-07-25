@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -13,7 +11,6 @@ namespace RedBookPlayer.GUI.Views
     {
         private readonly Settings _settings;
         private          string _selectedTheme;
-        private          ListBox _themeList;
 
         public SettingsWindow() {}
 
