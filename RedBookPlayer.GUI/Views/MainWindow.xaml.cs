@@ -10,6 +10,11 @@ namespace RedBookPlayer.GUI.Views
         public        ContentControl ContentControl;
         public        Window         SettingsWindow;
 
+        /// <summary>
+        /// Read-only access to the view
+        /// </summary>
+        public PlayerView PlayerView => Instance.ContentControl.Content as PlayerView;
+
         public MainWindow()
         {
             Instance = this;
@@ -26,11 +31,11 @@ namespace RedBookPlayer.GUI.Views
             ContentControl         = this.FindControl<ContentControl>("Content");
             ContentControl.Content = new PlayerView();
 
-            Instance.MaxWidth  = ((PlayerView)Instance.ContentControl.Content).Width;
-            Instance.MaxHeight = ((PlayerView)Instance.ContentControl.Content).Height;
+            Instance.MaxWidth  = PlayerView.Width;
+            Instance.MaxHeight = PlayerView.Height;
 
             ContentControl.Content = new PlayerView();
-            ((PlayerView)Instance.ContentControl.Content).PlayerViewModel.ApplyTheme(App.Settings.SelectedTheme);
+            PlayerView.PlayerViewModel.ApplyTheme(App.Settings.SelectedTheme);
 
             CanResize = false;
 
@@ -55,12 +60,12 @@ namespace RedBookPlayer.GUI.Views
         /// <remarks>
         /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
         /// </remarks>
-        public void MainWindow_Drop(object sender, DragEventArgs e) => ((PlayerView)Instance.ContentControl.Content)?.PlayerViewModel?.ExecuteLoadDragDrop(e);
+        public void MainWindow_Drop(object sender, DragEventArgs e) => PlayerView?.PlayerViewModel?.ExecuteLoadDragDrop(e);
 
         /// <remarks>
         /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
         /// </remarks>
-        public void OnKeyDown(object sender, KeyEventArgs e) => ((PlayerView)Instance.ContentControl.Content)?.PlayerViewModel?.ExecuteKeyPress(e);
+        public void OnKeyDown(object sender, KeyEventArgs e) => PlayerView?.PlayerViewModel?.ExecuteKeyPress(e);
 
         #endregion
     }

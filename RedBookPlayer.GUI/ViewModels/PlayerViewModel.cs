@@ -506,7 +506,7 @@ namespace RedBookPlayer.GUI.ViewModels
         public void ApplyTheme(string theme)
         {
             // If the PlayerView isn't set, don't do anything
-            if((PlayerView)MainWindow.Instance.ContentControl.Content == null)
+            if(MainWindow.Instance.PlayerView == null)
                 return;
 
             // If no theme path is provided, we can ignore
@@ -542,8 +542,8 @@ namespace RedBookPlayer.GUI.ViewModels
                 }
             }
 
-            MainWindow.Instance.Width = ((PlayerView)MainWindow.Instance.ContentControl.Content).Width;
-            MainWindow.Instance.Height = ((PlayerView)MainWindow.Instance.ContentControl.Content).Height;
+            MainWindow.Instance.Width = MainWindow.Instance.PlayerView.Width;
+            MainWindow.Instance.Height = MainWindow.Instance.PlayerView.Height;
             InitializeDigits();
         }
 
@@ -889,18 +889,20 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <param name="xaml">XAML data representing the theme, null for default</param>
         private void LoadTheme(string xaml)
         {
-            PlayerView playerView = (PlayerView)MainWindow.Instance.ContentControl.Content;
+            // If the view is null, we can't load the theme
+            if(MainWindow.Instance.PlayerView == null)
+                return;
 
             try
             {
                 if(xaml != null)
-                    new AvaloniaXamlLoader().Load(xaml, null, playerView);
+                    new AvaloniaXamlLoader().Load(xaml, null, MainWindow.Instance.PlayerView);
                 else
-                    AvaloniaXamlLoader.Load(playerView);
+                    AvaloniaXamlLoader.Load(MainWindow.Instance.PlayerView);
             }
-            catch
+            catch(Exception ex)
             {
-                AvaloniaXamlLoader.Load(playerView);
+                Console.Error.WriteLine(ex);
             }
         }
 
