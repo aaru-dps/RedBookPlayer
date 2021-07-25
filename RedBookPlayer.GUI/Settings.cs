@@ -5,13 +5,26 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Avalonia.Input;
+using ReactiveUI;
 using RedBookPlayer.Models;
 
 namespace RedBookPlayer.GUI
 {
-    public class Settings
+    public class Settings : ReactiveObject
     {
         #region Player Settings
+
+        /// <summary>
+        /// List of all data playback values
+        /// </summary>
+        [JsonIgnore]
+        public List<DataPlayback> DataPlaybackValues => GenerateDataPlaybackList();
+
+        /// <summary>
+        /// List of all session handling values
+        /// </summary>
+        [JsonIgnore]
+        public List<SessionHandling> SessionHandlingValues => GenerateSessionHandlingList();
 
         /// <summary>
         /// Indicates if discs should start playing on load
@@ -84,7 +97,7 @@ namespace RedBookPlayer.GUI
         /// List of all keyboard keys
         /// </summary>
         [JsonIgnore]
-        public List<Key> KeyboardList => GenerateKeyboardList();
+        public List<Key> KeyboardList => GenerateKeyList();
 
         /// <summary>
         /// Key assigned to open settings
@@ -219,8 +232,18 @@ namespace RedBookPlayer.GUI
         }
 
         /// <summary>
-        /// Generate a list of keyboard keys for mapping
+        /// Generate the list of DataPlayback values
         /// </summary>
-        private List<Key> GenerateKeyboardList() => Enum.GetValues(typeof(Key)).Cast<Key>().ToList();
+        private List<DataPlayback> GenerateDataPlaybackList() => Enum.GetValues(typeof(DataPlayback)).Cast<DataPlayback>().ToList();
+
+        /// <summary>
+        /// Generate the list of Key values
+        /// </summary>
+        private List<Key> GenerateKeyList() => Enum.GetValues(typeof(Key)).Cast<Key>().ToList();
+
+        /// <summary>
+        /// Generate the list of SessionHandling values
+        /// </summary>
+        private List<SessionHandling> GenerateSessionHandlingList() => Enum.GetValues(typeof(SessionHandling)).Cast<SessionHandling>().ToList();
     }
 }
