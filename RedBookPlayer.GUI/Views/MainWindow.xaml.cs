@@ -34,8 +34,6 @@ namespace RedBookPlayer.GUI.Views
 
             PlayerView.PlayerViewModel.ApplyTheme(App.Settings.SelectedTheme);
 
-            CanResize = false;
-
             // Add handlers
             Closing += (s, e) =>
             {

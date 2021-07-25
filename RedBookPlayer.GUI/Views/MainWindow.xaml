@@ -3,7 +3,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
         xmlns:t="clr-namespace:RedBookPlayer.GUI.Views;assembly=RedBookPlayer.GUI"
         x:Class="RedBookPlayer.GUI.Views.MainWindow" Title="RedBookPlayer" SizeToContent="WidthAndHeight"
-        DragDrop.AllowDrop="True">
+        CanResize="False" DragDrop.AllowDrop="True">
     <ContentControl Name="Content">
         <ContentControl.Content>
             <t:PlayerView/>
