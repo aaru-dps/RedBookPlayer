@@ -8,9 +8,9 @@ using Avalonia.Input;
 using ReactiveUI;
 using RedBookPlayer.Models;
 
-namespace RedBookPlayer.GUI
+namespace RedBookPlayer.GUI.ViewModels
 {
-    public class Settings : ReactiveObject
+    public class SettingsViewModel : ReactiveObject
     {
         #region Player Settings
 
@@ -192,22 +192,22 @@ namespace RedBookPlayer.GUI
         /// </summary>
         private int _volume = 100;
 
-        public Settings() {}
+        public SettingsViewModel() {}
 
-        public Settings(string filePath) => _filePath = filePath;
+        public SettingsViewModel(string filePath) => _filePath = filePath;
 
         /// <summary>
         /// Load settings from a file
         /// </summary>
         /// <param name="filePath">Path to the settings JSON file</param>
         /// <returns>Settings derived from the input file, if possible</returns>
-        public static Settings Load(string filePath)
+        public static SettingsViewModel Load(string filePath)
         {
             if(File.Exists(filePath))
             {
                 try
                 {
-                    Settings settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(filePath));
+                    SettingsViewModel settings = JsonSerializer.Deserialize<SettingsViewModel>(File.ReadAllText(filePath));
                     settings._filePath = filePath;
 
                     return settings;
@@ -216,11 +216,11 @@ namespace RedBookPlayer.GUI
                 {
                     Console.WriteLine("Couldn't parse settings, reverting to default");
 
-                    return new Settings(filePath);
+                    return new SettingsViewModel(filePath);
                 }
             }
 
-            return new Settings(filePath);
+            return new SettingsViewModel(filePath);
         }
 
         /// <summary>

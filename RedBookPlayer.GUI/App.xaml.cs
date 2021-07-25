@@ -5,15 +5,15 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using RedBookPlayer.GUI;
+using RedBookPlayer.GUI.ViewModels;
 using RedBookPlayer.GUI.Views;
 
 namespace RedBookPlayer
 {
     public class App : Application
     {
-        public static MainWindow MainWindow;
-        public static Settings   Settings;
+        public static MainWindow        MainWindow;
+        public static SettingsViewModel Settings;
 
         static App() =>
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
@@ -25,7 +25,7 @@ namespace RedBookPlayer
                 Console.WriteLine(((Exception)f.ExceptionObject).ToString());
             };
 
-            Settings = Settings.Load("settings.json");
+            Settings = SettingsViewModel.Load("settings.json");
             AvaloniaXamlLoader.Load(this);
         }
 
