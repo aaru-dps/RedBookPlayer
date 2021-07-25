@@ -37,8 +37,6 @@ namespace RedBookPlayer.GUI.Views
             CanResize = false;
 
             // Add handlers
-            KeyDown += OnKeyDown;
-
             Closing += (s, e) =>
             {
                 SettingsWindow?.Close();
@@ -50,6 +48,7 @@ namespace RedBookPlayer.GUI.Views
                 PlayerView?.PlayerViewModel?.ExecuteStop();
             };
 
+            AddHandler(KeyDownEvent, OnKeyDown);
             AddHandler(DragDrop.DropEvent, MainWindow_Drop);
         }
 
