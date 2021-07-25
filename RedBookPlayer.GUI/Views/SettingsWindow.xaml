@@ -44,8 +44,8 @@
                                     Name="VolumeSlider" PropertyChanged="VolumeChanged"/>
                         </DockPanel>
                     </StackPanel>
-                    <ListBox Name="ThemeList" SelectionMode="Single" Margin="0,0,0,16"
-                             Items="{Binding ThemeValues, Mode=OneWay}" SelectionChanged="ThemeList_SelectionChanged"/>
+                    <ListBox Name="ThemeList" SelectionMode="Single" Margin="0,0,0,16" SelectionChanged="ThemeList_SelectionChanged"
+                             Items="{Binding ThemeValues}" SelectedItem="{Binding SelectedTheme, Mode=OneWay}"/>
                 </DockPanel>
             </TabItem>
             <TabItem Header="Keyboard Bindings">
