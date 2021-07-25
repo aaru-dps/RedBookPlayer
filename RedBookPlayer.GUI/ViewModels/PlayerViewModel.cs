@@ -9,6 +9,7 @@ using System.Xml;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -371,9 +372,6 @@ namespace RedBookPlayer.GUI.ViewModels
             // Initialize Player
             _player = new Player(App.Settings.Volume);
             PlayerState = PlayerState.NoDisc;
-
-            // Initialize UI
-            ApplyTheme(App.Settings.SelectedTheme);
         }
 
         /// <summary>
@@ -507,6 +505,10 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <param name="theme">Path to the theme under the themes directory</param>
         public void ApplyTheme(string theme)
         {
+            // If the PlayerView isn't set, don't do anything
+            if((PlayerView)MainWindow.Instance.ContentControl.Content == null)
+                return;
+
             // If no theme path is provided, we can ignore
             if(string.IsNullOrWhiteSpace(theme))
                 return;
@@ -514,7 +516,7 @@ namespace RedBookPlayer.GUI.ViewModels
             // If the theme name is "default", we assume the internal theme is used
             if(theme.Equals("default", StringComparison.CurrentCultureIgnoreCase))
             {
-                MainWindow.Instance.ContentControl.Content = new PlayerView(this);
+                LoadTheme(null);
             }
             else
             {
@@ -531,12 +533,12 @@ namespace RedBookPlayer.GUI.ViewModels
                 {
                     string xaml = File.ReadAllText(xamlPath);
                     xaml = xaml.Replace("Source=\"", $"Source=\"file://{themeDirectory}/");
-                    MainWindow.Instance.ContentControl.Content = new PlayerView(xaml, this);
+                    LoadTheme(xaml);
                 }
                 catch(XmlException ex)
                 {
                     Console.WriteLine($"Error: invalid theme XAML ({ex.Message}), reverting to default");
-                    MainWindow.Instance.ContentControl.Content = new PlayerView(this);
+                    LoadTheme(null);
                 }
             }
 
@@ -879,6 +881,27 @@ namespace RedBookPlayer.GUI.ViewModels
 
                 return (await dialog.ShowAsync(MainWindow.Instance))?.FirstOrDefault();
             });
+        }
+
+        /// <summary>
+        /// Load the theme from a XAML, if possible
+        /// </summary>
+        /// <param name="xaml">XAML data representing the theme, null for default</param>
+        private void LoadTheme(string xaml)
+        {
+            PlayerView playerView = (PlayerView)MainWindow.Instance.ContentControl.Content;
+
+            try
+            {
+                if(xaml != null)
+                    new AvaloniaXamlLoader().Load(xaml, null, playerView);
+                else
+                    AvaloniaXamlLoader.Load(playerView);
+            }
+            catch
+            {
+                AvaloniaXamlLoader.Load(playerView);
+            }
         }
 
         /// <summary>
