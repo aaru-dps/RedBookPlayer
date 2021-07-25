@@ -10,7 +10,7 @@ namespace RedBookPlayer.GUI.Views
     {
         public static MainWindow     Instance;
         public        ContentControl ContentControl;
-        public        Window         settingsWindow;
+        public        Window         SettingsWindow;
 
         public MainWindow()
         {
@@ -40,8 +40,8 @@ namespace RedBookPlayer.GUI.Views
 
             Closing += (s, e) =>
             {
-                settingsWindow?.Close();
-                settingsWindow = null;
+                SettingsWindow?.Close();
+                SettingsWindow = null;
             };
 
             Closing += (e, f) =>
@@ -54,131 +54,9 @@ namespace RedBookPlayer.GUI.Views
 
         #region Event Handlers
 
-        public async void MainWindow_Drop(object sender, DragEventArgs e)
-        {
-            PlayerView playerView = ContentControl.Content as PlayerView;
-            if(playerView == null)
-                return;
+        public void MainWindow_Drop(object sender, DragEventArgs e) => ((PlayerView)Instance.ContentControl.Content)?.PlayerViewModel?.ExecuteLoadDragDrop(e);
 
-            IEnumerable<string> fileNames = e.Data.GetFileNames();
-            foreach(string filename in fileNames)
-            {
-                bool loaded = await playerView?.PlayerViewModel?.LoadImage(filename);
-                if(loaded)
-                    break;
-            }
-        }
-
-        public void OnKeyDown(object sender, KeyEventArgs e)
-        {
-            PlayerView playerView = ContentControl.Content as PlayerView;
-
-            // Open settings window
-            if(e.Key == App.Settings.OpenSettingsKey)
-            {
-                settingsWindow = new SettingsWindow(App.Settings);
-                settingsWindow.Closed += OnSettingsClosed;
-                settingsWindow.Show();
-            }
-
-            // Load image
-            else if (e.Key == App.Settings.LoadImageKey)
-            {
-                playerView?.PlayerViewModel?.ExecuteLoad();
-            }
-
-            // Toggle playback
-            else if(e.Key == App.Settings.TogglePlaybackKey || e.Key == Key.MediaPlayPause)
-            {
-                playerView?.PlayerViewModel?.ExecuteTogglePlayPause();
-            }
-
-            // Stop playback
-            else if(e.Key == App.Settings.StopPlaybackKey || e.Key == Key.MediaStop)
-            {
-                playerView?.PlayerViewModel?.ExecuteStop();
-            }
-
-            // Eject
-            else if(e.Key == App.Settings.EjectKey)
-            {
-                playerView?.PlayerViewModel?.ExecuteEject();
-            }
-
-            // Next Track
-            else if(e.Key == App.Settings.NextTrackKey || e.Key == Key.MediaNextTrack)
-            {
-                playerView?.PlayerViewModel?.ExecuteNextTrack();
-            }
-
-            // Previous Track
-            else if(e.Key == App.Settings.PreviousTrackKey || e.Key == Key.MediaPreviousTrack)
-            {
-                playerView?.PlayerViewModel?.ExecutePreviousTrack();
-            }
-
-            // Next Index
-            else if(e.Key == App.Settings.NextIndexKey)
-            {
-                playerView?.PlayerViewModel?.ExecuteNextIndex();
-            }
-
-            // Previous Index
-            else if(e.Key == App.Settings.PreviousIndexKey)
-            {
-                playerView?.PlayerViewModel?.ExecutePreviousIndex();
-            }
-
-            // Fast Foward
-            else if(e.Key == App.Settings.FastForwardPlaybackKey)
-            {
-                playerView?.PlayerViewModel?.ExecuteFastForward();
-            }
-
-            // Rewind
-            else if(e.Key == App.Settings.RewindPlaybackKey)
-            {
-                playerView?.PlayerViewModel?.ExecuteRewind();
-            }
-
-            // Volume Up
-            else if(e.Key == App.Settings.VolumeUpKey || e.Key == Key.VolumeUp)
-            {
-                int increment = 1;
-                if(e.KeyModifiers.HasFlag(KeyModifiers.Control))
-                    increment *= 2;
-                if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
-                    increment *= 5;
-
-                if(playerView?.PlayerViewModel?.Volume != null)
-                    playerView.PlayerViewModel.ExecuteSetVolume(playerView.PlayerViewModel.Volume + increment);
-            }
-
-            // Volume Down
-            else if(e.Key == App.Settings.VolumeDownKey || e.Key == Key.VolumeDown)
-            {
-                int decrement = 1;
-                if(e.KeyModifiers.HasFlag(KeyModifiers.Control))
-                    decrement *= 2;
-                if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
-                    decrement *= 5;
-
-                if (playerView?.PlayerViewModel?.Volume != null)
-                    playerView.PlayerViewModel.ExecuteSetVolume(playerView.PlayerViewModel.Volume - decrement);
-            }
-
-            // Mute Toggle
-            else if(e.Key == App.Settings.ToggleMuteKey || e.Key == Key.VolumeMute)
-            {
-                playerView?.PlayerViewModel?.ExecuteToggleMute();
-            }
-
-            // Emphasis Toggle
-            else if(e.Key == App.Settings.ToggleDeEmphasisKey)
-            {
-                playerView?.PlayerViewModel?.ExecuteToggleDeEmphasis();
-            }
-        }
+        public void OnKeyDown(object sender, KeyEventArgs e) => ((PlayerView)Instance.ContentControl.Content)?.PlayerViewModel?.ExecuteKeyPress(e);
 
         public void OnSettingsClosed(object sender, EventArgs e) => ((PlayerView)ContentControl.Content)?.PlayerViewModel?.RefreshFromSettings();
 

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -224,9 +225,19 @@ namespace RedBookPlayer.GUI.ViewModels
         #region Commands
 
         /// <summary>
+        /// Command for handling keypresses
+        /// </summary>
+        public ReactiveCommand<KeyEventArgs, Unit> KeyPressCommand { get; }
+
+        /// <summary>
         /// Command for loading a disc
         /// </summary>
         public ReactiveCommand<Unit, Unit> LoadCommand { get; }
+
+        /// <summary>
+        /// Command for loading a disc from drag and drop
+        /// </summary>
+        public ReactiveCommand<DragEventArgs, Unit> LoadDragDropCommand { get; }
 
         #region Playback
 
@@ -333,7 +344,9 @@ namespace RedBookPlayer.GUI.ViewModels
         public PlayerViewModel()
         {
             // Initialize commands
+            KeyPressCommand = ReactiveCommand.Create<KeyEventArgs>(ExecuteKeyPress);
             LoadCommand = ReactiveCommand.Create(ExecuteLoad);
+            LoadDragDropCommand = ReactiveCommand.Create<DragEventArgs>(ExecuteLoadDragDrop);
 
             PlayCommand = ReactiveCommand.Create(ExecutePlay);
             PauseCommand = ReactiveCommand.Create(ExecutePause);
@@ -533,6 +546,117 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
+        /// Execute the result of a keypress
+        /// </summary>
+        public void ExecuteKeyPress(KeyEventArgs e)
+        {
+            // Open settings window
+            if(e.Key == App.Settings.OpenSettingsKey)
+            {
+                MainWindow.Instance.SettingsWindow = new SettingsWindow(App.Settings);
+                MainWindow.Instance.SettingsWindow.Closed += OnSettingsClosed;
+                MainWindow.Instance.SettingsWindow.Show();
+            }
+
+            // Load image
+            else if(e.Key == App.Settings.LoadImageKey)
+            {
+                ExecuteLoad();
+            }
+
+            // Toggle playback
+            else if(e.Key == App.Settings.TogglePlaybackKey || e.Key == Key.MediaPlayPause)
+            {
+                ExecuteTogglePlayPause();
+            }
+
+            // Stop playback
+            else if(e.Key == App.Settings.StopPlaybackKey || e.Key == Key.MediaStop)
+            {
+                ExecuteStop();
+            }
+
+            // Eject
+            else if(e.Key == App.Settings.EjectKey)
+            {
+                ExecuteEject();
+            }
+
+            // Next Track
+            else if(e.Key == App.Settings.NextTrackKey || e.Key == Key.MediaNextTrack)
+            {
+                ExecuteNextTrack();
+            }
+
+            // Previous Track
+            else if(e.Key == App.Settings.PreviousTrackKey || e.Key == Key.MediaPreviousTrack)
+            {
+                ExecutePreviousTrack();
+            }
+
+            // Next Index
+            else if(e.Key == App.Settings.NextIndexKey)
+            {
+                ExecuteNextIndex();
+            }
+
+            // Previous Index
+            else if(e.Key == App.Settings.PreviousIndexKey)
+            {
+                ExecutePreviousIndex();
+            }
+
+            // Fast Foward
+            else if(e.Key == App.Settings.FastForwardPlaybackKey)
+            {
+                ExecuteFastForward();
+            }
+
+            // Rewind
+            else if(e.Key == App.Settings.RewindPlaybackKey)
+            {
+                ExecuteRewind();
+            }
+
+            // Volume Up
+            else if(e.Key == App.Settings.VolumeUpKey || e.Key == Key.VolumeUp)
+            {
+                int increment = 1;
+                if(e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    increment *= 2;
+                if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                    increment *= 5;
+
+                if(Volume != null)
+                    ExecuteSetVolume(Volume + increment);
+            }
+
+            // Volume Down
+            else if(e.Key == App.Settings.VolumeDownKey || e.Key == Key.VolumeDown)
+            {
+                int decrement = 1;
+                if(e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    decrement *= 2;
+                if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                    decrement *= 5;
+
+                ExecuteSetVolume(Volume - decrement);
+            }
+
+            // Mute Toggle
+            else if(e.Key == App.Settings.ToggleMuteKey || e.Key == Key.VolumeMute)
+            {
+                ExecuteToggleMute();
+            }
+
+            // Emphasis Toggle
+            else if(e.Key == App.Settings.ToggleDeEmphasisKey)
+            {
+                ExecuteToggleDeEmphasis();
+            }
+        }
+
+        /// <summary>
         /// Load a disc image from a selection box
         /// </summary>
         public async void ExecuteLoad()
@@ -542,6 +666,20 @@ namespace RedBookPlayer.GUI.ViewModels
                 return;
 
             await LoadImage(path);
+        }
+
+        /// <summary>
+        /// Load the first valid drag-and-dropped disc image
+        /// </summary>
+        public async void ExecuteLoadDragDrop(DragEventArgs e)
+        {
+            IEnumerable<string> fileNames = e.Data.GetFileNames();
+            foreach(string filename in fileNames)
+            {
+                bool loaded = await LoadImage(filename);
+                if(loaded)
+                    break;
+            }
         }
 
         /// <summary>
@@ -743,6 +881,11 @@ namespace RedBookPlayer.GUI.ViewModels
                 return (await dialog.ShowAsync(MainWindow.Instance))?.FirstOrDefault();
             });
         }
+
+        /// <summary>
+        /// Handle the settings window closing
+        /// </summary>
+        private void OnSettingsClosed(object sender, EventArgs e) => RefreshFromSettings();
 
         /// <summary>
         /// Update the view-model from the Player
