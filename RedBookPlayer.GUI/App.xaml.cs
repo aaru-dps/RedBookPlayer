@@ -12,7 +12,8 @@ namespace RedBookPlayer
 {
     public class App : Application
     {
-        public static Settings Settings;
+        public static MainWindow MainWindow;
+        public static Settings   Settings;
 
         static App() =>
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
@@ -32,8 +33,11 @@ namespace RedBookPlayer
         {
             if(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow   = new MainWindow();
+                MainWindow           = new MainWindow();
+                desktop.MainWindow   = MainWindow;
                 desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
+
+                MainWindow.PlayerView.PlayerViewModel.ApplyTheme(Settings.SelectedTheme);
             }
 
             base.OnFrameworkInitializationCompleted();

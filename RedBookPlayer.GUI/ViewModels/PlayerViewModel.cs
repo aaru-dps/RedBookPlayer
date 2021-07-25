@@ -506,7 +506,7 @@ namespace RedBookPlayer.GUI.ViewModels
         public void ApplyTheme(string theme)
         {
             // If the PlayerView isn't set, don't do anything
-            if(MainWindow.Instance.PlayerView == null)
+            if(App.MainWindow.PlayerView == null)
                 return;
 
             // If no theme path is provided, we can ignore
@@ -542,8 +542,8 @@ namespace RedBookPlayer.GUI.ViewModels
                 }
             }
 
-            MainWindow.Instance.Width = MainWindow.Instance.PlayerView.Width;
-            MainWindow.Instance.Height = MainWindow.Instance.PlayerView.Height;
+            App.MainWindow.Width = App.MainWindow.PlayerView.Width;
+            App.MainWindow.Height = App.MainWindow.PlayerView.Height;
             InitializeDigits();
         }
 
@@ -555,9 +555,9 @@ namespace RedBookPlayer.GUI.ViewModels
             // Open settings window
             if(e.Key == App.Settings.OpenSettingsKey)
             {
-                MainWindow.Instance.SettingsWindow = new SettingsWindow(App.Settings);
-                MainWindow.Instance.SettingsWindow.Closed += OnSettingsClosed;
-                MainWindow.Instance.SettingsWindow.Show();
+                App.MainWindow.SettingsWindow = new SettingsWindow(App.Settings);
+                App.MainWindow.SettingsWindow.Closed += OnSettingsClosed;
+                App.MainWindow.SettingsWindow.Show();
             }
 
             // Load image
@@ -689,7 +689,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public void InitializeDigits()
         {
-            if(!(MainWindow.Instance.ContentControl.Content is PlayerView playerView))
+            if(!(App.MainWindow.ContentControl.Content is PlayerView playerView))
                 return;
 
             _digits = new Image[]
@@ -740,7 +740,7 @@ namespace RedBookPlayer.GUI.ViewModels
 
                 Init(path, options, App.Settings.AutoPlay);
                 if(Initialized)
-                    MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
+                    App.MainWindow.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
 
                 return Initialized;
             });
@@ -879,7 +879,7 @@ namespace RedBookPlayer.GUI.ViewModels
                     Extensions = knownExtensions.ConvertAll(e => e.TrimStart('.'))
                 });
 
-                return (await dialog.ShowAsync(MainWindow.Instance))?.FirstOrDefault();
+                return (await dialog.ShowAsync(App.MainWindow))?.FirstOrDefault();
             });
         }
 
@@ -890,15 +890,15 @@ namespace RedBookPlayer.GUI.ViewModels
         private void LoadTheme(string xaml)
         {
             // If the view is null, we can't load the theme
-            if(MainWindow.Instance.PlayerView == null)
+            if(App.MainWindow.PlayerView == null)
                 return;
 
             try
             {
                 if(xaml != null)
-                    new AvaloniaXamlLoader().Load(xaml, null, MainWindow.Instance.PlayerView);
+                    new AvaloniaXamlLoader().Load(xaml, null, App.MainWindow.PlayerView);
                 else
-                    AvaloniaXamlLoader.Load(MainWindow.Instance.PlayerView);
+                    AvaloniaXamlLoader.Load(App.MainWindow.PlayerView);
             }
             catch(Exception ex)
             {
@@ -923,7 +923,7 @@ namespace RedBookPlayer.GUI.ViewModels
             {
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    MainWindow.Instance.Title = "RedBookPlayer";
+                    App.MainWindow.Title = "RedBookPlayer";
                 });
             }
 

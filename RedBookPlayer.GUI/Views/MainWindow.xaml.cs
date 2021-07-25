@@ -6,8 +6,7 @@ namespace RedBookPlayer.GUI.Views
 {
     public class MainWindow : Window
     {
-        public static MainWindow     Instance;
-        public        Window         SettingsWindow;
+        public Window SettingsWindow;
 
         /// <summary>
         /// Read-only access to the control
@@ -17,13 +16,9 @@ namespace RedBookPlayer.GUI.Views
         /// <summary>
         /// Read-only access to the view
         /// </summary>
-        public PlayerView PlayerView => Instance?.ContentControl?.Content as PlayerView;
+        public PlayerView PlayerView => App.MainWindow?.ContentControl?.Content as PlayerView;
 
-        public MainWindow()
-        {
-            Instance = this;
-            InitializeComponent();
-        }
+        public MainWindow() => InitializeComponent();
 
         /// <summary>
         /// Initialize the main window
@@ -31,8 +26,6 @@ namespace RedBookPlayer.GUI.Views
         void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
-
-            PlayerView.PlayerViewModel.ApplyTheme(App.Settings.SelectedTheme);
 
             // Add handlers
             Closing += (s, e) =>
