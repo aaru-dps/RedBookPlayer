@@ -31,9 +31,22 @@ namespace RedBookPlayer.GUI.Views
             _selectedTheme = (string)e.AddedItems[0];
         }
 
+        
+
+        void InitializeComponent()
+        {
+            AvaloniaXamlLoader.Load(this);
+            
+            PopulateThemes();
+
+            this.FindControl<Slider>("VolumeSlider").PropertyChanged += (s, e) => UpdateView();
+        }
+
+        #region Event Handlers
+
         public void ApplySettings(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(_selectedTheme))
+            if(!string.IsNullOrWhiteSpace(_selectedTheme))
             {
                 _settings.SelectedTheme = _selectedTheme;
                 App.MainWindow.PlayerView?.PlayerViewModel?.ApplyTheme(_selectedTheme);
@@ -44,17 +57,14 @@ namespace RedBookPlayer.GUI.Views
             _settings.Save();
         }
 
-        public void UpdateView() => this.FindControl<TextBlock>("VolumeLabel").Text = _settings.Volume.ToString();
-
-        void InitializeComponent()
+        public void UpdateView()
         {
-            AvaloniaXamlLoader.Load(this);
-            
-            PopulateThemes();
-
-            this.FindControl<Button>("ApplyButton").Click            += ApplySettings;
-            this.FindControl<Slider>("VolumeSlider").PropertyChanged += (s, e) => UpdateView();
+            this.FindControl<TextBlock>("VolumeLabel").Text = _settings.Volume.ToString();
         }
+
+        #endregion
+
+        #region Helpers
 
         /// <summary>
         /// Populate the list of themes
@@ -116,5 +126,7 @@ namespace RedBookPlayer.GUI.Views
             _settings.ToggleMuteKey             = (Key)this.FindControl<ComboBox>("ToggleMuteKeyBind").SelectedItem;
             _settings.ToggleDeEmphasisKey       = (Key)this.FindControl<ComboBox>("ToggleDeEmphasisKeyBind").SelectedItem;
         }
+
+        #endregion
     }
 }
