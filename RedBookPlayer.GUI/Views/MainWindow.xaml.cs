@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
@@ -54,11 +52,15 @@ namespace RedBookPlayer.GUI.Views
 
         #region Event Handlers
 
+        /// <remarks>
+        /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
+        /// </remarks>
         public void MainWindow_Drop(object sender, DragEventArgs e) => ((PlayerView)Instance.ContentControl.Content)?.PlayerViewModel?.ExecuteLoadDragDrop(e);
 
+        /// <remarks>
+        /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
+        /// </remarks>
         public void OnKeyDown(object sender, KeyEventArgs e) => ((PlayerView)Instance.ContentControl.Content)?.PlayerViewModel?.ExecuteKeyPress(e);
-
-        public void OnSettingsClosed(object sender, EventArgs e) => ((PlayerView)ContentControl.Content)?.PlayerViewModel?.RefreshFromSettings();
 
         #endregion
     }

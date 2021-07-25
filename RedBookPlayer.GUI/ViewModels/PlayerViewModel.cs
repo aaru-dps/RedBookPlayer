@@ -687,8 +687,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public void InitializeDigits()
         {
-            PlayerView playerView = MainWindow.Instance.ContentControl.Content as PlayerView;
-            if(playerView == null)
+            if(!(MainWindow.Instance.ContentControl.Content is PlayerView playerView))
                 return;
 
             _digits = new Image[]
