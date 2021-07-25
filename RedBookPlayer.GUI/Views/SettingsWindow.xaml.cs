@@ -125,23 +125,6 @@ namespace RedBookPlayer.GUI.Views
             ComboBox toggleMuteKeyBind = this.FindControl<ComboBox>("ToggleMuteKeyBind");
             ComboBox toggleDeEmphasisKeyBind = this.FindControl<ComboBox>("ToggleDeEmphasisKeyBind");
 
-            // Assign the list of values to all of them
-            Array keyboardList = GenerateKeyboardList();
-            loadImageKeyBind.Items = keyboardList;
-            togglePlaybackKeyBind.Items = keyboardList;
-            stopPlaybackKeyBind.Items = keyboardList;
-            ejectKeyBind.Items = keyboardList;
-            nextTrackKeyBind.Items = keyboardList;
-            previousTrackKeyBind.Items = keyboardList;
-            nextIndexKeyBind.Items = keyboardList;
-            previousIndexKeyBind.Items = keyboardList;
-            fastForwardPlaybackKeyBind.Items = keyboardList;
-            rewindPlaybackKeyBind.Items = keyboardList;
-            volumeUpKeyBind.Items = keyboardList;
-            volumeDownKeyBind.Items = keyboardList;
-            toggleMuteKeyBind.Items = keyboardList;
-            toggleDeEmphasisKeyBind.Items = keyboardList;
-
             // Set all of the currently selected items
             loadImageKeyBind.SelectedItem = _settings.LoadImageKey;
             togglePlaybackKeyBind.SelectedItem = _settings.TogglePlaybackKey;
@@ -207,15 +190,6 @@ namespace RedBookPlayer.GUI.Views
             _settings.VolumeDownKey = (Key)volumeDownKeyBind.SelectedItem;
             _settings.ToggleMuteKey = (Key)toggleMuteKeyBind.SelectedItem;
             _settings.ToggleDeEmphasisKey = (Key)toggleDeEmphasisKeyBind.SelectedItem;
-        }
-
-        /// <summary>
-        /// Generate a list of keyboard keys for mapping
-        /// </summary>
-        /// <returns></returns>
-        private Array GenerateKeyboardList()
-        {
-           return Enum.GetValues(typeof(Key));
         }
     }
 }

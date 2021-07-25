@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Avalonia.Input;
 using RedBookPlayer.Models;
 
@@ -76,6 +79,12 @@ namespace RedBookPlayer.GUI
         #endregion
 
         #region Key Mappings
+
+        /// <summary>
+        /// List of all keyboard keys
+        /// </summary>
+        [JsonIgnore]
+        public List<Key> KeyboardList => GenerateKeyboardList();
 
         /// <summary>
         /// Key assigned to open settings
@@ -208,5 +217,10 @@ namespace RedBookPlayer.GUI
             string json = JsonSerializer.Serialize(this, options);
             File.WriteAllText(_filePath, json);
         }
+
+        /// <summary>
+        /// Generate a list of keyboard keys for mapping
+        /// </summary>
+        private List<Key> GenerateKeyboardList() => Enum.GetValues(typeof(Key)).Cast<Key>().ToList();
     }
 }
