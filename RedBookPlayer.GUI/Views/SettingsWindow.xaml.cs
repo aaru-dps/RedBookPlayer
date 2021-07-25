@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -23,24 +23,7 @@ namespace RedBookPlayer.GUI.Views
             InitializeComponent();
         }
 
-        public void ThemeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.AddedItems.Count == 0)
-                return;
-
-            _selectedTheme = (string)e.AddedItems[0];
-        }
-
-        
-
-        void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
-            
-            PopulateThemes();
-
-            this.FindControl<Slider>("VolumeSlider").PropertyChanged += (s, e) => UpdateView();
-        }
+        void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
         #region Event Handlers
 
@@ -57,45 +40,28 @@ namespace RedBookPlayer.GUI.Views
             _settings.Save();
         }
 
-        public void UpdateView()
+        public void ThemeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.FindControl<TextBlock>("VolumeLabel").Text = _settings.Volume.ToString();
+            if(e.AddedItems.Count == 0)
+                return;
+
+            _selectedTheme = (string)e.AddedItems[0];
+        }
+
+        public void VolumeChanged(object s, AvaloniaPropertyChangedEventArgs e)
+        {
+            try
+            {
+                TextBlock volumeLabel = this.FindControl<TextBlock>("VolumeLabel");
+                if(volumeLabel != null)
+                    volumeLabel.Text = _settings.Volume.ToString();
+            }
+            catch { }
         }
 
         #endregion
 
         #region Helpers
-
-        /// <summary>
-        /// Populate the list of themes
-        /// </summary>
-        private void PopulateThemes()
-        {
-            // Get a reference to the theme list
-            _themeList = this.FindControl<ListBox>("ThemeList");
-            _themeList.SelectionChanged += ThemeList_SelectionChanged;
-
-            // Create a list of all found themes
-            List<string> items = new List<string>();
-            items.Add("default");
-
-            // Ensure the theme directory exists
-            if(!Directory.Exists("themes/"))
-                Directory.CreateDirectory("themes/");
-
-            // Add all theme directories if they're valid
-            foreach(string dir in Directory.EnumerateDirectories("themes/"))
-            {
-                string themeName = dir.Split('/')[1];
-
-                if(!File.Exists($"themes/{themeName}/view.xaml"))
-                    continue;
-
-                items.Add(themeName);
-            }
-
-            _themeList.Items = items;
-        }
 
         /// <summary>
         /// Save back the disc enum values

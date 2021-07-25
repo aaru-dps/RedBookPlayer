@@ -27,6 +27,12 @@ namespace RedBookPlayer.GUI
         public List<SessionHandling> SessionHandlingValues => GenerateSessionHandlingList();
 
         /// <summary>
+        /// List of all themes
+        /// </summary>
+        [JsonIgnore]
+        public List<string> ThemeValues => GenerateThemeList();
+
+        /// <summary>
         /// Indicates if discs should start playing on load
         /// </summary>
         public bool AutoPlay { get; set; } = false;
@@ -245,5 +251,32 @@ namespace RedBookPlayer.GUI
         /// Generate the list of SessionHandling values
         /// </summary>
         private List<SessionHandling> GenerateSessionHandlingList() => Enum.GetValues(typeof(SessionHandling)).Cast<SessionHandling>().ToList();
+
+        /// <summary>
+        /// Generate the list of valid themes
+        /// </summary>
+        private List<string> GenerateThemeList()
+        {
+            // Create a list of all found themes
+            List<string> items = new List<string>();
+            items.Add("default");
+
+            // Ensure the theme directory exists
+            if(!Directory.Exists("themes/"))
+                Directory.CreateDirectory("themes/");
+
+            // Add all theme directories if they're valid
+            foreach(string dir in Directory.EnumerateDirectories("themes/"))
+            {
+                string themeName = dir.Split('/')[1];
+
+                if(!File.Exists($"themes/{themeName}/view.xaml"))
+                    continue;
+
+                items.Add(themeName);
+            }
+
+            return items;
+        }
     }
 }
