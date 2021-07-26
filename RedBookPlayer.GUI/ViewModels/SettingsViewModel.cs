@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
 using ReactiveUI;
 using RedBookPlayer.Models;
@@ -182,19 +185,51 @@ namespace RedBookPlayer.GUI.ViewModels
 
         #endregion
 
+        #region Commands
+
+        /// <summary>
+        /// Command for applying settings
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> ApplySettingsCommand { get; }
+
+        /// <summary>
+        /// Command for changing the theme
+        /// </summary>
+        public ReactiveCommand<SelectionChangedEventArgs, Unit> ThemeChangedCommand { get; }
+
+        /// <summary>
+        /// Command for changing the volume
+        /// </summary>
+        public ReactiveCommand<AvaloniaPropertyChangedEventArgs, Unit> VolumeChangedCommand { get; }
+
+        #endregion
+
         /// <summary>
         /// Path to the settings file
         /// </summary>
         private string _filePath;
 
         /// <summary>
+        /// Cached selected theme
+        /// </summary>
+        private string _selectedTheme = "default";
+
+        /// <summary>
         /// Internal value for the volume
         /// </summary>
         private int _volume = 100;
 
-        public SettingsViewModel() {}
+        public SettingsViewModel() : this(null) { }
 
-        public SettingsViewModel(string filePath) => _filePath = filePath;
+        public SettingsViewModel(string filePath)
+        {
+            _filePath = filePath;
+
+            // Intialize commands
+            ApplySettingsCommand = ReactiveCommand.Create(ExecuteApplySettings);
+            ThemeChangedCommand = ReactiveCommand.Create<SelectionChangedEventArgs>(ExecuteThemeChanged);
+            VolumeChangedCommand = ReactiveCommand.Create<AvaloniaPropertyChangedEventArgs>(ExecuteVolumeChanged);
+        }
 
         /// <summary>
         /// Load settings from a file
@@ -224,9 +259,50 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
+        /// Apply settings from the UI
+        /// </summary>
+        public void ExecuteApplySettings()
+        {
+            if(!string.IsNullOrWhiteSpace(_selectedTheme))
+            {
+                SelectedTheme = _selectedTheme;
+                App.MainWindow.PlayerView?.PlayerViewModel?.ApplyTheme(SelectedTheme);
+            }
+
+            SaveDiscValues();
+            SaveKeyboardList();
+            Save();
+        }
+
+        /// <summary>
+        /// Handle a different theme selection
+        /// </summary>
+        public void ExecuteThemeChanged(SelectionChangedEventArgs e)
+        {
+            if(e.AddedItems.Count == 0)
+                return;
+
+            _selectedTheme = (string)e.AddedItems[0];
+        }
+
+        /// <summary>
+        /// Handle volume changing
+        /// </summary>
+        public void ExecuteVolumeChanged(AvaloniaPropertyChangedEventArgs e)
+        {
+            try
+            {
+                TextBlock volumeLabel = App.MainWindow.SettingsWindow.FindControl<TextBlock>("VolumeLabel");
+                if(volumeLabel != null)
+                    volumeLabel.Text = Volume.ToString();
+            }
+            catch { }
+        }
+
+        /// <summary>
         /// Save settings to a file
         /// </summary>
-        public void Save()
+        private void Save()
         {
             var options = new JsonSerializerOptions
             {
@@ -236,6 +312,8 @@ namespace RedBookPlayer.GUI.ViewModels
             string json = JsonSerializer.Serialize(this, options);
             File.WriteAllText(_filePath, json);
         }
+
+        #region Generation
 
         /// <summary>
         /// Generate the list of DataPlayback values
@@ -278,5 +356,41 @@ namespace RedBookPlayer.GUI.ViewModels
 
             return items;
         }
+
+        #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// Save back the disc enum values
+        /// </summary>
+        private void SaveDiscValues()
+        {
+            DataPlayback    = (DataPlayback)App.MainWindow.SettingsWindow.FindControl<ComboBox>("DataPlayback").SelectedItem;
+            SessionHandling = (SessionHandling)App.MainWindow.SettingsWindow.FindControl<ComboBox>("SessionHandling").SelectedItem;
+        }
+
+        /// <summary>
+        /// Save back all values from keyboard bindings
+        /// </summary>
+        private void SaveKeyboardList()
+        {
+            LoadImageKey            = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("LoadImageKeyBind").SelectedItem;
+            TogglePlaybackKey       = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("TogglePlaybackKeyBind").SelectedItem;
+            StopPlaybackKey         = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("StopPlaybackKeyBind").SelectedItem;
+            EjectKey                = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("EjectKeyBind").SelectedItem;
+            NextTrackKey            = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("NextTrackKeyBind").SelectedItem;
+            PreviousTrackKey        = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("PreviousTrackKeyBind").SelectedItem;
+            NextIndexKey            = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("NextIndexKeyBind").SelectedItem;
+            PreviousIndexKey        = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("PreviousIndexKeyBind").SelectedItem;
+            FastForwardPlaybackKey  = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("FastForwardPlaybackKeyBind").SelectedItem;
+            RewindPlaybackKey       = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("RewindPlaybackKeyBind").SelectedItem;
+            VolumeUpKey             = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("VolumeUpKeyBind").SelectedItem;
+            VolumeDownKey           = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("VolumeDownKeyBind").SelectedItem;
+            ToggleMuteKey           = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("ToggleMuteKeyBind").SelectedItem;
+            ToggleDeEmphasisKey     = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("ToggleDeEmphasisKeyBind").SelectedItem;
+        }
+
+        #endregion
     }
 }

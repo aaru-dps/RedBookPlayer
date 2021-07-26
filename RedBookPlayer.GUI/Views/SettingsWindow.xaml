@@ -157,6 +157,6 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Button Name="ApplyButton" Click="ApplySettings">Apply</Button>
+        <Button Name="ApplyButton" Click="ApplyButton_Click">Apply</Button>
     </StackPanel>
 </Window>

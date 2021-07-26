@@ -629,8 +629,7 @@ namespace RedBookPlayer.GUI.ViewModels
                 if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
                     increment *= 5;
 
-                if(Volume != null)
-                    ExecuteSetVolume(Volume + increment);
+                ExecuteSetVolume(Volume + increment);
             }
 
             // Volume Down
