@@ -41,6 +41,15 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Current track session
+        /// </summary>
+        public ushort CurrentTrackSession
+        {
+            get => _currentTrackSession;
+            private set => this.RaiseAndSetIfChanged(ref _currentTrackSession, value);
+        }
+
+        /// <summary>
         /// Current sector number
         /// </summary>
         public ulong CurrentSector
@@ -130,6 +139,7 @@ namespace RedBookPlayer.Models.Hardware
 
         private int _currentTrackNumber;
         private ushort _currentTrackIndex;
+        private ushort _currentTrackSession;
         private ulong _currentSector;
         private ulong _sectionStartSector;
 
@@ -557,6 +567,7 @@ namespace RedBookPlayer.Models.Hardware
         {
             CurrentTrackNumber = _opticalDisc.CurrentTrackNumber;
             CurrentTrackIndex = _opticalDisc.CurrentTrackIndex;
+            CurrentTrackSession = _opticalDisc.CurrentTrackSession;
             CurrentSector = _opticalDisc.CurrentSector;
             SectionStartSector = _opticalDisc.SectionStartSector;
 

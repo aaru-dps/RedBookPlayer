@@ -103,6 +103,7 @@ namespace RedBookPlayer.Models.Discs
 
                 TotalIndexes = cachedTrack.Indexes.Keys.Max();
                 CurrentTrackIndex = cachedTrack.Indexes.Keys.Min();
+                CurrentTrackSession = cachedTrack.TrackSession;
             }
         }
 
@@ -134,6 +135,13 @@ namespace RedBookPlayer.Models.Discs
                 SectionStartSector = (ulong)track.Indexes[CurrentTrackIndex];
                 TotalTime = track.TrackEndSector - track.TrackStartSector;
             }
+        }
+
+        /// <inheritdoc/>
+        public override ushort CurrentTrackSession
+        {
+            get => _currentTrackSession;
+            protected set => this.RaiseAndSetIfChanged(ref _currentTrackSession, value);
         }
 
         /// <inheritdoc/>
@@ -251,6 +259,11 @@ namespace RedBookPlayer.Models.Discs
         /// Current track index
         /// </summary>
         private ushort _currentTrackIndex = 0;
+
+        /// <summary>
+        /// Current track session
+        /// </summary>
+        private ushort _currentTrackSession = 0;
 
         /// <summary>
         /// Current sector number

@@ -24,6 +24,11 @@ namespace RedBookPlayer.Models.Discs
         public abstract ushort CurrentTrackIndex { get; protected set; }
 
         /// <summary>
+        /// Current track session
+        /// </summary>
+        public abstract ushort CurrentTrackSession { get; protected set; }
+
+        /// <summary>
         /// Current sector number
         /// </summary>
         public abstract ulong CurrentSector { get; protected set; }

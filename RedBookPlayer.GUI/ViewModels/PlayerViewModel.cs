@@ -56,6 +56,15 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
+        /// Current track session
+        /// </summary>
+        public ushort CurrentTrackSession
+        {
+            get => _currentTrackSession;
+            private set => this.RaiseAndSetIfChanged(ref _currentTrackSession, value);
+        }
+
+        /// <summary>
         /// Current sector number
         /// </summary>
         public ulong CurrentSector
@@ -145,6 +154,7 @@ namespace RedBookPlayer.GUI.ViewModels
 
         private int _currentTrackNumber;
         private ushort _currentTrackIndex;
+        private ushort _currentTrackSession;
         private ulong _currentSector;
         private ulong _sectionStartSector;
 
@@ -933,6 +943,7 @@ namespace RedBookPlayer.GUI.ViewModels
 
             CurrentTrackNumber = _player.CurrentTrackNumber;
             CurrentTrackIndex = _player.CurrentTrackIndex;
+            CurrentTrackSession = _player.CurrentTrackSession;
             CurrentSector = _player.CurrentSector;
             SectionStartSector = _player.SectionStartSector;
 
