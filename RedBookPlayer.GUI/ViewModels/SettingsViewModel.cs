@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reactive;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using ReactiveUI;
@@ -269,8 +268,6 @@ namespace RedBookPlayer.GUI.ViewModels
                 App.MainWindow.PlayerView?.PlayerViewModel?.ApplyTheme(SelectedTheme);
             }
 
-            SaveDiscValues();
-            SaveKeyboardList();
             Save();
         }
 
@@ -355,40 +352,6 @@ namespace RedBookPlayer.GUI.ViewModels
             }
 
             return items;
-        }
-
-        #endregion
-
-        #region Helpers
-
-        /// <summary>
-        /// Save back the disc enum values
-        /// </summary>
-        private void SaveDiscValues()
-        {
-            DataPlayback    = (DataPlayback)App.MainWindow.SettingsWindow.FindControl<ComboBox>("DataPlayback").SelectedItem;
-            SessionHandling = (SessionHandling)App.MainWindow.SettingsWindow.FindControl<ComboBox>("SessionHandling").SelectedItem;
-        }
-
-        /// <summary>
-        /// Save back all values from keyboard bindings
-        /// </summary>
-        private void SaveKeyboardList()
-        {
-            LoadImageKey            = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("LoadImageKeyBind").SelectedItem;
-            TogglePlaybackKey       = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("TogglePlaybackKeyBind").SelectedItem;
-            StopPlaybackKey         = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("StopPlaybackKeyBind").SelectedItem;
-            EjectKey                = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("EjectKeyBind").SelectedItem;
-            NextTrackKey            = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("NextTrackKeyBind").SelectedItem;
-            PreviousTrackKey        = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("PreviousTrackKeyBind").SelectedItem;
-            NextIndexKey            = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("NextIndexKeyBind").SelectedItem;
-            PreviousIndexKey        = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("PreviousIndexKeyBind").SelectedItem;
-            FastForwardPlaybackKey  = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("FastForwardPlaybackKeyBind").SelectedItem;
-            RewindPlaybackKey       = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("RewindPlaybackKeyBind").SelectedItem;
-            VolumeUpKey             = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("VolumeUpKeyBind").SelectedItem;
-            VolumeDownKey           = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("VolumeDownKeyBind").SelectedItem;
-            ToggleMuteKey           = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("ToggleMuteKeyBind").SelectedItem;
-            ToggleDeEmphasisKey     = (Key)App.MainWindow.SettingsWindow.FindControl<ComboBox>("ToggleDeEmphasisKeyBind").SelectedItem;
         }
 
         #endregion

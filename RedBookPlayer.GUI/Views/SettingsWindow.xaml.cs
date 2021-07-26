@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using RedBookPlayer.GUI.ViewModels;
 
 namespace RedBookPlayer.GUI.Views
@@ -12,14 +11,6 @@ namespace RedBookPlayer.GUI.Views
         /// Read-only access to the view model
         /// </summary>
         public SettingsViewModel Settings => DataContext as SettingsViewModel;
-
-        public SettingsWindow() {}
-
-        public SettingsWindow(SettingsViewModel settings)
-        {
-            DataContext = settings;
-            AvaloniaXamlLoader.Load(this);
-        }
 
         #region Event Handlers
 
