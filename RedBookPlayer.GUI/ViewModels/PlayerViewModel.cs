@@ -688,36 +688,36 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public void InitializeDigits()
         {
-            if(!(App.MainWindow.ContentControl.Content is PlayerView playerView))
+            if(App.MainWindow?.PlayerView == null)
                 return;
 
             _digits = new Image[]
             {
-                playerView.FindControl<Image>("TrackDigit1"),
-                playerView.FindControl<Image>("TrackDigit2"),
+                App.MainWindow.PlayerView.FindControl<Image>("TrackDigit1"),
+                App.MainWindow.PlayerView.FindControl<Image>("TrackDigit2"),
 
-                playerView.FindControl<Image>("IndexDigit1"),
-                playerView.FindControl<Image>("IndexDigit2"),
+                App.MainWindow.PlayerView.FindControl<Image>("IndexDigit1"),
+                App.MainWindow.PlayerView.FindControl<Image>("IndexDigit2"),
 
-                playerView.FindControl<Image>("TimeDigit1"),
-                playerView.FindControl<Image>("TimeDigit2"),
-                playerView.FindControl<Image>("TimeDigit3"),
-                playerView.FindControl<Image>("TimeDigit4"),
-                playerView.FindControl<Image>("TimeDigit5"),
-                playerView.FindControl<Image>("TimeDigit6"),
+                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit1"),
+                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit2"),
+                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit3"),
+                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit4"),
+                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit5"),
+                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit6"),
 
-                playerView.FindControl<Image>("TotalTracksDigit1"),
-                playerView.FindControl<Image>("TotalTracksDigit2"),
+                App.MainWindow.PlayerView.FindControl<Image>("TotalTracksDigit1"),
+                App.MainWindow.PlayerView.FindControl<Image>("TotalTracksDigit2"),
 
-                playerView.FindControl<Image>("TotalIndexesDigit1"),
-                playerView.FindControl<Image>("TotalIndexesDigit2"),
+                App.MainWindow.PlayerView.FindControl<Image>("TotalIndexesDigit1"),
+                App.MainWindow.PlayerView.FindControl<Image>("TotalIndexesDigit2"),
 
-                playerView.FindControl<Image>("TotalTimeDigit1"),
-                playerView.FindControl<Image>("TotalTimeDigit2"),
-                playerView.FindControl<Image>("TotalTimeDigit3"),
-                playerView.FindControl<Image>("TotalTimeDigit4"),
-                playerView.FindControl<Image>("TotalTimeDigit5"),
-                playerView.FindControl<Image>("TotalTimeDigit6"),
+                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit1"),
+                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit2"),
+                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit3"),
+                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit4"),
+                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit5"),
+                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit6"),
             };
         }
 
