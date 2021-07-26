@@ -18,10 +18,8 @@ namespace RedBookPlayer.GUI.Views
         public SettingsWindow(SettingsViewModel settings)
         {
             DataContext = settings;
-            InitializeComponent();
+            AvaloniaXamlLoader.Load(this);
         }
-
-        void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
         #region Event Handlers
 
@@ -38,7 +36,7 @@ namespace RedBookPlayer.GUI.Views
         /// <remarks>
         /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
         /// </remarks>
-        public void VolumeChanged(object s, AvaloniaPropertyChangedEventArgs e) => Settings?.ExecuteVolumeChanged(e);
+        public void VolumeChanged(object s, AvaloniaPropertyChangedEventArgs e) => Settings?.ExecuteVolumeChanged();
 
         #endregion
     }

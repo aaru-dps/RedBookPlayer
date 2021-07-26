@@ -200,7 +200,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Command for changing the volume
         /// </summary>
-        public ReactiveCommand<AvaloniaPropertyChangedEventArgs, Unit> VolumeChangedCommand { get; }
+        public ReactiveCommand<Unit, Unit> VolumeChangedCommand { get; }
 
         #endregion
 
@@ -228,7 +228,7 @@ namespace RedBookPlayer.GUI.ViewModels
             // Intialize commands
             ApplySettingsCommand = ReactiveCommand.Create(ExecuteApplySettings);
             ThemeChangedCommand = ReactiveCommand.Create<SelectionChangedEventArgs>(ExecuteThemeChanged);
-            VolumeChangedCommand = ReactiveCommand.Create<AvaloniaPropertyChangedEventArgs>(ExecuteVolumeChanged);
+            VolumeChangedCommand = ReactiveCommand.Create(ExecuteVolumeChanged);
         }
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Handle volume changing
         /// </summary>
-        public void ExecuteVolumeChanged(AvaloniaPropertyChangedEventArgs e)
+        public void ExecuteVolumeChanged()
         {
             try
             {
