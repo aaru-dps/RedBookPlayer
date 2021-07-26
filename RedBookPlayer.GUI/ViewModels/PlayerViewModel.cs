@@ -903,6 +903,9 @@ namespace RedBookPlayer.GUI.ViewModels
             {
                 Console.Error.WriteLine(ex);
             }
+
+            // Reset the data context
+            App.MainWindow.PlayerView.DataContext = this;
         }
 
         /// <summary>
