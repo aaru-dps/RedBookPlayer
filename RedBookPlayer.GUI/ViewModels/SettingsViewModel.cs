@@ -73,7 +73,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Indicates how to handle tracks on different sessions
         /// </summary>
-        public SessionHandling SessionHandling { get; set; } = SessionHandling.AllSessions;
+        public SessionHandling SessionHandling { get; set; } = SessionHandling.FirstSessionOnly;
 
         /// <summary>
         /// Indicates the default playback volume
