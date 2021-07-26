@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
@@ -26,20 +27,6 @@ namespace RedBookPlayer.GUI.Views
         void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
-
-            // Add handlers
-            Closing += (s, e) =>
-            {
-                SettingsWindow?.Close();
-                SettingsWindow = null;
-            };
-
-            Closing += (e, f) =>
-            {
-                PlayerView?.PlayerViewModel?.ExecuteStop();
-            };
-
-            AddHandler(KeyDownEvent, OnKeyDown);
             AddHandler(DragDrop.DropEvent, MainWindow_Drop);
         }
 
@@ -49,6 +36,11 @@ namespace RedBookPlayer.GUI.Views
         /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
         /// </remarks>
         public void MainWindow_Drop(object sender, DragEventArgs e) => PlayerView?.PlayerViewModel?.ExecuteLoadDragDrop(e);
+
+        /// <remarks>
+        /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
+        /// </remarks>
+        public void OnClosing(object sender, CancelEventArgs e) => PlayerView?.PlayerViewModel?.ExecuteStop();
 
         /// <remarks>
         /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
