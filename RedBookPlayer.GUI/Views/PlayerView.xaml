@@ -1,10 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
-             xmlns:t="clr-namespace:RedBookPlayer.GUI.ViewModels;assembly=RedBookPlayer.GUI"
+             xmlns:viewModels="clr-namespace:RedBookPlayer.GUI.ViewModels;assembly=RedBookPlayer.GUI"
              x:Class="RedBookPlayer.GUI.Views.PlayerView" Width="900" Height="400">
     <UserControl.DataContext>
-        <t:PlayerViewModel/>
+        <viewModels:PlayerViewModel/>
     </UserControl.DataContext>
     <StackPanel Margin="16" VerticalAlignment="Center">
         <Button Command="{Binding LoadCommand}" Margin="32,0,32,16">Load</Button>

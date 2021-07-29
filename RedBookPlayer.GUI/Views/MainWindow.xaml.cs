@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
+using RedBookPlayer.GUI.ViewModels;
 
 namespace RedBookPlayer.GUI.Views
 {
@@ -19,6 +20,11 @@ namespace RedBookPlayer.GUI.Views
         /// </summary>
         public PlayerView PlayerView => App.MainWindow?.ContentControl?.Content as PlayerView;
 
+        /// <summary>
+        /// Read-only access to the view model
+        /// </summary>
+        public MainViewModel MainViewModel => DataContext as MainViewModel;
+
         public MainWindow() => InitializeComponent();
 
         /// <summary>
@@ -35,17 +41,17 @@ namespace RedBookPlayer.GUI.Views
         /// <remarks>
         /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
         /// </remarks>
-        public void MainWindow_Drop(object sender, DragEventArgs e) => PlayerView?.PlayerViewModel?.ExecuteLoadDragDrop(e);
+        public void MainWindow_Drop(object sender, DragEventArgs e) => MainViewModel?.ExecuteLoadDragDrop(e);
 
         /// <remarks>
         /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
         /// </remarks>
-        public void OnClosing(object sender, CancelEventArgs e) => PlayerView?.PlayerViewModel?.ExecuteStop();
+        public void OnClosing(object sender, CancelEventArgs e) => MainViewModel?.ExecuteStop();
 
         /// <remarks>
         /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
         /// </remarks>
-        public void OnKeyDown(object sender, KeyEventArgs e) => PlayerView?.PlayerViewModel?.ExecuteKeyPress(e);
+        public void OnKeyDown(object sender, KeyEventArgs e) => MainViewModel?.ExecuteKeyPress(e);
 
         #endregion
     }
