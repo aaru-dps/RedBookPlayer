@@ -1,11 +1,12 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<ReactiveUserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+             xmlns:rxui="clr-namespace:Avalonia;assembly=Avalonia.ReactiveUI"
              xmlns:viewModels="clr-namespace:RedBookPlayer.GUI.ViewModels;assembly=RedBookPlayer.GUI"
              x:Class="RedBookPlayer.GUI.Views.PlayerView" Width="900" Height="400">
-    <UserControl.DataContext>
+    <ReactiveUserControl.ViewModel>
         <viewModels:PlayerViewModel/>
-    </UserControl.DataContext>
+    </ReactiveUserControl.ViewModel>
     <StackPanel Margin="16" VerticalAlignment="Center">
         <Button Command="{Binding LoadCommand}" Margin="32,0,32,16">Load</Button>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
@@ -105,4 +106,4 @@
             <TextBlock Margin="0,0,16,0" Text="{Binding Volume}"/>
         </StackPanel>
     </StackPanel>
-</UserControl>
+</ReactiveUserControl>

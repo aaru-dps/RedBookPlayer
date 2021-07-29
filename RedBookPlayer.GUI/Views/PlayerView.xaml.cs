@@ -1,13 +1,9 @@
-using Avalonia.Controls;
+using Avalonia.ReactiveUI;
 using RedBookPlayer.GUI.ViewModels;
 
 namespace RedBookPlayer.GUI.Views
 {
-    public class PlayerView : UserControl
+    public class PlayerView : ReactiveUserControl<PlayerViewModel>
     {
-        /// <summary>
-        /// Read-only access to the view model
-        /// </summary>
-        public PlayerViewModel PlayerViewModel => DataContext as PlayerViewModel;
     }
 }

@@ -37,7 +37,7 @@ namespace RedBookPlayer
                 desktop.MainWindow   = MainWindow;
                 desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
-                MainWindow.PlayerView.PlayerViewModel.ApplyTheme(Settings.SelectedTheme);
+                MainWindow.PlayerView.ViewModel.ApplyTheme(Settings.SelectedTheme);
             }
 
             base.OnFrameworkInitializationCompleted();

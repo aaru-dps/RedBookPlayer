@@ -52,17 +52,17 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Execute the result of a keypress
         /// </summary>
-        public void ExecuteKeyPress(KeyEventArgs e) => PlayerView?.PlayerViewModel?.ExecuteKeyPress(e);
+        public void ExecuteKeyPress(KeyEventArgs e) => PlayerView?.ViewModel?.ExecuteKeyPress(e);
 
         /// <summary>
         /// Load the first valid drag-and-dropped disc image
         /// </summary>
-        public void ExecuteLoadDragDrop(DragEventArgs e) => PlayerView?.PlayerViewModel?.ExecuteLoadDragDrop(e);
+        public void ExecuteLoadDragDrop(DragEventArgs e) => PlayerView?.ViewModel?.ExecuteLoadDragDrop(e);
 
         /// <summary>
         /// Stop current playback
         /// </summary>
-        public void ExecuteStop() => PlayerView?.PlayerViewModel?.ExecuteStop();
+        public void ExecuteStop() => PlayerView?.ViewModel?.ExecuteStop();
 
         #endregion
     }
