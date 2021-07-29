@@ -1,13 +1,9 @@
-using Avalonia.Controls;
+using Avalonia.ReactiveUI;
 using RedBookPlayer.GUI.ViewModels;
 
 namespace RedBookPlayer.GUI.Views
 {
-    public class SettingsWindow : Window
+    public class SettingsWindow : ReactiveWindow<SettingsViewModel>
     {
-        /// <summary>
-        /// Read-only access to the view model
-        /// </summary>
-        public SettingsViewModel Settings => DataContext as SettingsViewModel;
     }
 }
