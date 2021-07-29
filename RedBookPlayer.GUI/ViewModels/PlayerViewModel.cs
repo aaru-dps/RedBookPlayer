@@ -565,9 +565,9 @@ namespace RedBookPlayer.GUI.ViewModels
             // Open settings window
             if(e.Key == App.Settings.OpenSettingsKey)
             {
-                App.MainWindow.SettingsWindow = new SettingsWindow() { DataContext = App.Settings };
-                App.MainWindow.SettingsWindow.Closed += OnSettingsClosed;
-                App.MainWindow.SettingsWindow.Show();
+                SettingsWindow settingsWindow = new SettingsWindow() { DataContext = App.Settings };
+                settingsWindow.Closed += OnSettingsClosed;
+                settingsWindow.ShowDialog(App.MainWindow);
             }
 
             // Load image

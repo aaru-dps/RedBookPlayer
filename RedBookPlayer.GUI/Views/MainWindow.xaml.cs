@@ -8,8 +8,6 @@ namespace RedBookPlayer.GUI.Views
 {
     public class MainWindow : ReactiveWindow<MainViewModel>
     {
-        public ReactiveWindow<SettingsViewModel> SettingsWindow;
-
         public MainWindow() => InitializeComponent();
 
         /// <summary>
