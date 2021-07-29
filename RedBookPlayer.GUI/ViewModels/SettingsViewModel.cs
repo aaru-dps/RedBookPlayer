@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reactive;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Avalonia.Controls;
 using Avalonia.Input;
 using ReactiveUI;
 using RedBookPlayer.Models;
@@ -212,7 +211,6 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             _filePath = filePath;
 
-            // Intialize commands
             ApplySettingsCommand = ReactiveCommand.Create(ExecuteApplySettings);
         }
 
@@ -251,14 +249,6 @@ namespace RedBookPlayer.GUI.ViewModels
             if(!string.IsNullOrWhiteSpace(SelectedTheme))
                 App.MainWindow.PlayerView?.PlayerViewModel?.ApplyTheme(SelectedTheme);
 
-            Save();
-        }
-
-        /// <summary>
-        /// Save settings to a file
-        /// </summary>
-        private void Save()
-        {
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true
