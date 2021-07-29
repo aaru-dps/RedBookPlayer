@@ -2,7 +2,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
         xmlns:rxui="clr-namespace:Avalonia;assembly=Avalonia.ReactiveUI" d:DesignWidth="800"
+        xmlns:viewModels="clr-namespace:RedBookPlayer.GUI.ViewModels;assembly=RedBookPlayer.GUI"
         d:DesignHeight="450" x:Class="RedBookPlayer.GUI.Views.SettingsWindow" Title="Settings" SizeToContent="WidthAndHeight">
+    <ReactiveWindow.ViewModel>
+        <viewModels:SettingsViewModel/>
+    </ReactiveWindow.ViewModel>
     <StackPanel>
         <TabControl>
             <TabItem Header="UI Settings">
