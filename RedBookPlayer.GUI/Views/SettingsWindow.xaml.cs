@@ -1,4 +1,3 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using RedBookPlayer.GUI.ViewModels;
@@ -18,11 +17,6 @@ namespace RedBookPlayer.GUI.Views
         /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
         /// </remarks>
         public void ApplyButton_Click(object sender, RoutedEventArgs e) => Settings?.ExecuteApplySettings();
-
-        /// <remarks>
-        /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
-        /// </remarks>
-        public void VolumeChanged(object s, AvaloniaPropertyChangedEventArgs e) => Settings?.ExecuteVolumeChanged();
 
         #endregion
     }

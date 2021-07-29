@@ -81,14 +81,17 @@ namespace RedBookPlayer.GUI.ViewModels
         public int Volume
         {
             get => _volume;
-            set
+            private set
             {
+                int tempValue;
                 if(value > 100)
-                    _volume = 100;
+                    tempValue = 100;
                 else if(value < 0)
-                    _volume = 0;
+                    tempValue = 0;
                 else
-                    _volume = value;
+                    tempValue = value;
+
+                this.RaiseAndSetIfChanged(ref _volume, tempValue);
             }
         }
 
@@ -191,11 +194,6 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit> ApplySettingsCommand { get; }
 
-        /// <summary>
-        /// Command for changing the volume
-        /// </summary>
-        public ReactiveCommand<Unit, Unit> VolumeChangedCommand { get; }
-
         #endregion
 
         /// <summary>
@@ -216,7 +214,6 @@ namespace RedBookPlayer.GUI.ViewModels
 
             // Intialize commands
             ApplySettingsCommand = ReactiveCommand.Create(ExecuteApplySettings);
-            VolumeChangedCommand = ReactiveCommand.Create(ExecuteVolumeChanged);
         }
 
         /// <summary>
@@ -255,20 +252,6 @@ namespace RedBookPlayer.GUI.ViewModels
                 App.MainWindow.PlayerView?.PlayerViewModel?.ApplyTheme(SelectedTheme);
 
             Save();
-        }
-
-        /// <summary>
-        /// Handle volume changing
-        /// </summary>
-        public void ExecuteVolumeChanged()
-        {
-            try
-            {
-                TextBlock volumeLabel = App.MainWindow.SettingsWindow.FindControl<TextBlock>("VolumeLabel");
-                if(volumeLabel != null)
-                    volumeLabel.Text = Volume.ToString();
-            }
-            catch { }
         }
 
         /// <summary>
