@@ -22,11 +22,6 @@ namespace RedBookPlayer.GUI.Views
         /// <remarks>
         /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
         /// </remarks>
-        public void ThemeList_SelectionChanged(object sender, SelectionChangedEventArgs e) => Settings?.ExecuteThemeChanged(e);
-
-        /// <remarks>
-        /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
-        /// </remarks>
         public void VolumeChanged(object s, AvaloniaPropertyChangedEventArgs e) => Settings?.ExecuteVolumeChanged();
 
         #endregion

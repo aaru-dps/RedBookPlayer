@@ -192,11 +192,6 @@ namespace RedBookPlayer.GUI.ViewModels
         public ReactiveCommand<Unit, Unit> ApplySettingsCommand { get; }
 
         /// <summary>
-        /// Command for changing the theme
-        /// </summary>
-        public ReactiveCommand<SelectionChangedEventArgs, Unit> ThemeChangedCommand { get; }
-
-        /// <summary>
         /// Command for changing the volume
         /// </summary>
         public ReactiveCommand<Unit, Unit> VolumeChangedCommand { get; }
@@ -207,11 +202,6 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Path to the settings file
         /// </summary>
         private string _filePath;
-
-        /// <summary>
-        /// Cached selected theme
-        /// </summary>
-        private string _selectedTheme = "default";
 
         /// <summary>
         /// Internal value for the volume
@@ -226,7 +216,6 @@ namespace RedBookPlayer.GUI.ViewModels
 
             // Intialize commands
             ApplySettingsCommand = ReactiveCommand.Create(ExecuteApplySettings);
-            ThemeChangedCommand = ReactiveCommand.Create<SelectionChangedEventArgs>(ExecuteThemeChanged);
             VolumeChangedCommand = ReactiveCommand.Create(ExecuteVolumeChanged);
         }
 
@@ -262,24 +251,10 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public void ExecuteApplySettings()
         {
-            if(!string.IsNullOrWhiteSpace(_selectedTheme))
-            {
-                SelectedTheme = _selectedTheme;
+            if(!string.IsNullOrWhiteSpace(SelectedTheme))
                 App.MainWindow.PlayerView?.PlayerViewModel?.ApplyTheme(SelectedTheme);
-            }
 
             Save();
-        }
-
-        /// <summary>
-        /// Handle a different theme selection
-        /// </summary>
-        public void ExecuteThemeChanged(SelectionChangedEventArgs e)
-        {
-            if(e.AddedItems.Count == 0)
-                return;
-
-            _selectedTheme = (string)e.AddedItems[0];
         }
 
         /// <summary>
