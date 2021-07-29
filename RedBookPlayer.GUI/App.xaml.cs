@@ -15,6 +15,11 @@ namespace RedBookPlayer
         public static MainWindow        MainWindow;
         public static SettingsViewModel Settings;
 
+        /// <summary>
+        /// Read-only access to the current player view
+        /// </summary>
+        public static PlayerView PlayerView => MainWindow?.ViewModel?.PlayerView;
+
         static App() =>
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
 
@@ -37,7 +42,7 @@ namespace RedBookPlayer
                 desktop.MainWindow   = MainWindow;
                 desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
-                MainWindow.PlayerView.ViewModel.ApplyTheme(Settings.SelectedTheme);
+                PlayerView.ViewModel.ApplyTheme(Settings.SelectedTheme);
             }
 
             base.OnFrameworkInitializationCompleted();

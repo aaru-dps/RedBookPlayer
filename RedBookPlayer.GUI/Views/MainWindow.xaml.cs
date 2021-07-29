@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
@@ -10,16 +9,6 @@ namespace RedBookPlayer.GUI.Views
     public class MainWindow : ReactiveWindow<MainViewModel>
     {
         public ReactiveWindow<SettingsViewModel> SettingsWindow;
-
-        /// <summary>
-        /// Read-only access to the control
-        /// </summary>
-        public ContentControl ContentControl => this.FindControl<ContentControl>("Content");
-
-        /// <summary>
-        /// Read-only access to the view
-        /// </summary>
-        public PlayerView PlayerView => App.MainWindow?.ContentControl?.Content as PlayerView;
 
         public MainWindow() => InitializeComponent();
 

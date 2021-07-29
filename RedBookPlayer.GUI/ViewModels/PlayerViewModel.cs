@@ -516,7 +516,7 @@ namespace RedBookPlayer.GUI.ViewModels
         public void ApplyTheme(string theme)
         {
             // If the PlayerView isn't set, don't do anything
-            if(App.MainWindow.PlayerView == null)
+            if(App.PlayerView == null)
                 return;
 
             // If no theme path is provided, we can ignore
@@ -552,8 +552,8 @@ namespace RedBookPlayer.GUI.ViewModels
                 }
             }
 
-            App.MainWindow.Width = App.MainWindow.PlayerView.Width;
-            App.MainWindow.Height = App.MainWindow.PlayerView.Height;
+            App.MainWindow.Width = App.PlayerView.Width;
+            App.MainWindow.Height = App.PlayerView.Height;
             InitializeDigits();
         }
 
@@ -698,36 +698,36 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public void InitializeDigits()
         {
-            if(App.MainWindow?.PlayerView == null)
+            if(App.PlayerView == null)
                 return;
 
             _digits = new Image[]
             {
-                App.MainWindow.PlayerView.FindControl<Image>("TrackDigit1"),
-                App.MainWindow.PlayerView.FindControl<Image>("TrackDigit2"),
+                App.PlayerView.FindControl<Image>("TrackDigit1"),
+                App.PlayerView.FindControl<Image>("TrackDigit2"),
 
-                App.MainWindow.PlayerView.FindControl<Image>("IndexDigit1"),
-                App.MainWindow.PlayerView.FindControl<Image>("IndexDigit2"),
+                App.PlayerView.FindControl<Image>("IndexDigit1"),
+                App.PlayerView.FindControl<Image>("IndexDigit2"),
 
-                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit1"),
-                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit2"),
-                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit3"),
-                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit4"),
-                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit5"),
-                App.MainWindow.PlayerView.FindControl<Image>("TimeDigit6"),
+                App.PlayerView.FindControl<Image>("TimeDigit1"),
+                App.PlayerView.FindControl<Image>("TimeDigit2"),
+                App.PlayerView.FindControl<Image>("TimeDigit3"),
+                App.PlayerView.FindControl<Image>("TimeDigit4"),
+                App.PlayerView.FindControl<Image>("TimeDigit5"),
+                App.PlayerView.FindControl<Image>("TimeDigit6"),
 
-                App.MainWindow.PlayerView.FindControl<Image>("TotalTracksDigit1"),
-                App.MainWindow.PlayerView.FindControl<Image>("TotalTracksDigit2"),
+                App.PlayerView.FindControl<Image>("TotalTracksDigit1"),
+                App.PlayerView.FindControl<Image>("TotalTracksDigit2"),
 
-                App.MainWindow.PlayerView.FindControl<Image>("TotalIndexesDigit1"),
-                App.MainWindow.PlayerView.FindControl<Image>("TotalIndexesDigit2"),
+                App.PlayerView.FindControl<Image>("TotalIndexesDigit1"),
+                App.PlayerView.FindControl<Image>("TotalIndexesDigit2"),
 
-                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit1"),
-                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit2"),
-                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit3"),
-                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit4"),
-                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit5"),
-                App.MainWindow.PlayerView.FindControl<Image>("TotalTimeDigit6"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit1"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit2"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit3"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit4"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit5"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit6"),
             };
         }
 
@@ -899,23 +899,23 @@ namespace RedBookPlayer.GUI.ViewModels
         private void LoadTheme(string xaml)
         {
             // If the view is null, we can't load the theme
-            if(App.MainWindow.PlayerView == null)
+            if(App.PlayerView == null)
                 return;
 
             try
             {
                 if(xaml != null)
-                    new AvaloniaXamlLoader().Load(xaml, null, App.MainWindow.PlayerView);
+                    new AvaloniaXamlLoader().Load(xaml, null, App.PlayerView);
                 else
-                    AvaloniaXamlLoader.Load(App.MainWindow.PlayerView);
+                    AvaloniaXamlLoader.Load(App.PlayerView);
             }
             catch(Exception ex)
             {
                 Console.Error.WriteLine(ex);
             }
 
-            // Reset the data context
-            App.MainWindow.PlayerView.DataContext = this;
+            // Reset the view model
+            App.PlayerView.ViewModel = this;
         }
 
         /// <summary>

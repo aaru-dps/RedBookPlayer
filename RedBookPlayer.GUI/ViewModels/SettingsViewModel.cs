@@ -247,7 +247,7 @@ namespace RedBookPlayer.GUI.ViewModels
         public void ExecuteApplySettings()
         {
             if(!string.IsNullOrWhiteSpace(SelectedTheme))
-                App.MainWindow.PlayerView?.ViewModel?.ApplyTheme(SelectedTheme);
+                App.PlayerView?.ViewModel?.ApplyTheme(SelectedTheme);
 
             var options = new JsonSerializerOptions
             {
