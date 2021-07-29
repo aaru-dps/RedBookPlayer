@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Reactive;
+using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Input;
-using ReactiveUI;
 using RedBookPlayer.GUI.Views;
 
 namespace RedBookPlayer.GUI.ViewModels
@@ -20,41 +19,12 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public PlayerView PlayerView => ContentControl?.Content as PlayerView;
 
-        #region Commands
-
-        /// <summary>
-        /// Command for handling keypresses
-        /// </summary>
-        public ReactiveCommand<KeyEventArgs, Unit> KeyPressCommand { get; }
-
-        /// <summary>
-        /// Command for loading a disc from drag and drop
-        /// </summary>
-        public ReactiveCommand<DragEventArgs, Unit> LoadDragDropCommand { get; }
-
-        /// <summary>
-        /// Command for stopping playback
-        /// </summary>
-        public ReactiveCommand<Unit, Unit> StopCommand { get; }
-
-        #endregion
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public MainViewModel()
-        {
-            KeyPressCommand = ReactiveCommand.Create<KeyEventArgs>(ExecuteKeyPress);
-            LoadDragDropCommand = ReactiveCommand.Create<DragEventArgs>(ExecuteLoadDragDrop);
-            StopCommand = ReactiveCommand.Create(ExecuteStop);
-        }
-
         #region Helpers
 
         /// <summary>
         /// Execute the result of a keypress
         /// </summary>
-        public void ExecuteKeyPress(KeyEventArgs e)
+        public void ExecuteKeyPress(object sender, KeyEventArgs e)
         {
             // Open settings window
             if(e.Key == App.Settings.OpenSettingsKey)
@@ -166,7 +136,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Load the first valid drag-and-dropped disc image
         /// </summary>
-        public async void ExecuteLoadDragDrop(DragEventArgs e)
+        public async void ExecuteLoadDragDrop(object sender, DragEventArgs e)
         {
             if(PlayerView?.ViewModel == null)
                 return;
@@ -183,7 +153,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Stop current playback
         /// </summary>
-        public void ExecuteStop() => PlayerView?.ViewModel?.ExecuteStop();
+        public void ExecuteStop(object sender, CancelEventArgs e) => PlayerView?.ViewModel?.ExecuteStop();
 
         /// <summary>
         /// Handle the settings window closing

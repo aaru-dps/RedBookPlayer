@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
@@ -16,26 +15,11 @@ namespace RedBookPlayer.GUI.Views
         void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
-            AddHandler(DragDrop.DropEvent, MainWindow_Drop);
+
+            // Add handlers
+            Closing += ViewModel.ExecuteStop;
+            AddHandler(DragDrop.DropEvent, ViewModel.ExecuteLoadDragDrop);
+            KeyDown += ViewModel.ExecuteKeyPress;
         }
-
-        #region Event Handlers
-
-        /// <remarks>
-        /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
-        /// </remarks>
-        public void MainWindow_Drop(object sender, DragEventArgs e) => ViewModel?.ExecuteLoadDragDrop(e);
-
-        /// <remarks>
-        /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
-        /// </remarks>
-        public void OnClosing(object sender, CancelEventArgs e) => ViewModel?.ExecuteStop();
-
-        /// <remarks>
-        /// This can't be set in the XAML because the current version of Avalonia emits XAML errors if it's set there directly
-        /// </remarks>
-        public void OnKeyDown(object sender, KeyEventArgs e) => ViewModel?.ExecuteKeyPress(e);
-
-        #endregion
     }
 }

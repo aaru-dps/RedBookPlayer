@@ -5,7 +5,7 @@
         xmlns:viewModels="clr-namespace:RedBookPlayer.GUI.ViewModels;assembly=RedBookPlayer.GUI"
         xmlns:views="clr-namespace:RedBookPlayer.GUI.Views;assembly=RedBookPlayer.GUI"
         x:Class="RedBookPlayer.GUI.Views.MainWindow" Title="RedBookPlayer" SizeToContent="WidthAndHeight"
-        CanResize="False" DragDrop.AllowDrop="True" KeyDown="OnKeyDown" Closing="OnClosing">
+        CanResize="False" DragDrop.AllowDrop="True">
     <ReactiveWindow.ViewModel>
         <viewModels:MainViewModel/>
     </ReactiveWindow.ViewModel>
