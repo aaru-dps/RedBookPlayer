@@ -747,6 +747,10 @@ namespace RedBookPlayer.GUI.ViewModels
                     SessionHandling = App.Settings.SessionHandling,
                 };
 
+                // Ensure the context and view model are set
+                App.PlayerView.DataContext = this;
+                App.PlayerView.ViewModel = this;
+
                 Init(path, options, App.Settings.AutoPlay);
                 if(Initialized)
                     App.MainWindow.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
@@ -914,7 +918,8 @@ namespace RedBookPlayer.GUI.ViewModels
                 Console.Error.WriteLine(ex);
             }
 
-            // Reset the view model
+            // Ensure the context and view model are set
+            App.PlayerView.DataContext = this;
             App.PlayerView.ViewModel = this;
         }
 
