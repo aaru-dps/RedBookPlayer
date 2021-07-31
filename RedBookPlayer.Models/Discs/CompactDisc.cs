@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Aaru.CommonTypes.Enums;
 using Aaru.CommonTypes.Interfaces;
 using Aaru.CommonTypes.Structs;
 using Aaru.Decoders.CD;
 using Aaru.Helpers;
+using CSCore.Codecs.WAV;
 using ReactiveUI;
 using static Aaru.Decoders.CD.FullTOC;
 
@@ -434,6 +436,44 @@ namespace RedBookPlayer.Models.Discs
         #endregion
 
         #region Helpers
+
+        /// <inheritdoc/>
+        public override void ExtractTrackToWav(uint trackNumber, string outputDirectory)
+        {
+            if(_image == null)
+                return;
+
+            // Get the track with that value, if possible
+            Track track = _image.Tracks.FirstOrDefault(t => t.TrackSequence == trackNumber);
+
+            // If the track isn't valid, we can't do anything
+            if(track == null || track.TrackType != TrackType.Audio)
+                return;
+
+            // Read in the track data to a buffer
+            uint length = (uint)(track.TrackEndSector - track.TrackStartSector);
+            byte[] buffer = _image.ReadSectors(track.TrackStartSector, length);
+
+            // Build the WAV output
+            string filename = Path.Combine(outputDirectory, $"Track {trackNumber.ToString().PadLeft(2, '0')}.wav");
+            using(WaveWriter waveWriter = new WaveWriter(filename, new CSCore.WaveFormat()))
+            {
+                // Write out to the file
+                waveWriter.Write(buffer, 0, buffer.Length);
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void ExtractAllTracksToWav(string outputDirectory)
+        {
+            if(_image == null)
+                return;
+
+            foreach(Track track in _image.Tracks)
+            {
+                ExtractTrackToWav(track.TrackSequence, outputDirectory);
+            }
+        }
 
         /// <inheritdoc/>
         public override void LoadFirstTrack()

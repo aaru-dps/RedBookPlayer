@@ -74,6 +74,7 @@
                         <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
 
                     <!-- Load Image-->
@@ -82,81 +83,87 @@
                               Items="{Binding KeyboardList}" SelectedItem="{Binding LoadImageKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
+                    <!-- Save Track -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Width="120">Save Track(s)</TextBlock>
+                    <ComboBox Grid.Row="1" Grid.Column="1" Name="SaveTrackKeyBind"
+                              Items="{Binding KeyboardList}" SelectedItem="{Binding SaveTrackKey, Mode=TwoWay}"
+                              HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
+
                     <!-- Toggle Play/Pause -->
-                    <TextBlock Grid.Row="1" Grid.Column="0" Width="120">Toggle Play/Pause</TextBlock>
-                    <ComboBox Grid.Row="1" Grid.Column="1" Name="TogglePlaybackKeyBind"
+                    <TextBlock Grid.Row="2" Grid.Column="0" Width="120">Toggle Play/Pause</TextBlock>
+                    <ComboBox Grid.Row="2" Grid.Column="1" Name="TogglePlaybackKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding TogglePlaybackKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Stop Playback-->
-                    <TextBlock Grid.Row="2" Grid.Column="0" Width="120">Stop Playback</TextBlock>
-                    <ComboBox Grid.Row="2" Grid.Column="1" Name="StopPlaybackKeyBind"
+                    <TextBlock Grid.Row="3" Grid.Column="0" Width="120">Stop Playback</TextBlock>
+                    <ComboBox Grid.Row="3" Grid.Column="1" Name="StopPlaybackKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding StopPlaybackKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Eject Disc-->
-                    <TextBlock Grid.Row="3" Grid.Column="0" Width="120">Eject Disc</TextBlock>
-                    <ComboBox Grid.Row="3" Grid.Column="1" Name="EjectKeyBind"
+                    <TextBlock Grid.Row="4" Grid.Column="0" Width="120">Eject Disc</TextBlock>
+                    <ComboBox Grid.Row="4" Grid.Column="1" Name="EjectKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding EjectKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Next Track -->
-                    <TextBlock Grid.Row="4" Grid.Column="0" Width="120">Next Track</TextBlock>
-                    <ComboBox Grid.Row="4" Grid.Column="1" Name="NextTrackKeyBind"
+                    <TextBlock Grid.Row="5" Grid.Column="0" Width="120">Next Track</TextBlock>
+                    <ComboBox Grid.Row="5" Grid.Column="1" Name="NextTrackKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding NextTrackKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Previous Track -->
-                    <TextBlock Grid.Row="5" Grid.Column="0" Width="120">Previous Track</TextBlock>
-                    <ComboBox Grid.Row="5" Grid.Column="1" Name="PreviousTrackKeyBind"
+                    <TextBlock Grid.Row="6" Grid.Column="0" Width="120">Previous Track</TextBlock>
+                    <ComboBox Grid.Row="6" Grid.Column="1" Name="PreviousTrackKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding PreviousTrackKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Next Index -->
-                    <TextBlock Grid.Row="6" Grid.Column="0" Width="120">Next Index</TextBlock>
-                    <ComboBox Grid.Row="6" Grid.Column="1" Name="NextIndexKeyBind"
+                    <TextBlock Grid.Row="7" Grid.Column="0" Width="120">Next Index</TextBlock>
+                    <ComboBox Grid.Row="7" Grid.Column="1" Name="NextIndexKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding NextIndexKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Previous Index -->
-                    <TextBlock Grid.Row="7" Grid.Column="0" Width="120">Previous Index</TextBlock>
-                    <ComboBox Grid.Row="7" Grid.Column="1" Name="PreviousIndexKeyBind"
+                    <TextBlock Grid.Row="8" Grid.Column="0" Width="120">Previous Index</TextBlock>
+                    <ComboBox Grid.Row="8" Grid.Column="1" Name="PreviousIndexKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding PreviousIndexKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Fast Forward -->
-                    <TextBlock Grid.Row="8" Grid.Column="0" Width="120">Fast-Forward</TextBlock>
-                    <ComboBox Grid.Row="8" Grid.Column="1" Name="FastForwardPlaybackKeyBind"
+                    <TextBlock Grid.Row="9" Grid.Column="0" Width="120">Fast-Forward</TextBlock>
+                    <ComboBox Grid.Row="9" Grid.Column="1" Name="FastForwardPlaybackKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding FastForwardPlaybackKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Rewind -->
-                    <TextBlock Grid.Row="9" Grid.Column="0" Width="120">Rewind</TextBlock>
-                    <ComboBox Grid.Row="9" Grid.Column="1" Name="RewindPlaybackKeyBind"
+                    <TextBlock Grid.Row="10" Grid.Column="0" Width="120">Rewind</TextBlock>
+                    <ComboBox Grid.Row="10" Grid.Column="1" Name="RewindPlaybackKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding RewindPlaybackKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Volume Up -->
-                    <TextBlock Grid.Row="10" Grid.Column="0" Width="120">Volume Up</TextBlock>
-                    <ComboBox Grid.Row="10" Grid.Column="1" Name="VolumeUpKeyBind"
+                    <TextBlock Grid.Row="11" Grid.Column="0" Width="120">Volume Up</TextBlock>
+                    <ComboBox Grid.Row="11" Grid.Column="1" Name="VolumeUpKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding VolumeUpKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Volume Down -->
-                    <TextBlock Grid.Row="11" Grid.Column="0" Width="120">Volume Down</TextBlock>
-                    <ComboBox Grid.Row="11" Grid.Column="1" Name="VolumeDownKeyBind"
+                    <TextBlock Grid.Row="12" Grid.Column="0" Width="120">Volume Down</TextBlock>
+                    <ComboBox Grid.Row="12" Grid.Column="1" Name="VolumeDownKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding VolumeDownKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Mute Toggle -->
-                    <TextBlock Grid.Row="12" Grid.Column="0" Width="120">Toggle Mute</TextBlock>
-                    <ComboBox Grid.Row="12" Grid.Column="1" Name="ToggleMuteKeyBind"
+                    <TextBlock Grid.Row="13" Grid.Column="0" Width="120">Toggle Mute</TextBlock>
+                    <ComboBox Grid.Row="13" Grid.Column="1" Name="ToggleMuteKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding ToggleMuteKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- De-Emphasis Toggle -->
-                    <TextBlock Grid.Row="13" Grid.Column="0" Width="120">Toggle De-Emphasis</TextBlock>
-                    <ComboBox Grid.Row="13" Grid.Column="1" Name="ToggleDeEmphasisKeyBind"
+                    <TextBlock Grid.Row="14" Grid.Column="0" Width="120">Toggle De-Emphasis</TextBlock>
+                    <ComboBox Grid.Row="14" Grid.Column="1" Name="ToggleDeEmphasisKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding ToggleDeEmphasisKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
                 </Grid>

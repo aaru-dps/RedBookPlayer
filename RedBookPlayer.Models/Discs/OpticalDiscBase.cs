@@ -128,6 +128,19 @@ namespace RedBookPlayer.Models.Discs
         #region Helpers
 
         /// <summary>
+        /// Extract a track to WAV
+        /// </summary>
+        /// <param name="trackNumber">Track number to extract</param>
+        /// <param name="outputDirectory">Output path to write data to</param
+        public abstract void ExtractTrackToWav(uint trackNumber, string outputDirectory);
+
+        /// <summary>
+        /// Extract all tracks to WAV
+        /// </summary>
+        /// <param name="outputDirectory">Output path to write data to</param
+        public abstract void ExtractAllTracksToWav(string outputDirectory);
+
+        /// <summary>
         /// Load the first valid track in the image
         /// </summary>
         public abstract void LoadFirstTrack();

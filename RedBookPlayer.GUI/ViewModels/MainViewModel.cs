@@ -24,7 +24,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Execute the result of a keypress
         /// </summary>
-        public void ExecuteKeyPress(object sender, KeyEventArgs e)
+        public async void ExecuteKeyPress(object sender, KeyEventArgs e)
         {
             // Open settings window
             if(e.Key == App.Settings.OpenSettingsKey)
@@ -38,6 +38,23 @@ namespace RedBookPlayer.GUI.ViewModels
             else if(e.Key == App.Settings.LoadImageKey)
             {
                 PlayerView?.ViewModel?.ExecuteLoad();
+            }
+
+            // Save track(s)
+            else if (e.Key == App.Settings.SaveTrackKey)
+            {
+                if(PlayerView?.ViewModel == null || !PlayerView.ViewModel.Initialized)
+                    return;
+
+                var dialog = new OpenFolderDialog();
+                string path = await dialog.ShowAsync(App.MainWindow);
+                if(string.IsNullOrWhiteSpace(path))
+                    return;
+
+                if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                    PlayerView.ViewModel.ExtractAllTracksToWav(path);
+                else
+                    PlayerView.ViewModel.ExtractSingleTrackToWav((uint)PlayerView.ViewModel.CurrentTrackNumber, path);
             }
 
             // Toggle playback

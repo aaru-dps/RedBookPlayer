@@ -120,6 +120,11 @@ namespace RedBookPlayer.GUI.ViewModels
         public Key LoadImageKey { get; set; } = Key.F2;
 
         /// <summary>
+        /// Key assigned to save the current track or all tracks
+        /// </summary>
+        public Key SaveTrackKey { get; set; } = Key.S;
+
+        /// <summary>
         /// Key assigned to toggle play and pause
         /// </summary>
         public Key TogglePlaybackKey { get; set; } = Key.Space;
