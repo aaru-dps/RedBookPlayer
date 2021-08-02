@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel;
 using Aaru.CommonTypes.Enums;
 using ReactiveUI;
@@ -448,7 +447,7 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
-        /// Rewind playback by 75 sectors, if possible
+        /// Rewind playback by 75 sectors
         /// </summary>
         public void Rewind()
         {
