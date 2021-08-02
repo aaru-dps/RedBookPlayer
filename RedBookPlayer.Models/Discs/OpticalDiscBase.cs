@@ -141,6 +141,12 @@ namespace RedBookPlayer.Models.Discs
         public abstract void ExtractAllTracksToWav(string outputDirectory);
 
         /// <summary>
+        /// Load the desired track, if possible
+        /// </summary>
+        /// <param name="track">Track number to load</param>
+        public abstract void LoadTrack(int track);
+
+        /// <summary>
         /// Load the first valid track in the image
         /// </summary>
         public abstract void LoadFirstTrack();
@@ -162,12 +168,6 @@ namespace RedBookPlayer.Models.Discs
         /// </summary>
         /// <param name="sector">New sector number to use</param>
         public void SetCurrentSector(ulong sector) => CurrentSector = sector;
-
-        /// <summary>
-        /// Load the desired track, if possible
-        /// </summary>
-        /// <param name="track">Track number to load</param>
-        protected abstract void LoadTrack(int track);
 
         #endregion
     }

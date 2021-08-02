@@ -256,7 +256,7 @@ namespace RedBookPlayer.Models.Hardware
             _opticalDisc.PropertyChanged += OpticalDiscStateChanged;
 
             // Initialize the sound output
-            _soundOutput.Init(_opticalDisc, autoPlay);
+            _soundOutput.Init(_opticalDisc, autoPlay: autoPlay);
             if(_soundOutput == null || !_soundOutput.Initialized)
                 return;
 

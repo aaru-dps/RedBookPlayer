@@ -173,7 +173,6 @@ namespace RedBookPlayer.Models.Discs
                 // If the current sector is outside of the last known track, seek to the right one
                 if(CurrentSector < track.TrackStartSector || CurrentSector > track.TrackEndSector)
                 {
-                    // TODO: Handle repeat here
                     track = _image.Tracks.Last(t => CurrentSector >= t.TrackStartSector);
                     CurrentTrackNumber = (int)track.TrackSequence;
                 }
@@ -479,6 +478,23 @@ namespace RedBookPlayer.Models.Discs
         }
 
         /// <inheritdoc/>
+        public override void LoadTrack(int trackNumber)
+        {
+            if(_image == null)
+                return;
+
+            // If the track number is invalid, just return
+            if(trackNumber < _image.Tracks.Min(t => t.TrackSequence) || trackNumber > _image.Tracks.Max(t => t.TrackSequence))
+                return;
+
+            // Cache the current track for easy access
+            Track track = GetTrack(trackNumber);
+
+            // Select the first index that has a sector offset greater than or equal to 0
+            CurrentSector = (ulong)(track?.Indexes.OrderBy(kvp => kvp.Key).First(kvp => kvp.Value >= 0).Value ?? 0);
+        }
+
+        /// <inheritdoc/>
         public override void LoadFirstTrack()
         {
             CurrentTrackNumber = 1;
@@ -503,23 +519,6 @@ namespace RedBookPlayer.Models.Discs
                 return;
 
             TotalIndexes = GetTrack(CurrentTrackNumber)?.Indexes.Keys.Max() ?? 0;
-        }
-
-        /// <inheritdoc/>
-        protected override void LoadTrack(int trackNumber)
-        {
-            if(_image == null)
-                return;
-
-            // If the track number is invalid, just return
-            if(trackNumber < _image.Tracks.Min(t => t.TrackSequence) || trackNumber > _image.Tracks.Max(t => t.TrackSequence))
-                return;
-
-            // Cache the current track for easy access
-            Track track = GetTrack(trackNumber);
-
-            // Select the first index that has a sector offset greater than or equal to 0
-            CurrentSector = (ulong)(track?.Indexes.OrderBy(kvp => kvp.Key).First(kvp => kvp.Value >= 0).Value ?? 0);
         }
 
         /// <summary>

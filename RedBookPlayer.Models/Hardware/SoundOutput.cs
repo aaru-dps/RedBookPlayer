@@ -127,8 +127,9 @@ namespace RedBookPlayer.Models.Hardware
         /// Initialize the output with a given image
         /// </summary>
         /// <param name="opticalDisc">OpticalDisc to load from</param>
+        /// <param name="repeatMode">RepeatMode for sound output</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(OpticalDiscBase opticalDisc, bool autoPlay = false)
+        public void Init(OpticalDiscBase opticalDisc, RepeatMode repeatMode = RepeatMode.All, bool autoPlay = false)
         {
             // If we have an unusable disc, just return
             if(opticalDisc == null || !opticalDisc.Initialized)
@@ -146,6 +147,9 @@ namespace RedBookPlayer.Models.Hardware
 
             // Setup the audio output
             SetupAudio();
+
+            // Setup the repeat mode
+            RepeatMode = repeatMode;
 
             // Initialize playback, if necessary
             if(autoPlay)
@@ -207,8 +211,15 @@ namespace RedBookPlayer.Models.Hardware
             _currentSectorReadPosition += count;
             if(_currentSectorReadPosition >= _opticalDisc.BytesPerSector)
             {
+                int currentTrack = _opticalDisc.CurrentTrackNumber;
                 _opticalDisc.SetCurrentSector(_opticalDisc.CurrentSector + (ulong)(_currentSectorReadPosition / _opticalDisc.BytesPerSector));
                 _currentSectorReadPosition %= _opticalDisc.BytesPerSector;
+
+                // TODO: Fully implement this
+                //if(RepeatMode == RepeatMode.None && _opticalDisc.CurrentTrackNumber < currentTrack)
+                //    Stop();
+                //else if(RepeatMode == RepeatMode.Single && _opticalDisc.CurrentTrackNumber != currentTrack)
+                //    _opticalDisc.LoadTrack(currentTrack);
             }
 
             return count;
@@ -343,10 +354,7 @@ namespace RedBookPlayer.Models.Hardware
                         {
                             return _opticalDisc.ReadSectors((uint)sectorsToRead).Concat(zeroSectors).ToArray();
                         }
-                        catch(ArgumentOutOfRangeException)
-                        {
-                            _opticalDisc.LoadFirstTrack();
-                        }
+                        catch { }
                     }
 
                     return zeroSectors;
