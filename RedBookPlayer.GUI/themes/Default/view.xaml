@@ -1,0 +1,109 @@
+<ReactiveUserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+             xmlns:rxui="clr-namespace:Avalonia;assembly=Avalonia.ReactiveUI"
+             xmlns:viewModels="clr-namespace:RedBookPlayer.GUI.ViewModels;assembly=RedBookPlayer.GUI"
+             x:Class="RedBookPlayer.GUI.Views.PlayerView" Width="900" Height="400">
+    <ReactiveUserControl.ViewModel>
+        <viewModels:PlayerViewModel/>
+    </ReactiveUserControl.ViewModel>
+    <StackPanel Margin="16" VerticalAlignment="Center">
+        <Button Command="{Binding LoadCommand}" Margin="32,0,32,16">Load</Button>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <Button Command="{Binding PlayCommand}" Width="100" Margin="0,0,16,0">Play</Button>
+            <Button Command="{Binding PauseCommand}" Width="100" Margin="0,0,16,0">Pause</Button>
+            <Button Command="{Binding StopCommand}" Width="100" Margin="0,0,16,0">Stop</Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <Button Command="{Binding PreviousTrackCommand}" Width="100" Margin="0,0,16,0">Previous Track</Button>
+            <Button Command="{Binding NextTrackCommand}" Width="100" Margin="0,0,16,0">Next Track</Button>
+            <Button Command="{Binding PreviousIndexCommand}" Width="100" Margin="0,0,16,0">Previous Index</Button>
+            <Button Command="{Binding NextIndexCommand}" Width="100" Margin="0,0,16,0">Next Index</Button>
+            <RepeatButton Command="{Binding RewindCommand}" Width="100" Margin="0,0,16,0">Rewind</RepeatButton>
+            <RepeatButton Command="{Binding FastForwardCommand}" Width="100">Fast Forward</RepeatButton>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <StackPanel Margin="0,0,32,0">
+                <TextBlock Margin="0,0,0,4">TRACK</TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Name="TrackDigit1" Width="42" Height="51" Source="/-.png" />
+                    <Image Name="TrackDigit2" Width="42" Height="51" Source="/-.png" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="0,0,32,0">
+                <TextBlock Margin="0,0,0,4">INDEX</TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Name="IndexDigit1" Width="42" Height="51" Source="/-.png" />
+                    <Image Name="IndexDigit2" Width="42" Height="51" Source="/-.png" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Margin="0,0,0,4">TIME</TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Name="TimeDigit1" Width="42" Height="51" Source="/-.png" />
+                    <Image Name="TimeDigit2" Width="42" Height="51" Source="/-.png" />
+                    <Image Width="11" Height="51" Source="/colon.png" />
+                    <Image Name="TimeDigit3" Width="42" Height="51" Source="/-.png" />
+                    <Image Name="TimeDigit4" Width="42" Height="51" Source="/-.png" />
+                    <Image Width="11" Height="51" Source="/colon.png" />
+                    <Image Name="TimeDigit5" Width="42" Height="51" Source="/-.png" />
+                    <Image Name="TimeDigit6" Width="42" Height="51" Source="/-.png" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <StackPanel Margin="0,0,32,0">
+                <TextBlock Margin="0,0,0,4">TRACKS</TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Name="TotalTracksDigit1" Width="42" Height="51" Source="/-.png" />
+                    <Image Name="TotalTracksDigit2" Width="42" Height="51" Source="/-.png" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="0,0,32,0">
+                <TextBlock Margin="0,0,0,4">INDEXES</TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Name="TotalIndexesDigit1" Width="42" Height="51" Source="/-.png" />
+                    <Image Name="TotalIndexesDigit2" Width="42" Height="51" Source="/-.png" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Margin="0,0,0,4">TOTAL</TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Name="TotalTimeDigit1" Width="42" Height="51" Source="/-.png" />
+                    <Image Name="TotalTimeDigit2" Width="42" Height="51" Source="/-.png" />
+                    <Image Width="11" Height="51" Source="/colon.png" />
+                    <Image Name="TotalTimeDigit3" Width="42" Height="51" Source="/-.png" />
+                    <Image Name="TotalTimeDigit4" Width="42" Height="51" Source="/-.png" />
+                    <Image Width="11" Height="51" Source="/colon.png" />
+                    <Image Name="TotalTimeDigit5" Width="42" Height="51" Source="/-.png" />
+                    <Image Name="TotalTimeDigit6" Width="42" Height="51" Source="/-.png" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <Button Command="{Binding EnableDeEmphasisCommand}" IsVisible="{Binding !ApplyDeEmphasis}" Width="200"
+                    Margin="0,0,16,0">
+                Enable De-Emphasis
+            </Button>
+            <Button Command="{Binding DisableDeEmphasisCommand}" IsVisible="{Binding ApplyDeEmphasis}" Width="200"
+                    Margin="0,0,16,0">
+                Disable De-Emphasis
+            </Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding IsDataTrack}">AUDIO</TextBlock>
+            <TextBlock Margin="0,0,16,0" IsVisible="{Binding !IsDataTrack}">AUDIO</TextBlock>
+            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !IsDataTrack}">DATA</TextBlock>
+            <TextBlock Margin="0,0,16,0" IsVisible="{Binding IsDataTrack}">DATA</TextBlock>
+            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !TrackHasEmphasis}">EMPHASIS</TextBlock>
+            <TextBlock Margin="0,0,16,0" IsVisible="{Binding TrackHasEmphasis}">EMPHASIS</TextBlock>
+            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !CopyAllowed}">COPY</TextBlock>
+            <TextBlock Margin="0,0,16,0" IsVisible="{Binding CopyAllowed}">COPY</TextBlock>
+            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !QuadChannel}">4CH</TextBlock>
+            <TextBlock Margin="0,0,16,0" IsVisible="{Binding QuadChannel}">4CH</TextBlock>
+            <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !HiddenTrack}">HIDDEN</TextBlock>
+            <TextBlock Margin="0,0,16,0" IsVisible="{Binding HiddenTrack}">HIDDEN</TextBlock>
+            <TextBlock Margin="0,0,16,0" Text="{Binding Volume}"/>
+        </StackPanel>
+    </StackPanel>
+</ReactiveUserControl>

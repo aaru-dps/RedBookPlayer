@@ -97,7 +97,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Indicates the currently selected theme
         /// </summary>
-        public string SelectedTheme { get; set; } = "default";
+        public string SelectedTheme { get; set; } = "Default";
 
         #endregion
 
@@ -287,7 +287,6 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             // Create a list of all found themes
             List<string> items = new List<string>();
-            items.Add("default");
 
             // Ensure the theme directory exists
             if(!Directory.Exists("themes/"))

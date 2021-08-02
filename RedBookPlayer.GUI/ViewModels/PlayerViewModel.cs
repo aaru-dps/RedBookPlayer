@@ -509,33 +509,25 @@ namespace RedBookPlayer.GUI.ViewModels
             if(string.IsNullOrWhiteSpace(theme))
                 return;
 
-            // If the theme name is "default", we assume the internal theme is used
-            if(theme.Equals("default", StringComparison.CurrentCultureIgnoreCase))
+            string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{theme}";
+            string xamlPath = $"{themeDirectory}/view.xaml";
+
+            if(!File.Exists(xamlPath))
             {
-                LoadTheme(null);
+                Console.WriteLine("Warning: specified theme doesn't exist, reverting to default");
+                return;
             }
-            else
+
+            try
             {
-                string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{theme}";
-                string xamlPath = $"{themeDirectory}/view.xaml";
-
-                if(!File.Exists(xamlPath))
-                {
-                    Console.WriteLine("Warning: specified theme doesn't exist, reverting to default");
-                    return;
-                }
-
-                try
-                {
-                    string xaml = File.ReadAllText(xamlPath);
-                    xaml = xaml.Replace("Source=\"", $"Source=\"file://{themeDirectory}/");
-                    LoadTheme(xaml);
-                }
-                catch(XmlException ex)
-                {
-                    Console.WriteLine($"Error: invalid theme XAML ({ex.Message}), reverting to default");
-                    LoadTheme(null);
-                }
+                string xaml = File.ReadAllText(xamlPath);
+                xaml = xaml.Replace("Source=\"", $"Source=\"file://{themeDirectory}/");
+                LoadTheme(xaml);
+            }
+            catch(XmlException ex)
+            {
+                Console.WriteLine($"Error: invalid theme XAML ({ex.Message}), reverting to default");
+                LoadTheme(null);
             }
 
             App.MainWindow.Width = App.PlayerView.Width;
@@ -717,18 +709,9 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             try
             {
-                if(App.Settings.SelectedTheme == "default")
-                {
-                    IAssetLoader assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-
-                    return new Bitmap(assets.Open(new Uri($"avares://RedBookPlayer/Assets/{character}.png")));
-                }
-                else
-                {
-                    string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{App.Settings.SelectedTheme}";
-                    using FileStream stream = File.Open($"{themeDirectory}/{character}.png", FileMode.Open);
-                    return new Bitmap(stream);
-                }
+                string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{App.Settings.SelectedTheme}";
+                using FileStream stream = File.Open($"{themeDirectory}/{character}.png", FileMode.Open);
+                return new Bitmap(stream);
             }
             catch
             {
