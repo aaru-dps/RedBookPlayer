@@ -156,26 +156,29 @@ namespace RedBookPlayer.Models.Discs
                 if(_image == null)
                     return;
 
+                // If the sector is over the end of the image, then loop
+                ulong tempSector = value;
+                if(tempSector > _image.Info.Sectors)
+                    tempSector = 0;
+                else if(tempSector < 0)
+                    tempSector = _image.Info.Sectors - 1;
+
                 // Cache the current track for easy access
                 Track track = GetTrack(CurrentTrackNumber);
                 if(track == null)
                     return;
 
-                this.RaiseAndSetIfChanged(ref _currentSector, value);
+                this.RaiseAndSetIfChanged(ref _currentSector, tempSector);
 
-                if((CurrentTrackNumber < _image.Tracks.Count - 1 && CurrentSector >= (GetTrack(CurrentTrackNumber + 1)?.TrackStartSector ?? 0))
-                    || (CurrentTrackNumber > 0 && CurrentSector < track.TrackStartSector))
+                // If the current sector is outside of the last known track, seek to the right one
+                if(CurrentSector < track.TrackStartSector || CurrentSector > track.TrackEndSector)
                 {
-                    foreach(Track trackData in _image.Tracks.ToArray().Reverse())
-                    {
-                        if(CurrentSector >= trackData.TrackStartSector)
-                        {
-                            CurrentTrackNumber = (int)trackData.TrackSequence;
-                            break;
-                        }
-                    }
+                    // TODO: Handle repeat here
+                    track = _image.Tracks.Last(t => CurrentSector >= t.TrackStartSector);
+                    CurrentTrackNumber = (int)track.TrackSequence;
                 }
 
+                // Set the new index, if necessary
                 foreach((ushort key, int i) in track.Indexes.Reverse())
                 {
                     if((int)CurrentSector >= i)

@@ -284,30 +284,19 @@ namespace RedBookPlayer.Models.Hardware
         /// <param name="zeroSectorsAmount">Number of zeroed sectors to concatenate</param>
         private void DetermineReadAmount(int count, out ulong sectorsToRead, out ulong zeroSectorsAmount)
         {
-            do
+            // Attempt to read 5 more sectors than requested
+            sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 5;
+            zeroSectorsAmount = 0;
+
+            // Avoid overreads by padding with 0-byte data at the end
+            if(_opticalDisc.CurrentSector + sectorsToRead > _opticalDisc.TotalSectors)
             {
-                // Attempt to read 5 more sectors than requested
-                sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 5;
-                zeroSectorsAmount = 0;
+                ulong oldSectorsToRead = sectorsToRead;
+                sectorsToRead = _opticalDisc.TotalSectors - _opticalDisc.CurrentSector;
 
-                // Avoid overreads by padding with 0-byte data at the end
-                if(_opticalDisc.CurrentSector + sectorsToRead > _opticalDisc.TotalSectors)
-                {
-                    ulong oldSectorsToRead = sectorsToRead;
-                    sectorsToRead = _opticalDisc.TotalSectors - _opticalDisc.CurrentSector;
-
-                    int tempZeroSectorCount = (int)(oldSectorsToRead - sectorsToRead);
-                    zeroSectorsAmount = (ulong)(tempZeroSectorCount < 0 ? 0 : tempZeroSectorCount);
-                }
-
-                // If we're reading past the last sector of the disc, wrap around
-                // TODO: Have past-end reads looping back controlled by a flag instead (Repeat? Repeat All?)
-                if(sectorsToRead <= 0)
-                {
-                    _opticalDisc.LoadFirstTrack();
-                    _currentSectorReadPosition = 0;
-                }
-            } while(sectorsToRead <= 0);
+                int tempZeroSectorCount = (int)(oldSectorsToRead - sectorsToRead);
+                zeroSectorsAmount = (ulong)(tempZeroSectorCount < 0 ? 0 : tempZeroSectorCount);
+            }
         }
 
         /// <summary>
