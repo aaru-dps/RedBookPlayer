@@ -779,6 +779,7 @@ namespace RedBookPlayer.GUI.ViewModels
             // Ensure the context and view model are set
             App.PlayerView.DataContext = this;
             App.PlayerView.ViewModel = this;
+            UpdateDigits();
         }
 
         /// <summary>

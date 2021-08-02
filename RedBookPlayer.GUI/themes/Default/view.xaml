@@ -3,7 +3,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
              xmlns:rxui="clr-namespace:Avalonia;assembly=Avalonia.ReactiveUI"
              xmlns:viewModels="clr-namespace:RedBookPlayer.GUI.ViewModels;assembly=RedBookPlayer.GUI"
-             x:Class="RedBookPlayer.GUI.Views.PlayerView" Width="900" Height="400">
+             x:Class="RedBookPlayer.GUI.Views.PlayerView" Width="900" Height="400" Background="White">
     <ReactiveUserControl.ViewModel>
         <viewModels:PlayerViewModel/>
     </ReactiveUserControl.ViewModel>
