@@ -286,8 +286,8 @@ namespace RedBookPlayer.Models.Hardware
         {
             do
             {
-                // Attempt to read 2 more sectors than requested
-                sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 2;
+                // Attempt to read 5 more sectors than requested
+                sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 5;
                 zeroSectorsAmount = 0;
 
                 // Avoid overreads by padding with 0-byte data at the end
