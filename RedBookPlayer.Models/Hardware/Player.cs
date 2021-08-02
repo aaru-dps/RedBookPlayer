@@ -437,14 +437,14 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
-        /// Fast-forward playback by 75 sectors, if possible
+        /// Fast-forward playback by 75 sectors
         /// </summary>
         public void FastForward()
         {
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
-            _opticalDisc.SetCurrentSector(Math.Min(_opticalDisc.TotalSectors, _opticalDisc.CurrentSector + 75));
+            _opticalDisc.SetCurrentSector(_opticalDisc.CurrentSector + 75);
         }
 
         /// <summary>
@@ -455,8 +455,7 @@ namespace RedBookPlayer.Models.Hardware
             if(_opticalDisc == null || !_opticalDisc.Initialized)
                 return;
 
-            if(_opticalDisc.CurrentSector >= 75)
-                _opticalDisc.SetCurrentSector(_opticalDisc.CurrentSector - 75);
+            _opticalDisc.SetCurrentSector(_opticalDisc.CurrentSector - 75);
         }
 
         #endregion
