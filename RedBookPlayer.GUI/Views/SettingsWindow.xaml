@@ -36,6 +36,11 @@
                                       Items="{Binding SessionHandlingValues}" SelectedItem="{Binding SessionHandling, Mode=TwoWay}" />
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Width="120">Repeat Mode</TextBlock>
+                            <ComboBox Grid.Row="0" Grid.Column="1" Name="RepeatMode" Margin="8,0,0,0" Width="120"
+                                      Items="{Binding RepeatModeValues}" SelectedItem="{Binding RepeatMode, Mode=TwoWay}" />
+                        </WrapPanel>
+                        <WrapPanel Margin="0,0,0,16">
                             <CheckBox IsChecked="{Binding GenerateMissingTOC}" Margin="0,0,8,0"/>
                             <TextBlock VerticalAlignment="Center">Generate a TOC if the disc is missing one</TextBlock>
                         </WrapPanel>

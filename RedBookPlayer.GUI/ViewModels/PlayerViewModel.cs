@@ -375,14 +375,15 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         /// <param name="path">Path to the disc image</param>
         /// <param name="options">Options to pass to the optical disc factory</param>
+        /// <param name="repeatMode">RepeatMode for sound output</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, OpticalDiscOptions options, bool autoPlay)
+        public void Init(string path, OpticalDiscOptions options, RepeatMode repeatMode, bool autoPlay)
         {
             // Stop current playback, if necessary
             if(PlayerState != PlayerState.NoDisc) ExecuteStop();
 
             // Attempt to initialize Player
-            _player.Init(path, options, autoPlay);
+            _player.Init(path, options, repeatMode, autoPlay);
             if(_player.Initialized)
             {
                 _player.PropertyChanged += PlayerStateChanged;
@@ -605,7 +606,7 @@ namespace RedBookPlayer.GUI.ViewModels
                 App.PlayerView.DataContext = this;
                 App.PlayerView.ViewModel = this;
 
-                Init(path, options, App.Settings.AutoPlay);
+                Init(path, options, App.Settings.RepeatMode, App.Settings.AutoPlay);
                 if(Initialized)
                     App.MainWindow.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
 

@@ -129,7 +129,7 @@ namespace RedBookPlayer.Models.Hardware
         /// <param name="opticalDisc">OpticalDisc to load from</param>
         /// <param name="repeatMode">RepeatMode for sound output</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(OpticalDiscBase opticalDisc, RepeatMode repeatMode = RepeatMode.All, bool autoPlay = false)
+        public void Init(OpticalDiscBase opticalDisc, RepeatMode repeatMode, bool autoPlay)
         {
             // If we have an unusable disc, just return
             if(opticalDisc == null || !opticalDisc.Initialized)
@@ -215,11 +215,10 @@ namespace RedBookPlayer.Models.Hardware
                 _opticalDisc.SetCurrentSector(_opticalDisc.CurrentSector + (ulong)(_currentSectorReadPosition / _opticalDisc.BytesPerSector));
                 _currentSectorReadPosition %= _opticalDisc.BytesPerSector;
 
-                // TODO: Fully implement this
-                //if(RepeatMode == RepeatMode.None && _opticalDisc.CurrentTrackNumber < currentTrack)
-                //    Stop();
-                //else if(RepeatMode == RepeatMode.Single && _opticalDisc.CurrentTrackNumber != currentTrack)
-                //    _opticalDisc.LoadTrack(currentTrack);
+                if(RepeatMode == RepeatMode.None && _opticalDisc.CurrentTrackNumber < currentTrack)
+                    Stop();
+                else if(RepeatMode == RepeatMode.Single && _opticalDisc.CurrentTrackNumber != currentTrack)
+                    _opticalDisc.LoadTrack(currentTrack);
             }
 
             return count;

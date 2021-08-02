@@ -241,8 +241,9 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         /// <param name="path">Path to the disc image</param>
         /// <param name="options">Options to pass to the optical disc factory</param>
+        /// <param name="repeatMode">RepeatMode for sound output</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, OpticalDiscOptions options, bool autoPlay)
+        public void Init(string path, OpticalDiscOptions options, RepeatMode repeatMode, bool autoPlay)
         {
             // Reset initialization
             Initialized = false;
@@ -256,7 +257,7 @@ namespace RedBookPlayer.Models.Hardware
             _opticalDisc.PropertyChanged += OpticalDiscStateChanged;
 
             // Initialize the sound output
-            _soundOutput.Init(_opticalDisc, autoPlay: autoPlay);
+            _soundOutput.Init(_opticalDisc, repeatMode, autoPlay);
             if(_soundOutput == null || !_soundOutput.Initialized)
                 return;
 

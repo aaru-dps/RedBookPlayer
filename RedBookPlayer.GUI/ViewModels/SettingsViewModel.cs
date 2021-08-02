@@ -22,6 +22,12 @@ namespace RedBookPlayer.GUI.ViewModels
         public List<DataPlayback> DataPlaybackValues => GenerateDataPlaybackList();
 
         /// <summary>
+        /// List of all repeat mode values
+        /// </summary>
+        [JsonIgnore]
+        public List<RepeatMode> RepeatModeValues => GenerateRepeatModeList();
+
+        /// <summary>
         /// List of all session handling values
         /// </summary>
         [JsonIgnore]
@@ -66,7 +72,6 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Indicates how to repeat tracks
         /// </summary>
-        /// TODO: Add to settings UI
         public RepeatMode RepeatMode { get; set; } = RepeatMode.All;
 
         /// <summary>
@@ -274,6 +279,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Generate the list of Key values
         /// </summary>
         private List<Key> GenerateKeyList() => Enum.GetValues(typeof(Key)).Cast<Key>().ToList();
+
+        /// <summary>
+        /// Generate the list of RepeatMode values
+        /// </summary>
+        private List<RepeatMode> GenerateRepeatModeList() => Enum.GetValues(typeof(RepeatMode)).Cast<RepeatMode>().ToList();
 
         /// <summary>
         /// Generate the list of SessionHandling values
