@@ -13,7 +13,7 @@
     <Compile Update="**\*.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <AvaloniaResource Include="**\*.xaml" Exclude="bin\**;obj\**">
+    <AvaloniaResource Include="**\*.xaml" Exclude="bin\**;obj\**;themes\**">
       <SubType>Designer</SubType>
     </AvaloniaResource>
   </ItemGroup>
@@ -27,5 +27,8 @@
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\*" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="themes\**" CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
 </Project>
