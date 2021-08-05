@@ -29,6 +29,10 @@
     <AvaloniaResource Include="Assets\*" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="themes\**" CopyToOutputDirectory="PreserveNewest"/>
+    <None Update="themes\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile> 
+    </None>
   </ItemGroup>
 </Project>
