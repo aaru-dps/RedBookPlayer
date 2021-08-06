@@ -4,6 +4,8 @@
 
 * This project is fully sponsored by the [Game Preservation Society](https://www.gamepres.org/en/).
 
+[OpenAL](https://www.openal.org/) is required to run this application. Please install it using the most recent instructions for your operating system of choice.
+
 ## Default Player Controls
 
 | Key | Action |

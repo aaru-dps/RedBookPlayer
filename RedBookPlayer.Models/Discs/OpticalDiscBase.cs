@@ -123,6 +123,12 @@ namespace RedBookPlayer.Models.Discs
         #region Helpers
 
         /// <summary>
+        /// Load the desired track, if possible
+        /// </summary>
+        /// <param name="track">Track number to load</param>
+        public abstract void LoadTrack(int track);
+
+        /// <summary>
         /// Load the first valid track in the image
         /// </summary>
         public abstract void LoadFirstTrack();
@@ -132,7 +138,7 @@ namespace RedBookPlayer.Models.Discs
         /// </summary>
         /// <param name="sectorsToRead">Current number of sectors to read</param>
         /// <returns>Byte array representing the read sectors, if possible</returns>
-        public byte[] ReadSectors(uint sectorsToRead) => _image.ReadSectors(CurrentSector, sectorsToRead);
+        public virtual byte[] ReadSectors(uint sectorsToRead) => _image.ReadSectors(CurrentSector, sectorsToRead);
 
         /// <summary>
         /// Set the total indexes from the current track
@@ -144,12 +150,6 @@ namespace RedBookPlayer.Models.Discs
         /// </summary>
         /// <param name="sector">New sector number to use</param>
         public void SetCurrentSector(ulong sector) => CurrentSector = sector;
-
-        /// <summary>
-        /// Load the desired track, if possible
-        /// </summary>
-        /// <param name="track">Track number to load</param>
-        protected abstract void LoadTrack(int track);
 
         #endregion
     }

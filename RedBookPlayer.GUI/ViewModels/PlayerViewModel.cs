@@ -5,13 +5,16 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using System.Xml;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using ReactiveUI;
-using RedBookPlayer.GUI.Views;
+using RedBookPlayer.Models;
+using RedBookPlayer.Models.Discs;
 using RedBookPlayer.Models.Hardware;
 
 namespace RedBookPlayer.GUI.ViewModels
@@ -21,7 +24,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Player representing the internal state
         /// </summary>
-        private Player _player;
+        private readonly Player _player;
 
         /// <summary>
         /// Set of images representing the digits for the UI
@@ -48,6 +51,15 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             get => _currentTrackIndex;
             private set => this.RaiseAndSetIfChanged(ref _currentTrackIndex, value);
+        }
+
+        /// <summary>
+        /// Current track session
+        /// </summary>
+        public ushort CurrentTrackSession
+        {
+            get => _currentTrackSession;
+            private set => this.RaiseAndSetIfChanged(ref _currentTrackSession, value);
         }
 
         /// <summary>
@@ -140,6 +152,7 @@ namespace RedBookPlayer.GUI.ViewModels
 
         private int _currentTrackNumber;
         private ushort _currentTrackIndex;
+        private ushort _currentTrackSession;
         private ulong _currentSector;
         private ulong _sectionStartSector;
 
@@ -156,15 +169,28 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Indicate if the model is ready to be used
         /// </summary>
-        public bool Initialized => _player?.Initialized ?? false;
+        public bool Initialized
+        {
+            get => _initialized;
+            private set => this.RaiseAndSetIfChanged(ref _initialized, value);
+        }
 
         /// <summary>
         /// Indicate if the output is playing
         /// </summary>
-        public bool? Playing
+        public PlayerState PlayerState
         {
-            get => _playing;
-            private set => this.RaiseAndSetIfChanged(ref _playing, value);
+            get => _playerState;
+            private set => this.RaiseAndSetIfChanged(ref _playerState, value);
+        }
+
+        /// <summary>
+        /// Indicates how to handle playback of data tracks
+        /// </summary>
+        public DataPlayback DataPlayback
+        {
+            get => _dataPlayback;
+            private set => this.RaiseAndSetIfChanged(ref _dataPlayback, value);
         }
 
         /// <summary>
@@ -185,7 +211,9 @@ namespace RedBookPlayer.GUI.ViewModels
             private set => this.RaiseAndSetIfChanged(ref _volume, value);
         }
 
-        private bool? _playing;
+        private bool _initialized;
+        private PlayerState _playerState;
+        private DataPlayback _dataPlayback;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -299,6 +327,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public PlayerViewModel()
         {
+            // Initialize commands
             LoadCommand = ReactiveCommand.Create(ExecuteLoad);
 
             PlayCommand = ReactiveCommand.Create(ExecutePlay);
@@ -319,25 +348,27 @@ namespace RedBookPlayer.GUI.ViewModels
             EnableDeEmphasisCommand = ReactiveCommand.Create(ExecuteEnableDeEmphasis);
             DisableDeEmphasisCommand = ReactiveCommand.Create(ExecuteDisableDeEmphasis);
             ToggleDeEmphasisCommand = ReactiveCommand.Create(ExecuteToggleDeEmphasis);
+
+            // Initialize Player
+            _player = new Player(App.Settings.Volume);
+            PlayerState = PlayerState.NoDisc;
         }
 
         /// <summary>
         /// Initialize the view model with a given image path
         /// </summary>
         /// <param name="path">Path to the disc image</param>
-        /// <param name="generateMissingToc">Generate a TOC if the disc is missing one [CompactDisc only]</param>
-        /// <param name="loadHiddenTracks">Load hidden tracks for playback [CompactDisc only]</param>
-        /// <param name="loadDataTracks">Load data tracks for playback [CompactDisc only]</param>
+        /// <param name="options">Options to pass to the optical disc factory</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public void Init(string path, bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks, bool autoPlay, int defaultVolume)
+        public void Init(string path, OpticalDiscOptions options, bool autoPlay)
         {
             // Stop current playback, if necessary
-            if(Playing != null) ExecuteStop();
+            if(PlayerState != PlayerState.NoDisc)
+                ExecuteStop();
 
-            // Create and attempt to initialize new Player
-            _player = new Player(path, generateMissingToc, loadHiddenTracks, loadDataTracks, autoPlay, defaultVolume);
-            if(Initialized)
+            // Attempt to initialize Player
+            _player.Init(path, options, autoPlay);
+            if(_player.Initialized)
             {
                 _player.PropertyChanged += PlayerStateChanged;
                 PlayerStateChanged(this, null);
@@ -445,6 +476,46 @@ namespace RedBookPlayer.GUI.ViewModels
         #region Helpers
 
         /// <summary>
+        /// Apply a custom theme to the player
+        /// </summary>
+        /// <param name="theme">Path to the theme under the themes directory</param>
+        public void ApplyTheme(string theme)
+        {
+            // If the PlayerView isn't set, don't do anything
+            if(App.PlayerView == null)
+                return;
+
+            // If no theme path is provided, we can ignore
+            if(string.IsNullOrWhiteSpace(theme))
+                return;
+
+            string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{theme}";
+            string xamlPath = $"{themeDirectory}/view.xaml";
+
+            if(!File.Exists(xamlPath))
+            {
+                Console.WriteLine("Warning: specified theme doesn't exist, reverting to default");
+                return;
+            }
+
+            try
+            {
+                string xaml = File.ReadAllText(xamlPath);
+                xaml = xaml.Replace("Source=\"", $"Source=\"file://{themeDirectory}/");
+                LoadTheme(xaml);
+            }
+            catch(XmlException ex)
+            {
+                Console.WriteLine($"Error: invalid theme XAML ({ex.Message}), reverting to default");
+                LoadTheme(null);
+            }
+
+            App.MainWindow.Width = App.PlayerView.Width;
+            App.MainWindow.Height = App.PlayerView.Height;
+            InitializeDigits();
+        }
+
+        /// <summary>
         /// Load a disc image from a selection box
         /// </summary>
         public async void ExecuteLoad()
@@ -461,35 +532,36 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public void InitializeDigits()
         {
-            PlayerView playerView = MainWindow.Instance.ContentControl.Content as PlayerView;
+            if(App.PlayerView == null)
+                return;
 
             _digits = new Image[]
             {
-                playerView.FindControl<Image>("TrackDigit1"),
-                playerView.FindControl<Image>("TrackDigit2"),
+                App.PlayerView.FindControl<Image>("TrackDigit1"),
+                App.PlayerView.FindControl<Image>("TrackDigit2"),
 
-                playerView.FindControl<Image>("IndexDigit1"),
-                playerView.FindControl<Image>("IndexDigit2"),
+                App.PlayerView.FindControl<Image>("IndexDigit1"),
+                App.PlayerView.FindControl<Image>("IndexDigit2"),
 
-                playerView.FindControl<Image>("TimeDigit1"),
-                playerView.FindControl<Image>("TimeDigit2"),
-                playerView.FindControl<Image>("TimeDigit3"),
-                playerView.FindControl<Image>("TimeDigit4"),
-                playerView.FindControl<Image>("TimeDigit5"),
-                playerView.FindControl<Image>("TimeDigit6"),
+                App.PlayerView.FindControl<Image>("TimeDigit1"),
+                App.PlayerView.FindControl<Image>("TimeDigit2"),
+                App.PlayerView.FindControl<Image>("TimeDigit3"),
+                App.PlayerView.FindControl<Image>("TimeDigit4"),
+                App.PlayerView.FindControl<Image>("TimeDigit5"),
+                App.PlayerView.FindControl<Image>("TimeDigit6"),
 
-                playerView.FindControl<Image>("TotalTracksDigit1"),
-                playerView.FindControl<Image>("TotalTracksDigit2"),
+                App.PlayerView.FindControl<Image>("TotalTracksDigit1"),
+                App.PlayerView.FindControl<Image>("TotalTracksDigit2"),
 
-                playerView.FindControl<Image>("TotalIndexesDigit1"),
-                playerView.FindControl<Image>("TotalIndexesDigit2"),
+                App.PlayerView.FindControl<Image>("TotalIndexesDigit1"),
+                App.PlayerView.FindControl<Image>("TotalIndexesDigit2"),
 
-                playerView.FindControl<Image>("TotalTimeDigit1"),
-                playerView.FindControl<Image>("TotalTimeDigit2"),
-                playerView.FindControl<Image>("TotalTimeDigit3"),
-                playerView.FindControl<Image>("TotalTimeDigit4"),
-                playerView.FindControl<Image>("TotalTimeDigit5"),
-                playerView.FindControl<Image>("TotalTimeDigit6"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit1"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit2"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit3"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit4"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit5"),
+                App.PlayerView.FindControl<Image>("TotalTimeDigit6"),
             };
         }
 
@@ -501,19 +573,39 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             return await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                Init(path, App.Settings.GenerateMissingTOC, App.Settings.PlayHiddenTracks, App.Settings.PlayDataTracks, App.Settings.AutoPlay, App.Settings.Volume);
+                OpticalDiscOptions options = new OpticalDiscOptions
+                {
+                    DataPlayback = App.Settings.DataPlayback,
+                    GenerateMissingToc = App.Settings.GenerateMissingTOC,
+                    LoadHiddenTracks = App.Settings.PlayHiddenTracks,
+                };
+
+                // Ensure the context and view model are set
+                App.PlayerView.DataContext = this;
+                App.PlayerView.ViewModel = this;
+
+                Init(path, options, App.Settings.AutoPlay);
                 if(Initialized)
-                    MainWindow.Instance.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
+                    App.MainWindow.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
 
                 return Initialized;
             });
         }
 
         /// <summary>
-        /// Set the value for loading data tracks [CompactDisc only]
+        /// Refresh the view model from the current settings
         /// </summary>
-        /// <param name="load">True to enable loading data tracks, false otherwise</param>
-        public void SetLoadDataTracks(bool load) => _player?.SetLoadDataTracks(load);
+        public void RefreshFromSettings()
+        {
+            SetDataPlayback(App.Settings.DataPlayback);
+            SetLoadHiddenTracks(App.Settings.PlayHiddenTracks);
+        }
+
+        /// <summary>
+        /// Set data playback method [CompactDisc only]
+        /// </summary>
+        /// <param name="dataPlayback">New playback value</param>
+        public void SetDataPlayback(DataPlayback dataPlayback) => _player?.SetDataPlayback(dataPlayback);
 
         /// <summary>
         /// Set the value for loading hidden tracks [CompactDisc only]
@@ -569,18 +661,9 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             try
             {
-                if(App.Settings.SelectedTheme == "default")
-                {
-                    IAssetLoader assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-
-                    return new Bitmap(assets.Open(new Uri($"avares://RedBookPlayer/Assets/{character}.png")));
-                }
-                else
-                {
-                    string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{App.Settings.SelectedTheme}";
-                    using FileStream stream = File.Open($"{themeDirectory}/{character}.png", FileMode.Open);
-                    return new Bitmap(stream);
-                }
+                string themeDirectory = $"{Directory.GetCurrentDirectory()}/themes/{App.Settings.SelectedTheme}";
+                using FileStream stream = File.Open($"{themeDirectory}/{character}.png", FileMode.Open);
+                return new Bitmap(stream);
             }
             catch
             {
@@ -619,8 +702,36 @@ namespace RedBookPlayer.GUI.ViewModels
                     Extensions = knownExtensions.ConvertAll(e => e.TrimStart('.'))
                 });
 
-                return (await dialog.ShowAsync(MainWindow.Instance))?.FirstOrDefault();
+                return (await dialog.ShowAsync(App.MainWindow))?.FirstOrDefault();
             });
+        }
+
+        /// <summary>
+        /// Load the theme from a XAML, if possible
+        /// </summary>
+        /// <param name="xaml">XAML data representing the theme, null for default</param>
+        private void LoadTheme(string xaml)
+        {
+            // If the view is null, we can't load the theme
+            if(App.PlayerView == null)
+                return;
+
+            try
+            {
+                if(xaml != null)
+                    new AvaloniaXamlLoader().Load(xaml, null, App.PlayerView);
+                else
+                    AvaloniaXamlLoader.Load(App.PlayerView);
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+            }
+
+            // Ensure the context and view model are set
+            App.PlayerView.DataContext = this;
+            App.PlayerView.ViewModel = this;
+            UpdateDigits();
         }
 
         /// <summary>
@@ -628,8 +739,18 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         private void PlayerStateChanged(object sender, PropertyChangedEventArgs e)
         {
-            if(_player?.Initialized != true)
+            if(_player == null)
                 return;
+
+            if(!_player.Initialized)
+            {
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    App.MainWindow.Title = "RedBookPlayer";
+                });
+            }
+
+            Initialized = _player.Initialized;
 
             CurrentTrackNumber = _player.CurrentTrackNumber;
             CurrentTrackIndex = _player.CurrentTrackIndex;
@@ -643,7 +764,8 @@ namespace RedBookPlayer.GUI.ViewModels
             CopyAllowed = _player.CopyAllowed;
             TrackHasEmphasis = _player.TrackHasEmphasis;
 
-            Playing = _player.Playing;
+            PlayerState = _player.PlayerState;
+            DataPlayback = _player.DataPlayback;
             ApplyDeEmphasis = _player.ApplyDeEmphasis;
             Volume = _player.Volume;
 
@@ -655,6 +777,10 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         private void UpdateDigits()
         {
+            // Ensure the digits
+            if(_digits == null)
+                InitializeDigits();
+
             Dispatcher.UIThread.Post(() =>
             {
                 string digitString = GenerateDigitString() ?? string.Empty.PadLeft(20, '-');

@@ -1,14 +1,31 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reactive;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Avalonia.Input;
-using RedBookPlayer.GUI.Views;
+using ReactiveUI;
+using RedBookPlayer.Models;
 
-namespace RedBookPlayer.GUI
+namespace RedBookPlayer.GUI.ViewModels
 {
-    public class Settings
+    public class SettingsViewModel : ReactiveObject
     {
         #region Player Settings
+
+        /// <summary>
+        /// List of all data playback values
+        /// </summary>
+        [JsonIgnore]
+        public List<DataPlayback> DataPlaybackValues => GenerateDataPlaybackList();
+
+        /// <summary>
+        /// List of all themes
+        /// </summary>
+        [JsonIgnore]
+        public List<string> ThemeValues => GenerateThemeList();
 
         /// <summary>
         /// Indicates if discs should start playing on load
@@ -31,14 +48,14 @@ namespace RedBookPlayer.GUI
         public bool PlayHiddenTracks { get; set; } = false;
 
         /// <summary>
-        /// Indicates if data tracks should be played like old, non-compliant players
-        /// </summary>
-        public bool PlayDataTracks { get; set; } = false;
-
-        /// <summary>
         /// Generate a TOC if the disc is missing one
         /// </summary>
         public bool GenerateMissingTOC { get; set; } = true;
+
+        /// <summary>
+        /// Indicates how to deal with data tracks
+        /// </summary>
+        public DataPlayback DataPlayback { get; set; } = DataPlayback.Skip;
 
         /// <summary>
         /// Indicates the default playback volume
@@ -46,25 +63,34 @@ namespace RedBookPlayer.GUI
         public int Volume
         {
             get => _volume;
-            set
+            private set
             {
+                int tempValue;
                 if(value > 100)
-                    _volume = 100;
+                    tempValue = 100;
                 else if(value < 0)
-                    _volume = 0;
+                    tempValue = 0;
                 else
-                    _volume = value;
+                    tempValue = value;
+
+                this.RaiseAndSetIfChanged(ref _volume, tempValue);
             }
         }
 
         /// <summary>
         /// Indicates the currently selected theme
         /// </summary>
-        public string SelectedTheme { get; set; } = "default";
+        public string SelectedTheme { get; set; } = "Default";
 
         #endregion
 
         #region Key Mappings
+
+        /// <summary>
+        /// List of all keyboard keys
+        /// </summary>
+        [JsonIgnore]
+        public List<Key> KeyboardList => GenerateKeyList();
 
         /// <summary>
         /// Key assigned to open settings
@@ -85,6 +111,11 @@ namespace RedBookPlayer.GUI
         /// Key assigned to stop playback
         /// </summary>
         public Key StopPlaybackKey { get; set; } = Key.Escape;
+
+        /// <summary>
+        /// Key assigned to eject the disc
+        /// </summary>
+        public Key EjectKey { get; set; } = Key.OemTilde;
 
         /// <summary>
         /// Key assigned to move to the next track
@@ -138,6 +169,15 @@ namespace RedBookPlayer.GUI
 
         #endregion
 
+        #region Commands
+
+        /// <summary>
+        /// Command for applying settings
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> ApplySettingsCommand { get; }
+
+        #endregion
+
         /// <summary>
         /// Path to the settings file
         /// </summary>
@@ -148,25 +188,28 @@ namespace RedBookPlayer.GUI
         /// </summary>
         private int _volume = 100;
 
-        public Settings() {}
+        public SettingsViewModel() : this(null) { }
 
-        public Settings(string filePath) => _filePath = filePath;
+        public SettingsViewModel(string filePath)
+        {
+            _filePath = filePath;
+
+            ApplySettingsCommand = ReactiveCommand.Create(ExecuteApplySettings);
+        }
 
         /// <summary>
         /// Load settings from a file
         /// </summary>
         /// <param name="filePath">Path to the settings JSON file</param>
         /// <returns>Settings derived from the input file, if possible</returns>
-        public static Settings Load(string filePath)
+        public static SettingsViewModel Load(string filePath)
         {
             if(File.Exists(filePath))
             {
                 try
                 {
-                    Settings settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(filePath));
+                    SettingsViewModel settings = JsonSerializer.Deserialize<SettingsViewModel>(File.ReadAllText(filePath));
                     settings._filePath = filePath;
-
-                    MainWindow.ApplyTheme(settings.SelectedTheme);
 
                     return settings;
                 }
@@ -174,18 +217,21 @@ namespace RedBookPlayer.GUI
                 {
                     Console.WriteLine("Couldn't parse settings, reverting to default");
 
-                    return new Settings(filePath);
+                    return new SettingsViewModel(filePath);
                 }
             }
 
-            return new Settings(filePath);
+            return new SettingsViewModel(filePath);
         }
 
         /// <summary>
-        /// Save settings to a file
+        /// Apply settings from the UI
         /// </summary>
-        public void Save()
+        public void ExecuteApplySettings()
         {
+            if(!string.IsNullOrWhiteSpace(SelectedTheme))
+                App.PlayerView?.ViewModel?.ApplyTheme(SelectedTheme);
+
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true
@@ -194,5 +240,45 @@ namespace RedBookPlayer.GUI
             string json = JsonSerializer.Serialize(this, options);
             File.WriteAllText(_filePath, json);
         }
+
+        #region Generation
+
+        /// <summary>
+        /// Generate the list of DataPlayback values
+        /// </summary>
+        private List<DataPlayback> GenerateDataPlaybackList() => Enum.GetValues(typeof(DataPlayback)).Cast<DataPlayback>().ToList();
+
+        /// <summary>
+        /// Generate the list of Key values
+        /// </summary>
+        private List<Key> GenerateKeyList() => Enum.GetValues(typeof(Key)).Cast<Key>().ToList();
+
+        /// <summary>
+        /// Generate the list of valid themes
+        /// </summary>
+        private List<string> GenerateThemeList()
+        {
+            // Create a list of all found themes
+            List<string> items = new List<string>();
+
+            // Ensure the theme directory exists
+            if(!Directory.Exists("themes/"))
+                Directory.CreateDirectory("themes/");
+
+            // Add all theme directories if they're valid
+            foreach(string dir in Directory.EnumerateDirectories("themes/"))
+            {
+                string themeName = dir.Split('/')[1];
+
+                if(!File.Exists($"themes/{themeName}/view.xaml"))
+                    continue;
+
+                items.Add(themeName);
+            }
+
+            return items;
+        }
+
+        #endregion
     }
 }
