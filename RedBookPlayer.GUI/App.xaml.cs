@@ -5,14 +5,20 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using RedBookPlayer.GUI;
+using RedBookPlayer.GUI.ViewModels;
 using RedBookPlayer.GUI.Views;
 
 namespace RedBookPlayer
 {
     public class App : Application
     {
-        public static Settings Settings;
+        public static MainWindow        MainWindow;
+        public static SettingsViewModel Settings;
+
+        /// <summary>
+        /// Read-only access to the current player view
+        /// </summary>
+        public static PlayerView PlayerView => MainWindow?.ViewModel?.PlayerView;
 
         static App() =>
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
@@ -24,6 +30,7 @@ namespace RedBookPlayer
                 Console.WriteLine(((Exception)f.ExceptionObject).ToString());
             };
 
+            Settings = SettingsViewModel.Load("settings.json");
             AvaloniaXamlLoader.Load(this);
         }
 
@@ -31,10 +38,11 @@ namespace RedBookPlayer
         {
             if(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow   = new MainWindow();
+                MainWindow           = new MainWindow();
+                desktop.MainWindow   = MainWindow;
                 desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
-                Settings = Settings.Load("settings.json");
+                PlayerView.ViewModel.ApplyTheme(Settings.SelectedTheme);
             }
 
             base.OnFrameworkInitializationCompleted();

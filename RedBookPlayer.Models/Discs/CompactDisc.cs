@@ -26,7 +26,7 @@ namespace RedBookPlayer.Models.Discs
                     return;
 
                 // Data tracks only and flag disabled means we can't do anything
-                if(_image.Tracks.All(t => t.TrackType != TrackType.Audio) && !LoadDataTracks)
+                if(_image.Tracks.All(t => t.TrackType != TrackType.Audio) && DataPlayback == DataPlayback.Skip)
                     return;
 
                 // Cache the value and the current track number
@@ -69,8 +69,10 @@ namespace RedBookPlayer.Models.Discs
                     SetTrackFlags(track);
 
                     // If the track is playable, just return
-                    if(TrackType == TrackType.Audio || LoadDataTracks)
+                    if(TrackType == TrackType.Audio || DataPlayback != DataPlayback.Skip)
+                    {
                         break;
+                    }
 
                     // If we're not playing the track, skip
                     if(increment)
@@ -143,26 +145,28 @@ namespace RedBookPlayer.Models.Discs
                 if(_image == null)
                     return;
 
+                // If the sector is over the end of the image, then loop
+                ulong tempSector = value;
+                if(tempSector > _image.Info.Sectors)
+                    tempSector = 0;
+                else if(tempSector < 0)
+                    tempSector = _image.Info.Sectors - 1;
+
                 // Cache the current track for easy access
                 Track track = GetTrack(CurrentTrackNumber);
                 if(track == null)
                     return;
 
-                this.RaiseAndSetIfChanged(ref _currentSector, value);
+                this.RaiseAndSetIfChanged(ref _currentSector, tempSector);
 
-                if((CurrentTrackNumber < _image.Tracks.Count - 1 && CurrentSector >= (GetTrack(CurrentTrackNumber + 1)?.TrackStartSector ?? 0))
-                    || (CurrentTrackNumber > 0 && CurrentSector < track.TrackStartSector))
+                // If the current sector is outside of the last known track, seek to the right one
+                if(CurrentSector < track.TrackStartSector || CurrentSector > track.TrackEndSector)
                 {
-                    foreach(Track trackData in _image.Tracks.ToArray().Reverse())
-                    {
-                        if(CurrentSector >= trackData.TrackStartSector)
-                        {
-                            CurrentTrackNumber = (int)trackData.TrackSequence;
-                            break;
-                        }
-                    }
+                    track = _image.Tracks.Last(t => CurrentSector >= t.TrackStartSector);
+                    CurrentTrackNumber = (int)track.TrackSequence;
                 }
 
+                // Set the new index, if necessary
                 foreach((ushort key, int i) in track.Indexes.Reverse())
                 {
                     if((int)CurrentSector >= i)
@@ -216,9 +220,9 @@ namespace RedBookPlayer.Models.Discs
         }
 
         /// <summary>
-        /// Indicate if data tracks should be loaded
+        /// Indicate how data tracks should be handled
         /// </summary>
-        public bool LoadDataTracks { get; set; } = false;
+        public DataPlayback DataPlayback { get; set; } = DataPlayback.Skip;
 
         /// <summary>
         /// Indicate if hidden tracks should be loaded
@@ -264,14 +268,12 @@ namespace RedBookPlayer.Models.Discs
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="generateMissingToc">Generate a TOC if the disc is missing one</param>
-        /// <param name="loadHiddenTracks">Load hidden tracks for playback</param>
-        /// <param name="loadDataTracks">Load data tracks for playback</param>
-        public CompactDisc(bool generateMissingToc, bool loadHiddenTracks, bool loadDataTracks)
+        /// <param name="options">Set of options for a new disc</param>
+        public CompactDisc(OpticalDiscOptions options)
         {
-            _generateMissingToc = generateMissingToc;
-            LoadHiddenTracks = loadHiddenTracks;
-            LoadDataTracks = loadDataTracks;
+            DataPlayback = options.DataPlayback;
+            _generateMissingToc = options.GenerateMissingToc;
+            LoadHiddenTracks = options.LoadHiddenTracks;
         }
 
         /// <inheritdoc/>
@@ -392,7 +394,7 @@ namespace RedBookPlayer.Models.Discs
             }
 
             // If the previous index has an invalid offset, change tracks if needed
-            else if (track.Indexes[(ushort)(CurrentTrackIndex - 1)] < 0)
+            else if(track.Indexes[(ushort)(CurrentTrackIndex - 1)] < 0)
             {
                 if(changeTrack)
                 {
@@ -401,7 +403,7 @@ namespace RedBookPlayer.Models.Discs
                     return true;
                 }
             }
-            
+
             // Otherwise, just move to the previous index
             else
             {
@@ -416,23 +418,7 @@ namespace RedBookPlayer.Models.Discs
         #region Helpers
 
         /// <inheritdoc/>
-        public override void LoadFirstTrack()
-        {
-            CurrentTrackNumber = 1;
-            LoadTrack(CurrentTrackNumber);
-        }
-
-        /// <inheritdoc/>
-        public override void SetTotalIndexes()
-        {
-            if(_image == null)
-                return;
-
-            TotalIndexes = GetTrack(CurrentTrackNumber)?.Indexes.Keys.Max() ?? 0;
-        }
-
-        /// <inheritdoc/>
-        protected override void LoadTrack(int trackNumber)
+        public override void LoadTrack(int trackNumber)
         {
             if(_image == null)
                 return;
@@ -446,6 +432,33 @@ namespace RedBookPlayer.Models.Discs
 
             // Select the first index that has a sector offset greater than or equal to 0
             CurrentSector = (ulong)(track?.Indexes.OrderBy(kvp => kvp.Key).First(kvp => kvp.Value >= 0).Value ?? 0);
+        }
+
+        /// <inheritdoc/>
+        public override void LoadFirstTrack()
+        {
+            CurrentTrackNumber = 1;
+            LoadTrack(CurrentTrackNumber);
+        }
+
+        /// <inheritdoc/>
+        public override byte[] ReadSectors(uint sectorsToRead)
+        {
+            if(TrackType == TrackType.Audio || DataPlayback == DataPlayback.Play)
+                return base.ReadSectors(sectorsToRead);
+            else if(DataPlayback == DataPlayback.Blank)
+                return new byte[sectorsToRead * BytesPerSector];
+            else
+                return new byte[0];
+        }
+
+        /// <inheritdoc/>
+        public override void SetTotalIndexes()
+        {
+            if(_image == null)
+                return;
+
+            TotalIndexes = GetTrack(CurrentTrackNumber)?.Indexes.Keys.Max() ?? 0;
         }
 
         /// <summary>

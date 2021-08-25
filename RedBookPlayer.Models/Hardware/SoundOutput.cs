@@ -16,15 +16,19 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Indicate if the output is ready to be used
         /// </summary>
-        public bool Initialized { get; private set; } = false;
+        public bool Initialized
+        {
+            get => _initialized;
+            private set => this.RaiseAndSetIfChanged(ref _initialized, value);
+        }
 
         /// <summary>
-        /// Indicate if the output is playing
+        /// Indicates the current player state
         /// </summary>
-        public bool Playing
+        public PlayerState PlayerState
         {
-            get => _playing;
-            private set => this.RaiseAndSetIfChanged(ref _playing, value);
+            get => _playerState;
+            private set => this.RaiseAndSetIfChanged(ref _playerState, value);
         }
 
         /// <summary>
@@ -54,7 +58,8 @@ namespace RedBookPlayer.Models.Hardware
             }
         }
 
-        private bool _playing;
+        private bool _initialized;
+        private PlayerState _playerState;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -103,12 +108,17 @@ namespace RedBookPlayer.Models.Hardware
         #endregion
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
+        public SoundOutput(int defaultVolume = 100) => Volume = defaultVolume;
+
+        /// <summary>
         /// Initialize the output with a given image
         /// </summary>
         /// <param name="opticalDisc">OpticalDisc to load from</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public void Init(OpticalDiscBase opticalDisc, bool autoPlay = false, int defaultVolume = 100)
+        public void Init(OpticalDiscBase opticalDisc, bool autoPlay)
         {
             // If we have an unusable disc, just return
             if(opticalDisc == null || !opticalDisc.Initialized)
@@ -116,9 +126,6 @@ namespace RedBookPlayer.Models.Hardware
 
             // Save a reference to the disc
             _opticalDisc = opticalDisc;
-
-            // Set the initial playback volume
-            Volume = defaultVolume;
 
             // Enable de-emphasis for CDs, if necessary
             if(opticalDisc is CompactDisc compactDisc)
@@ -136,6 +143,7 @@ namespace RedBookPlayer.Models.Hardware
 
             // Mark the output as ready
             Initialized = true;
+            PlayerState = PlayerState.Stopped;
 
             // Begin loading data
             _source.Start();
@@ -163,56 +171,13 @@ namespace RedBookPlayer.Models.Hardware
             // Determine how many sectors we can read
             DetermineReadAmount(count, out ulong sectorsToRead, out ulong zeroSectorsAmount);
 
-            // Create padding data for overreads
-            byte[] zeroSectors = new byte[(int)zeroSectorsAmount * _opticalDisc.BytesPerSector];
-            byte[] audioData;
-
-            // Attempt to read the required number of sectors
-            var readSectorTask = Task.Run(() =>
-            {
-                lock(_readingImage)
-                {
-                    for(int i = 0; i < 4; i++)
-                    {
-                        try
-                        {
-                            return _opticalDisc.ReadSectors((uint)sectorsToRead).Concat(zeroSectors).ToArray();
-                        }
-                        catch(ArgumentOutOfRangeException)
-                        {
-                            _opticalDisc.LoadFirstTrack();
-                        }
-                    }
-
-                    return zeroSectors;
-                }
-            });
-
-            // Wait 100ms at longest for the read to occur
-            if(readSectorTask.Wait(TimeSpan.FromMilliseconds(100)))
-            {
-                audioData = readSectorTask.Result;
-            }
-            else
+            // Get data to return
+            byte[] audioDataSegment = ReadData(count, sectorsToRead, zeroSectorsAmount);
+            if(audioDataSegment == null)
             {
                 Array.Clear(buffer, offset, count);
                 return count;
             }
-
-            // Load only the requested audio segment
-            byte[] audioDataSegment = new byte[count];
-            int copyAmount = Math.Min(count, audioData.Length - _currentSectorReadPosition);
-            if(Math.Max(0, copyAmount) == 0)
-            {
-                Array.Clear(buffer, offset, count);
-                return count;
-            }
-
-            Array.Copy(audioData, _currentSectorReadPosition, audioDataSegment, 0, copyAmount);
-
-            // Apply de-emphasis filtering, only if enabled
-            if(ApplyDeEmphasis)
-                ProcessDeEmphasis(audioDataSegment);
 
             // Write out the audio data to the buffer
             Array.Copy(audioDataSegment, 0, buffer, offset, count);
@@ -221,6 +186,7 @@ namespace RedBookPlayer.Models.Hardware
             _currentSectorReadPosition += count;
             if(_currentSectorReadPosition >= _opticalDisc.BytesPerSector)
             {
+                int currentTrack = _opticalDisc.CurrentTrackNumber;
                 _opticalDisc.SetCurrentSector(_opticalDisc.CurrentSector + (ulong)(_currentSectorReadPosition / _opticalDisc.BytesPerSector));
                 _currentSectorReadPosition %= _opticalDisc.BytesPerSector;
             }
@@ -235,10 +201,10 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         public void Play()
         {
-            if (_soundOut.PlaybackState != PlaybackState.Playing)
+            if(_soundOut.PlaybackState != PlaybackState.Playing)
                 _soundOut.Play();
 
-            Playing = _soundOut.PlaybackState == PlaybackState.Playing;
+            PlayerState = PlayerState.Playing;
         }
 
         /// <summary>
@@ -249,7 +215,7 @@ namespace RedBookPlayer.Models.Hardware
             if(_soundOut.PlaybackState != PlaybackState.Paused)
                 _soundOut.Pause();
 
-            Playing = _soundOut.PlaybackState == PlaybackState.Playing;
+            PlayerState = PlayerState.Paused;
         }
 
         /// <summary>
@@ -260,7 +226,7 @@ namespace RedBookPlayer.Models.Hardware
             if(_soundOut.PlaybackState != PlaybackState.Stopped)
                 _soundOut.Stop();
 
-            Playing = _soundOut.PlaybackState == PlaybackState.Playing;
+            PlayerState = PlayerState.Stopped;
         }
 
         #endregion
@@ -270,7 +236,7 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Set de-emphasis status
         /// </summary>
-        /// <param name="apply"></param>
+        /// <param name="apply">New de-emphasis status</param>
         public void SetDeEmphasis(bool apply) => ApplyDeEmphasis = apply;
 
         /// <summary>
@@ -287,30 +253,19 @@ namespace RedBookPlayer.Models.Hardware
         /// <param name="zeroSectorsAmount">Number of zeroed sectors to concatenate</param>
         private void DetermineReadAmount(int count, out ulong sectorsToRead, out ulong zeroSectorsAmount)
         {
-            do
+            // Attempt to read 5 more sectors than requested
+            sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 5;
+            zeroSectorsAmount = 0;
+
+            // Avoid overreads by padding with 0-byte data at the end
+            if(_opticalDisc.CurrentSector + sectorsToRead > _opticalDisc.TotalSectors)
             {
-                // Attempt to read 2 more sectors than requested
-                sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 2;
-                zeroSectorsAmount = 0;
+                ulong oldSectorsToRead = sectorsToRead;
+                sectorsToRead = _opticalDisc.TotalSectors - _opticalDisc.CurrentSector;
 
-                // Avoid overreads by padding with 0-byte data at the end
-                if(_opticalDisc.CurrentSector + sectorsToRead > _opticalDisc.TotalSectors)
-                {
-                    ulong oldSectorsToRead = sectorsToRead;
-                    sectorsToRead = _opticalDisc.TotalSectors - _opticalDisc.CurrentSector;
-
-                    int tempZeroSectorCount = (int)(oldSectorsToRead - sectorsToRead);
-                    zeroSectorsAmount = (ulong)(tempZeroSectorCount < 0 ? 0 : tempZeroSectorCount);
-                }
-
-                // If we're reading past the last sector of the disc, wrap around
-                // TODO: Have past-end reads looping back controlled by a flag instead (Repeat? Repeat All?)
-                if(sectorsToRead <= 0)
-                {
-                    _opticalDisc.LoadFirstTrack();
-                    _currentSectorReadPosition = 0;
-                }
-            } while(sectorsToRead <= 0);
+                int tempZeroSectorCount = (int)(oldSectorsToRead - sectorsToRead);
+                zeroSectorsAmount = (ulong)(tempZeroSectorCount < 0 ? 0 : tempZeroSectorCount);
+            }
         }
 
         /// <summary>
@@ -331,6 +286,58 @@ namespace RedBookPlayer.Models.Hardware
             }
 
             ByteConverter.FromFloats16Bit(floatAudioData, audioData);
+        }
+
+        /// <summary>
+        /// Read the requested amount of data from an input
+        /// </summary>
+        /// <param name="count">Number of bytes to load</param>
+        /// <param name="sectorsToRead">Number of sectors to read</param>
+        /// <param name="zeroSectorsAmount">Number of zeroed sectors to concatenate</param>
+        /// <returns>The requested amount of data, if possible</returns>
+        private byte[] ReadData(int count, ulong sectorsToRead, ulong zeroSectorsAmount)
+        {
+            // Create padding data for overreads
+            byte[] zeroSectors = new byte[(int)zeroSectorsAmount * _opticalDisc.BytesPerSector];
+            byte[] audioData;
+
+            // Attempt to read the required number of sectors
+            var readSectorTask = Task.Run(() =>
+            {
+                lock(_readingImage)
+                {
+                    for(int i = 0; i < 4; i++)
+                    {
+                        try
+                        {
+                            return _opticalDisc.ReadSectors((uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                        }
+                        catch { }
+                    }
+
+                    return zeroSectors;
+                }
+            });
+
+            // Wait 100ms at longest for the read to occur
+            if(readSectorTask.Wait(TimeSpan.FromMilliseconds(100)))
+                audioData = readSectorTask.Result;
+            else
+                return null;
+
+            // Load only the requested audio segment
+            byte[] audioDataSegment = new byte[count];
+            int copyAmount = Math.Min(count, audioData.Length - _currentSectorReadPosition);
+            if(Math.Max(0, copyAmount) == 0)
+                return null;
+
+            Array.Copy(audioData, _currentSectorReadPosition, audioDataSegment, 0, copyAmount);
+
+            // Apply de-emphasis filtering, only if enabled
+            if(ApplyDeEmphasis)
+                ProcessDeEmphasis(audioDataSegment);
+
+            return audioDataSegment;
         }
 
         /// <summary>

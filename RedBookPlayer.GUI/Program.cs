@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 #endif
 using Avalonia;
 using Avalonia.Logging.Serilog;
+using Avalonia.ReactiveUI;
 
 namespace RedBookPlayer.GUI
 {
@@ -24,6 +25,6 @@ namespace RedBookPlayer.GUI
         static extern bool AllocConsole();
 #endif
 
-        public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UsePlatformDetect().LogToDebug();
+        public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UseReactiveUI().UsePlatformDetect().LogToDebug();
     }
 }

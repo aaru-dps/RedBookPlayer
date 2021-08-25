@@ -1,7 +1,17 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<ReactiveWindow xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+        xmlns:rxui="clr-namespace:Avalonia;assembly=Avalonia.ReactiveUI"
+        xmlns:viewModels="clr-namespace:RedBookPlayer.GUI.ViewModels;assembly=RedBookPlayer.GUI"
+        xmlns:views="clr-namespace:RedBookPlayer.GUI.Views;assembly=RedBookPlayer.GUI"
         x:Class="RedBookPlayer.GUI.Views.MainWindow" Title="RedBookPlayer" SizeToContent="WidthAndHeight"
-        DragDrop.AllowDrop="True">
-    <ContentControl Name="Content" />
-</Window>
+        CanResize="False" DragDrop.AllowDrop="True">
+    <ReactiveWindow.ViewModel>
+        <viewModels:MainViewModel/>
+    </ReactiveWindow.ViewModel>
+    <ContentControl Name="Content">
+        <ContentControl.Content>
+            <views:PlayerView/>
+        </ContentControl.Content>
+    </ContentControl>
+</ReactiveWindow>
