@@ -32,6 +32,15 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Indicates the repeat mode
+        /// </summary>
+        public RepeatMode RepeatMode
+        {
+            get => _repeatMode;
+            private set => this.RaiseAndSetIfChanged(ref _repeatMode, value);
+        }
+        
+        /// <summary>
         /// Indicates if de-emphasis should be applied
         /// </summary>
         public bool ApplyDeEmphasis
@@ -60,6 +69,7 @@ namespace RedBookPlayer.Models.Hardware
 
         private bool _initialized;
         private PlayerState _playerState;
+        private RepeatMode _repeatMode;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -117,8 +127,9 @@ namespace RedBookPlayer.Models.Hardware
         /// Initialize the output with a given image
         /// </summary>
         /// <param name="opticalDisc">OpticalDisc to load from</param>
+        /// <param name="repeatMode">RepeatMode for sound output</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(OpticalDiscBase opticalDisc, bool autoPlay)
+        public void Init(OpticalDiscBase opticalDisc, RepeatMode repeatMode, bool autoPlay)
         {
             // If we have an unusable disc, just return
             if(opticalDisc == null || !opticalDisc.Initialized)
@@ -137,6 +148,9 @@ namespace RedBookPlayer.Models.Hardware
             // Setup the audio output
             SetupAudio();
 
+            // Setup the repeat mode
+            RepeatMode = repeatMode;
+
             // Initialize playback, if necessary
             if(autoPlay)
                 _soundOut.Play();
@@ -147,6 +161,17 @@ namespace RedBookPlayer.Models.Hardware
 
             // Begin loading data
             _source.Start();
+        }
+
+        /// <summary>
+        /// Reset the current internal state
+        /// </summary>
+        public void Reset()
+        {
+            _soundOut.Stop();
+            _opticalDisc = null;
+            Initialized = false;
+            PlayerState = PlayerState.NoDisc;
         }
 
         /// <summary>
@@ -189,6 +214,11 @@ namespace RedBookPlayer.Models.Hardware
                 int currentTrack = _opticalDisc.CurrentTrackNumber;
                 _opticalDisc.SetCurrentSector(_opticalDisc.CurrentSector + (ulong)(_currentSectorReadPosition / _opticalDisc.BytesPerSector));
                 _currentSectorReadPosition %= _opticalDisc.BytesPerSector;
+
+                if(RepeatMode == RepeatMode.None && _opticalDisc.CurrentTrackNumber < currentTrack)
+                    Stop();
+                else if(RepeatMode == RepeatMode.Single && _opticalDisc.CurrentTrackNumber != currentTrack)
+                    _opticalDisc.LoadTrack(currentTrack);
             }
 
             return count;
@@ -229,6 +259,11 @@ namespace RedBookPlayer.Models.Hardware
             PlayerState = PlayerState.Stopped;
         }
 
+        /// <summary>
+        /// Eject the currently loaded disc
+        /// </summary>
+        public void Eject() => Reset();
+
         #endregion
 
         #region Helpers
@@ -238,6 +273,12 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         /// <param name="apply">New de-emphasis status</param>
         public void SetDeEmphasis(bool apply) => ApplyDeEmphasis = apply;
+
+        /// <summary>
+        /// Set repeat mode
+        /// </summary>
+        /// <param name="repeatMode">New repeat mode value</param>
+        public void SetRepeatMode(RepeatMode repeatMode) => RepeatMode = repeatMode;
 
         /// <summary>
         /// Set the value for the volume
@@ -253,8 +294,8 @@ namespace RedBookPlayer.Models.Hardware
         /// <param name="zeroSectorsAmount">Number of zeroed sectors to concatenate</param>
         private void DetermineReadAmount(int count, out ulong sectorsToRead, out ulong zeroSectorsAmount)
         {
-            // Attempt to read 5 more sectors than requested
-            sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 5;
+            // Attempt to read 10 more sectors than requested
+            sectorsToRead = ((ulong)count / (ulong)_opticalDisc.BytesPerSector) + 10;
             zeroSectorsAmount = 0;
 
             // Avoid overreads by padding with 0-byte data at the end

@@ -40,6 +40,23 @@ namespace RedBookPlayer.GUI.ViewModels
                 PlayerView?.ViewModel?.ExecuteLoad();
             }
 
+            // Save track(s)
+            else if(e.Key == App.Settings.SaveTrackKey)
+            {
+                if(PlayerView?.ViewModel == null || !PlayerView.ViewModel.Initialized)
+                    return;
+
+                var dialog = new OpenFolderDialog();
+                string path = await dialog.ShowAsync(App.MainWindow);
+                if(string.IsNullOrWhiteSpace(path))
+                    return;
+
+                if(e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                    PlayerView.ViewModel.ExtractAllTracksToWav(path);
+                else
+                    PlayerView.ViewModel.ExtractSingleTrackToWav((uint)PlayerView.ViewModel.CurrentTrackNumber, path);
+            }
+
             // Toggle playback
             else if(e.Key == App.Settings.TogglePlaybackKey || e.Key == Key.MediaPlayPause)
             {
@@ -50,6 +67,12 @@ namespace RedBookPlayer.GUI.ViewModels
             else if(e.Key == App.Settings.StopPlaybackKey || e.Key == Key.MediaStop)
             {
                 PlayerView?.ViewModel?.ExecuteStop();
+            }
+
+            // Eject
+            else if(e.Key == App.Settings.EjectKey)
+            {
+                PlayerView?.ViewModel?.ExecuteEject();
             }
 
             // Next Track

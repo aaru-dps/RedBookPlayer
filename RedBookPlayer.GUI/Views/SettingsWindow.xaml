@@ -31,6 +31,16 @@
                                       Items="{Binding DataPlaybackValues}" SelectedItem="{Binding DataPlayback, Mode=TwoWay}" />
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Width="120">Session Handling</TextBlock>
+                            <ComboBox Grid.Row="0" Grid.Column="1" Name="SessionHandling" Margin="8,0,0,0" Width="120"
+                                      Items="{Binding SessionHandlingValues}" SelectedItem="{Binding SessionHandling, Mode=TwoWay}" />
+                        </WrapPanel>
+                        <WrapPanel Margin="0,0,0,16">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Width="120">Repeat Mode</TextBlock>
+                            <ComboBox Grid.Row="0" Grid.Column="1" Name="RepeatMode" Margin="8,0,0,0" Width="120"
+                                      Items="{Binding RepeatModeValues}" SelectedItem="{Binding RepeatMode, Mode=TwoWay}" />
+                        </WrapPanel>
+                        <WrapPanel Margin="0,0,0,16">
                             <CheckBox IsChecked="{Binding GenerateMissingTOC}" Margin="0,0,8,0"/>
                             <TextBlock VerticalAlignment="Center">Generate a TOC if the disc is missing one</TextBlock>
                         </WrapPanel>
@@ -76,6 +86,12 @@
                     <TextBlock Grid.Row="0" Grid.Column="0" Width="120">Load Image</TextBlock>
                     <ComboBox Grid.Row="0" Grid.Column="1" Name="LoadImageKeyBind"
                               Items="{Binding KeyboardList}" SelectedItem="{Binding LoadImageKey, Mode=TwoWay}"
+                              HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
+
+                    <!-- Save Track -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Width="120">Save Track(s)</TextBlock>
+                    <ComboBox Grid.Row="1" Grid.Column="1" Name="SaveTrackKeyBind"
+                              Items="{Binding KeyboardList}" SelectedItem="{Binding SaveTrackKey, Mode=TwoWay}"
                               HorizontalAlignment="Right" Margin="8,0,0,0" Width="120"/>
 
                     <!-- Toggle Play/Pause -->

@@ -46,4 +46,41 @@ namespace RedBookPlayer.Models
         /// </summary>
         Playing,
     }
+
+    /// <summary>
+    /// Playback repeat mode
+    /// </summary>
+    public enum RepeatMode
+    {
+        /// <summary>
+        /// No repeat
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Repeat a single track
+        /// </summary>
+        Single,
+
+        /// <summary>
+        /// Repeat all tracks
+        /// </summary>
+        All,
+    }
+
+    /// <summary>
+    /// Determine how to handle different sessions
+    /// </summary>
+    public enum SessionHandling
+    {
+        /// <summary>
+        /// Allow playing tracks from all sessions
+        /// </summary>
+        AllSessions = 0,
+
+        /// <summary>
+        /// Only play tracks from the first session
+        /// </summary>
+        FirstSessionOnly = 1,
+    }
 }
