@@ -131,13 +131,13 @@ namespace RedBookPlayer.Models.Discs
         /// Extract a track to WAV
         /// </summary>
         /// <param name="trackNumber">Track number to extract</param>
-        /// <param name="outputDirectory">Output path to write data to</param
+        /// <param name="outputDirectory">Output path to write data to</param>
         public abstract void ExtractTrackToWav(uint trackNumber, string outputDirectory);
 
         /// <summary>
         /// Extract all tracks to WAV
         /// </summary>
-        /// <param name="outputDirectory">Output path to write data to</param
+        /// <param name="outputDirectory">Output path to write data to</param>
         public abstract void ExtractAllTracksToWav(string outputDirectory);
 
         /// <summary>

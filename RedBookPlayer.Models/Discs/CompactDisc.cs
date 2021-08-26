@@ -449,17 +449,22 @@ namespace RedBookPlayer.Models.Discs
             Track track = _image.Tracks.FirstOrDefault(t => t.TrackSequence == trackNumber);
 
             // If the track isn't valid, we can't do anything
-            if(track == null || track.TrackType != TrackType.Audio)
+            if(track == null || !(DataPlayback != DataPlayback.Skip || track.TrackType == TrackType.Audio))
                 return;
 
-            // Read in the track data to a buffer
+            // Get the number of sectors to read
             uint length = (uint)(track.TrackEndSector - track.TrackStartSector);
-            byte[] buffer = _image.ReadSectors(track.TrackStartSector, length);
+
+            // Read in the track data to a buffer
+            byte[] buffer = ReadSectors(track.TrackStartSector, length);
 
             // Build the WAV output
             string filename = Path.Combine(outputDirectory, $"Track {trackNumber.ToString().PadLeft(2, '0')}.wav");
             using(WaveWriter waveWriter = new WaveWriter(filename, new CSCore.WaveFormat()))
             {
+                // TODO: This should also apply de-emphasis as on playback
+                // Should this be configurable? Match the de-emphasis status?
+
                 // Write out to the file
                 waveWriter.Write(buffer, 0, buffer.Length);
             }
@@ -502,14 +507,30 @@ namespace RedBookPlayer.Models.Discs
         }
 
         /// <inheritdoc/>
-        public override byte[] ReadSectors(uint sectorsToRead)
+        public override byte[] ReadSectors(uint sectorsToRead) => ReadSectors(CurrentSector, sectorsToRead);
+
+        /// <summary>
+        /// Read sector data from the base image starting from the specified sector
+        /// </summary>
+        /// <param name="startSector">Sector to start at for reading</param>
+        /// <param name="sectorsToRead">Current number of sectors to read</param>
+        /// <returns>Byte array representing the read sectors, if possible</returns>
+        private byte[] ReadSectors(ulong startSector, uint sectorsToRead)
         {
             if(TrackType == TrackType.Audio || DataPlayback == DataPlayback.Play)
-                return base.ReadSectors(sectorsToRead);
+            {
+                return _image.ReadSectors(startSector, sectorsToRead);
+            }
             else if(DataPlayback == DataPlayback.Blank)
-                return new byte[sectorsToRead * BytesPerSector];
+            {
+                byte[] sectors = _image.ReadSectors(startSector, sectorsToRead);
+                Array.Clear(sectors, 0, sectors.Length);
+                return sectors;
+            }
             else
+            {
                 return new byte[0];
+            }
         }
 
         /// <inheritdoc/>

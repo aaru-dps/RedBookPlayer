@@ -535,12 +535,12 @@ namespace RedBookPlayer.Models.Hardware
         /// Extract a single track from the image to WAV
         /// </summary>
         /// <param name="trackNumber"></param>
-        /// <param name="outputDirectory">Output path to write data to</param
+        /// <param name="outputDirectory">Output path to write data to</param>
         public void ExtractSingleTrackToWav(uint trackNumber, string outputDirectory) => _opticalDisc?.ExtractTrackToWav(trackNumber, outputDirectory);
 
         /// <summary>
         /// Extract all tracks from the image to WAV
-        /// <param name="outputDirectory">Output path to write data to</param
+        /// <param name="outputDirectory">Output path to write data to</param>
         public void ExtractAllTracksToWav(string outputDirectory) => _opticalDisc?.ExtractAllTracksToWav(outputDirectory);
 
         /// <summary>
