@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using CSCore.SoundOut;
 using NWaves.Audio;
-using NWaves.Filters.BiQuad;
 using ReactiveUI;
 using RedBookPlayer.Models.Discs;
 
@@ -96,14 +95,9 @@ namespace RedBookPlayer.Models.Hardware
         private ALSoundOut _soundOut;
 
         /// <summary>
-        /// Left channel de-emphasis filter
+        /// Filtering stage for audio output
         /// </summary>
-        private BiQuadFilter _deEmphasisFilterLeft;
-
-        /// <summary>
-        /// Right channel de-emphasis filter
-        /// </summary>
-        private BiQuadFilter _deEmphasisFilterRight;
+        private FilterStage _filterStage;
 
         /// <summary>
         /// Current position in the sector
@@ -121,7 +115,12 @@ namespace RedBookPlayer.Models.Hardware
         /// Constructor
         /// </summary>
         /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public SoundOutput(int defaultVolume = 100) => Volume = defaultVolume;
+        public SoundOutput(int defaultVolume = 100)
+        {
+            Volume = defaultVolume;
+            _filterStage = new FilterStage();
+        }
+        
 
         /// <summary>
         /// Initialize the output with a given image
@@ -143,7 +142,7 @@ namespace RedBookPlayer.Models.Hardware
                 ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
 
             // Setup de-emphasis filters
-            SetupFilters();
+            _filterStage.SetupFilters();
 
             // Setup the audio output
             SetupAudio();
@@ -310,26 +309,6 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
-        /// Process de-emphasis of audio data
-        /// </summary>
-        /// <param name="audioData">Audio data to process</param>
-        private void ProcessDeEmphasis(byte[] audioData)
-        {
-            float[][] floatAudioData = new float[2][];
-            floatAudioData[0] = new float[audioData.Length / 4];
-            floatAudioData[1] = new float[audioData.Length / 4];
-            ByteConverter.ToFloats16Bit(audioData, floatAudioData);
-
-            for(int i = 0; i < floatAudioData[0].Length; i++)
-            {
-                floatAudioData[0][i] = _deEmphasisFilterLeft.Process(floatAudioData[0][i]);
-                floatAudioData[1][i] = _deEmphasisFilterRight.Process(floatAudioData[1][i]);
-            }
-
-            ByteConverter.FromFloats16Bit(floatAudioData, audioData);
-        }
-
-        /// <summary>
         /// Read the requested amount of data from an input
         /// </summary>
         /// <param name="count">Number of bytes to load</param>
@@ -376,26 +355,9 @@ namespace RedBookPlayer.Models.Hardware
 
             // Apply de-emphasis filtering, only if enabled
             if(ApplyDeEmphasis)
-                ProcessDeEmphasis(audioDataSegment);
+                _filterStage.ProcessAudioData(audioDataSegment);
 
             return audioDataSegment;
-        }
-
-        /// <summary>
-        /// Sets or resets the de-emphasis filters
-        /// </summary>
-        private void SetupFilters()
-        {
-            if(_deEmphasisFilterLeft == null)
-            {
-                _deEmphasisFilterLeft = new DeEmphasisFilter();
-                _deEmphasisFilterRight = new DeEmphasisFilter();
-            }
-            else
-            {
-                _deEmphasisFilterLeft.Reset();
-                _deEmphasisFilterRight.Reset();
-            }
         }
 
         /// <summary>
