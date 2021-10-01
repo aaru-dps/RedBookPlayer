@@ -12,8 +12,10 @@
 | --- | ------ |
 | **F1**  | Open Settings Window |
 | **F2** | Load New Image |
+| **S** | Save Track(s) |
 | **Space** | Toggle Play / Pause |
 | **Esc** | Stop Playback |
+| **~** | Eject |
 | **&#8594;** | Next Track |
 | **&#8592;** | Previous Track |
 | **]** | Next Index |
@@ -24,6 +26,10 @@
 | **Numpad -** | Volume Down |
 | **M** | Mute |
 | **E** | Toggle Emphasis |
+
+For Save Track(s):
+- Holding no modifying keys will prompt to save the current track
+- Holding **Shift** will prompt to save all tracks (including hidden)
 
 For both Volume Up and Volume Down:
 - Holding **Ctrl** will move in increments of 2

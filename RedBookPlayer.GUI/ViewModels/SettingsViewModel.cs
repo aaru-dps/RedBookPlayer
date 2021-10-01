@@ -22,6 +22,18 @@ namespace RedBookPlayer.GUI.ViewModels
         public List<DataPlayback> DataPlaybackValues => GenerateDataPlaybackList();
 
         /// <summary>
+        /// List of all repeat mode values
+        /// </summary>
+        [JsonIgnore]
+        public List<RepeatMode> RepeatModeValues => GenerateRepeatModeList();
+
+        /// <summary>
+        /// List of all session handling values
+        /// </summary>
+        [JsonIgnore]
+        public List<SessionHandling> SessionHandlingValues => GenerateSessionHandlingList();
+
+        /// <summary>
         /// List of all themes
         /// </summary>
         [JsonIgnore]
@@ -56,6 +68,16 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Indicates how to deal with data tracks
         /// </summary>
         public DataPlayback DataPlayback { get; set; } = DataPlayback.Skip;
+
+        /// <summary>
+        /// Indicates how to repeat tracks
+        /// </summary>
+        public RepeatMode RepeatMode { get; set; } = RepeatMode.All;
+
+        /// <summary>
+        /// Indicates how to handle tracks on different sessions
+        /// </summary>
+        public SessionHandling SessionHandling { get; set; } = SessionHandling.FirstSessionOnly;
 
         /// <summary>
         /// Indicates the default playback volume
@@ -101,6 +123,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Key assigned to load a new image
         /// </summary>
         public Key LoadImageKey { get; set; } = Key.F2;
+
+        /// <summary>
+        /// Key assigned to save the current track or all tracks
+        /// </summary>
+        public Key SaveTrackKey { get; set; } = Key.S;
 
         /// <summary>
         /// Key assigned to toggle play and pause
@@ -252,6 +279,16 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Generate the list of Key values
         /// </summary>
         private List<Key> GenerateKeyList() => Enum.GetValues(typeof(Key)).Cast<Key>().ToList();
+
+        /// <summary>
+        /// Generate the list of RepeatMode values
+        /// </summary>
+        private List<RepeatMode> GenerateRepeatModeList() => Enum.GetValues(typeof(RepeatMode)).Cast<RepeatMode>().ToList();
+
+        /// <summary>
+        /// Generate the list of SessionHandling values
+        /// </summary>
+        private List<SessionHandling> GenerateSessionHandlingList() => Enum.GetValues(typeof(SessionHandling)).Cast<SessionHandling>().ToList();
 
         /// <summary>
         /// Generate the list of valid themes

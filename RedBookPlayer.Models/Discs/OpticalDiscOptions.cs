@@ -19,6 +19,11 @@ namespace RedBookPlayer.Models.Discs
         /// </summary>
         public bool LoadHiddenTracks { get; set; } = false;
 
+        /// <summary>
+        /// Indicates how tracks on different session should be handled
+        /// </summary>
+        public SessionHandling SessionHandling { get; set; } = SessionHandling.AllSessions;
+
         #endregion
     }
 }

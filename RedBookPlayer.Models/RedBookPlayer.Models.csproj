@@ -6,13 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aaru.CommonTypes" Version="5.3.0" />
+    <PackageReference Include="Aaru.Decoders" Version="5.3.0" />
+    <PackageReference Include="Aaru.Images" Version="5.3.0" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.12" />
     <PackageReference Include="NWaves" Version="0.9.4" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Aaru\Aaru.Images\Aaru.Images.csproj" />
-    <ProjectReference Include="..\Aaru\Aaru.CommonTypes\Aaru.CommonTypes.csproj" />
-    <ProjectReference Include="..\Aaru\Aaru.Decoders\Aaru.Decoders.csproj" />
     <ProjectReference Include="..\cscore\CSCore\CSCore.csproj" />
   </ItemGroup>
 

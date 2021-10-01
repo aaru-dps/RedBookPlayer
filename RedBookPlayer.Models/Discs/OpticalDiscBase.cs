@@ -24,6 +24,11 @@ namespace RedBookPlayer.Models.Discs
         public abstract ushort CurrentTrackIndex { get; protected set; }
 
         /// <summary>
+        /// Current track session
+        /// </summary>
+        public abstract ushort CurrentTrackSession { get; protected set; }
+
+        /// <summary>
         /// Current sector number
         /// </summary>
         public abstract ulong CurrentSector { get; protected set; }
@@ -121,6 +126,19 @@ namespace RedBookPlayer.Models.Discs
         #endregion
 
         #region Helpers
+
+        /// <summary>
+        /// Extract a track to WAV
+        /// </summary>
+        /// <param name="trackNumber">Track number to extract</param>
+        /// <param name="outputDirectory">Output path to write data to</param>
+        public abstract void ExtractTrackToWav(uint trackNumber, string outputDirectory);
+
+        /// <summary>
+        /// Extract all tracks to WAV
+        /// </summary>
+        /// <param name="outputDirectory">Output path to write data to</param>
+        public abstract void ExtractAllTracksToWav(string outputDirectory);
 
         /// <summary>
         /// Load the desired track, if possible

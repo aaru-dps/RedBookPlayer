@@ -40,6 +40,15 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Current track session
+        /// </summary>
+        public ushort CurrentTrackSession
+        {
+            get => _currentTrackSession;
+            private set => this.RaiseAndSetIfChanged(ref _currentTrackSession, value);
+        }
+
+        /// <summary>
         /// Current sector number
         /// </summary>
         public ulong CurrentSector
@@ -129,6 +138,7 @@ namespace RedBookPlayer.Models.Hardware
 
         private int _currentTrackNumber;
         private ushort _currentTrackIndex;
+        private ushort _currentTrackSession;
         private ulong _currentSector;
         private ulong _sectionStartSector;
 
@@ -161,6 +171,15 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Indicates the repeat mode
+        /// </summary>
+        public RepeatMode RepeatMode
+        {
+            get => _repeatMode;
+            private set => this.RaiseAndSetIfChanged(ref _repeatMode, value);
+        }
+
+        /// <summary>
         /// Indicates if de-emphasis should be applied
         /// </summary>
         public bool ApplyDeEmphasis
@@ -180,6 +199,7 @@ namespace RedBookPlayer.Models.Hardware
 
         private PlayerState _playerState;
         private DataPlayback _dataPlayback;
+        private RepeatMode _repeatMode;
         private bool _applyDeEmphasis;
         private int _volume;
 
@@ -220,8 +240,9 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         /// <param name="path">Path to the disc image</param>
         /// <param name="options">Options to pass to the optical disc factory</param>
+        /// <param name="repeatMode">RepeatMode for sound output</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, OpticalDiscOptions options, bool autoPlay)
+        public void Init(string path, OpticalDiscOptions options, RepeatMode repeatMode, bool autoPlay)
         {
             // Reset initialization
             Initialized = false;
@@ -235,7 +256,7 @@ namespace RedBookPlayer.Models.Hardware
             _opticalDisc.PropertyChanged += OpticalDiscStateChanged;
 
             // Initialize the sound output
-            _soundOutput.Init(_opticalDisc, autoPlay);
+            _soundOutput.Init(_opticalDisc, repeatMode, autoPlay);
             if(_soundOutput == null || !_soundOutput.Initialized)
                 return;
 
@@ -321,6 +342,23 @@ namespace RedBookPlayer.Models.Hardware
             _soundOutput.Stop();
             _opticalDisc.LoadFirstTrack();
             PlayerState = PlayerState.Stopped;
+        }
+
+        /// <summary>
+        /// Eject the currently loaded disc
+        /// </summary>
+        public void Eject()
+        {
+            if(_opticalDisc == null || !_opticalDisc.Initialized)
+                return;
+            else if(_soundOutput == null)
+                return;
+
+            Stop();
+            _soundOutput.Eject();
+            _opticalDisc = null;
+            PlayerState = PlayerState.NoDisc;
+            Initialized = false;
         }
 
         /// <summary>
@@ -494,6 +532,18 @@ namespace RedBookPlayer.Models.Hardware
         #region Helpers
 
         /// <summary>
+        /// Extract a single track from the image to WAV
+        /// </summary>
+        /// <param name="trackNumber"></param>
+        /// <param name="outputDirectory">Output path to write data to</param>
+        public void ExtractSingleTrackToWav(uint trackNumber, string outputDirectory) => _opticalDisc?.ExtractTrackToWav(trackNumber, outputDirectory);
+
+        /// <summary>
+        /// Extract all tracks from the image to WAV
+        /// <param name="outputDirectory">Output path to write data to</param>
+        public void ExtractAllTracksToWav(string outputDirectory) => _opticalDisc?.ExtractAllTracksToWav(outputDirectory);
+
+        /// <summary>
         /// Set data playback method [CompactDisc only]
         /// </summary>
         /// <param name="dataPlayback">New playback value</param>
@@ -511,6 +561,22 @@ namespace RedBookPlayer.Models.Hardware
         {
             if(_opticalDisc is CompactDisc compactDisc)
                 compactDisc.LoadHiddenTracks = load;
+        }
+
+        /// <summary>
+        /// Set repeat mode
+        /// </summary>
+        /// <param name="repeatMode">New repeat mode value</param>
+        public void SetRepeatMode(RepeatMode repeatMode) => _soundOutput?.SetRepeatMode(repeatMode);
+
+        /// <summary>
+        /// Set the value for session handling [CompactDisc only]
+        /// </summary>
+        /// <param name="sessionHandling">New session handling value</param>
+        public void SetSessionHandling(SessionHandling sessionHandling)
+        {
+            if(_opticalDisc is CompactDisc compactDisc)
+                compactDisc.SessionHandling = sessionHandling;
         }
 
         /// <summary>
@@ -547,6 +613,7 @@ namespace RedBookPlayer.Models.Hardware
         private void SoundOutputStateChanged(object sender, PropertyChangedEventArgs e)
         {
             PlayerState = _soundOutput.PlayerState;
+            RepeatMode = _soundOutput.RepeatMode;
             ApplyDeEmphasis = _soundOutput.ApplyDeEmphasis;
             Volume = _soundOutput.Volume;
         }
