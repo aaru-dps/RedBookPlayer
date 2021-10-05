@@ -299,13 +299,14 @@ namespace RedBookPlayer.Models.Discs
         }
 
         /// <inheritdoc/>
-        public override void Init(IOpticalMediaImage image, bool autoPlay)
+        public override void Init(string path, IOpticalMediaImage image, bool autoPlay)
         {
             // If the image is null, we can't do anything
             if(image == null)
                 return;
 
             // Set the current disc image
+            ImagePath = path;
             _image = image;
 
             // Attempt to load the TOC

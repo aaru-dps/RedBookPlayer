@@ -103,7 +103,8 @@
             <TextBlock Margin="0,0,16,0" IsVisible="{Binding QuadChannel}">4CH</TextBlock>
             <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !HiddenTrack}">HIDDEN</TextBlock>
             <TextBlock Margin="0,0,16,0" IsVisible="{Binding HiddenTrack}">HIDDEN</TextBlock>
-            <TextBlock Margin="0,0,16,0" Text="{Binding Volume}"/>
+            <TextBlock Margin="0,0,16,0" Text="{Binding Volume, StringFormat='Volume {0}%'}"/>
+            <TextBlock Margin="0,0,16,0" Text="{Binding CurrentDisc, StringFormat='Disc Number: {0}'}"/>
         </StackPanel>
     </StackPanel>
 </ReactiveUserControl>

@@ -16,6 +16,8 @@
 | **Space** | Toggle Play / Pause |
 | **Esc** | Stop Playback |
 | **~** | Eject |
+| **Page Up** | Next Disc |
+| **Page Down** | Previous Disc |
 | **&#8594;** | Next Track |
 | **&#8592;** | Previous Track |
 | **]** | Next Index |

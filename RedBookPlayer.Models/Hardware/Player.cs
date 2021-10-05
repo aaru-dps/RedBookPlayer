@@ -42,6 +42,15 @@ namespace RedBookPlayer.Models.Hardware
         #region OpticalDisc Passthrough
 
         /// <summary>
+        /// Path to the disc image
+        /// </summary>
+        public string ImagePath
+        {
+            get => _imagePath;
+            private set => this.RaiseAndSetIfChanged(ref _imagePath, value);
+        }
+
+        /// <summary>
         /// Current track number
         /// </summary>
         public int CurrentTrackNumber
@@ -156,6 +165,7 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         public ulong TotalTime => _opticalDiscs[CurrentDisc]?.TotalTime ?? 0;
 
+        private string _imagePath;
         private int _currentTrackNumber;
         private ushort _currentTrackIndex;
         private ushort _currentTrackSession;
@@ -669,6 +679,7 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         private void OpticalDiscStateChanged(object sender, PropertyChangedEventArgs e)
         {
+            ImagePath = _opticalDiscs[CurrentDisc].ImagePath;
             CurrentTrackNumber = _opticalDiscs[CurrentDisc].CurrentTrackNumber;
             CurrentTrackIndex = _opticalDiscs[CurrentDisc].CurrentTrackIndex;
             CurrentSector = _opticalDiscs[CurrentDisc].CurrentSector;

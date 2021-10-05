@@ -75,6 +75,18 @@ namespace RedBookPlayer.GUI.ViewModels
                 PlayerView?.ViewModel?.ExecuteEject();
             }
 
+            // Next Disc
+            else if(e.Key == App.Settings.NextDiscKey)
+            {
+                PlayerView?.ViewModel?.ExecuteNextDisc();
+            }
+
+            // Previous Disc
+            else if(e.Key == App.Settings.PreviousDiscKey)
+            {
+                PlayerView?.ViewModel?.ExecutePreviousDisc();
+            }
+
             // Next Track
             else if(e.Key == App.Settings.NextTrackKey || e.Key == Key.MediaNextTrack)
             {

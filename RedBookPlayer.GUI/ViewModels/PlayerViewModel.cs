@@ -45,6 +45,15 @@ namespace RedBookPlayer.GUI.ViewModels
         #region OpticalDisc Passthrough
 
         /// <summary>
+        /// Path to the disc image
+        /// </summary>
+        public string ImagePath
+        {
+            get => _imagePath;
+            private set => this.RaiseAndSetIfChanged(ref _imagePath, value);
+        }
+
+        /// <summary>
         /// Current track number
         /// </summary>
         public int CurrentTrackNumber
@@ -159,6 +168,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public ulong TotalTime => _player.TotalTime;
 
+        private string _imagePath;
         private int _currentTrackNumber;
         private ushort _currentTrackIndex;
         private ushort _currentTrackSession;
@@ -275,6 +285,16 @@ namespace RedBookPlayer.GUI.ViewModels
         public ReactiveCommand<Unit, Unit> EjectCommand { get; }
 
         /// <summary>
+        /// Command for moving to the next disc
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> NextDiscCommand { get; }
+
+        /// <summary>
+        /// Command for moving to the previous disc
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> PreviousDiscCommand { get; }
+
+        /// <summary>
         /// Command for moving to the next track
         /// </summary>
         public ReactiveCommand<Unit, Unit> NextTrackCommand { get; }
@@ -359,6 +379,8 @@ namespace RedBookPlayer.GUI.ViewModels
             TogglePlayPauseCommand = ReactiveCommand.Create(ExecuteTogglePlayPause);
             StopCommand = ReactiveCommand.Create(ExecuteStop);
             EjectCommand = ReactiveCommand.Create(ExecuteEject);
+            NextDiscCommand = ReactiveCommand.Create(ExecuteNextDisc);
+            PreviousDiscCommand = ReactiveCommand.Create(ExecutePreviousDisc);
             NextTrackCommand = ReactiveCommand.Create(ExecuteNextTrack);
             PreviousTrackCommand = ReactiveCommand.Create(ExecutePreviousTrack);
             NextIndexCommand = ReactiveCommand.Create(ExecuteNextIndex);
@@ -819,7 +841,16 @@ namespace RedBookPlayer.GUI.ViewModels
                 });
             }
 
+            ImagePath = _player.ImagePath;
             Initialized = _player.Initialized;
+
+            if (!string.IsNullOrWhiteSpace(ImagePath) && Initialized)
+            {
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    App.MainWindow.Title = "RedBookPlayer - " + ImagePath.Split('/').Last().Split('\\').Last();
+                });
+            }
 
             CurrentDisc = _player.CurrentDisc;
             CurrentTrackNumber = _player.CurrentTrackNumber;

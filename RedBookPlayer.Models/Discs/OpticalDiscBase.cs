@@ -9,6 +9,11 @@ namespace RedBookPlayer.Models.Discs
         #region Public Fields
 
         /// <summary>
+        /// Path to the disc image
+        /// </summary>
+        public string ImagePath { get; protected set; }
+
+        /// <summary>
         /// Indicate if the disc is ready to be used
         /// </summary>
         public bool Initialized { get; protected set; } = false;
@@ -93,9 +98,10 @@ namespace RedBookPlayer.Models.Discs
         /// <summary>
         /// Initialize the disc with a given image
         /// </summary>
+        /// <param name="path">Path of the image</param>
         /// <param name="image">Aaruformat image to load</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public abstract void Init(IOpticalMediaImage image, bool autoPlay);
+        public abstract void Init(string path, IOpticalMediaImage image, bool autoPlay);
 
         #region Seeking
 
