@@ -387,6 +387,56 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Move to the next loaded disc
+        /// </summary>
+        public void NextDisc()
+        {
+            PlayerState wasPlaying = PlayerState;
+            if (wasPlaying == PlayerState.Playing)
+                Stop();
+
+            int lastdisc = CurrentDisc++;
+            while (CurrentDisc != lastdisc)
+            {
+                if (_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
+                    break;
+
+                CurrentDisc++;
+            }
+
+            OpticalDiscStateChanged(this, null);
+            SoundOutputStateChanged(this, null);
+
+            if(wasPlaying == PlayerState.Playing)
+                Play();
+        }
+
+        /// <summary>
+        /// Move to the previous loaded disc
+        /// </summary>
+        public void PreviousDisc()
+        {
+            PlayerState wasPlaying = PlayerState;
+            if (wasPlaying == PlayerState.Playing)
+                Stop();
+
+            int lastdisc = CurrentDisc--;
+            while (CurrentDisc != lastdisc)
+            {
+                if (_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
+                    break;
+
+                CurrentDisc--;
+            }
+
+            OpticalDiscStateChanged(this, null);
+            SoundOutputStateChanged(this, null);
+
+            if(wasPlaying == PlayerState.Playing)
+                Play();
+        }
+
+        /// <summary>
         /// Move to the next playable track
         /// </summary>
         public void NextTrack()

@@ -1,5 +1,4 @@
 using CSCore.SoundOut;
-using PortAudioSharp;
 
 namespace RedBookPlayer.Models.Hardware.Windows
 {
