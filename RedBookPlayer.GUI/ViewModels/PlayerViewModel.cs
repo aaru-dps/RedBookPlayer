@@ -31,6 +31,17 @@ namespace RedBookPlayer.GUI.ViewModels
 
         #region Player Passthrough
 
+        /// <summary>
+        /// Currently selected disc
+        /// </summary>
+        public int CurrentDisc
+        {
+            get => _currentDisc;
+            private set => this.RaiseAndSetIfChanged(ref _currentDisc, value);
+        }
+
+        private int _currentDisc;
+
         #region OpticalDisc Passthrough
 
         /// <summary>
@@ -418,6 +429,16 @@ namespace RedBookPlayer.GUI.ViewModels
         public void ExecuteEject() => _player?.Eject();
 
         /// <summary>
+        /// Move to the next disc
+        /// </summary>
+        public void ExecuteNextDisc() => _player?.NextDisc();
+
+        /// <summary>
+        /// Move to the previous disc
+        /// </summary>
+        public void ExecutePreviousDisc() => _player?.PreviousDisc();
+
+        /// <summary>
         /// Move to the next playable track
         /// </summary>
         public void ExecuteNextTrack() => _player?.NextTrack();
@@ -800,6 +821,7 @@ namespace RedBookPlayer.GUI.ViewModels
 
             Initialized = _player.Initialized;
 
+            CurrentDisc = _player.CurrentDisc;
             CurrentTrackNumber = _player.CurrentTrackNumber;
             CurrentTrackIndex = _player.CurrentTrackIndex;
             CurrentTrackSession = _player.CurrentTrackSession;
