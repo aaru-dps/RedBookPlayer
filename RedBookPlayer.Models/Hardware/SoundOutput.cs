@@ -1,8 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using CSCore.SoundOut;
-using NWaves.Audio;
 using ReactiveUI;
 using RedBookPlayer.Models.Discs;
 
@@ -92,7 +90,7 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Sound output instance
         /// </summary>
-        private ALSoundOut _soundOut;
+        private IAudioBackend _soundOut;
 
         /// <summary>
         /// Filtering stage for audio output
@@ -183,7 +181,7 @@ namespace RedBookPlayer.Models.Hardware
         public int ProviderRead(byte[] buffer, int offset, int count)
         {
             // Set the current volume
-            _soundOut.Volume = (float)Volume / 100;
+            _soundOut.SetVolume((float)Volume / 100);
 
             // If we have an unreadable track, just return
             if(_opticalDisc.BytesPerSector <= 0)
@@ -230,7 +228,7 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         public void Play()
         {
-            if(_soundOut.PlaybackState != PlaybackState.Playing)
+            if(_soundOut.GetPlayerState() != PlayerState.Playing)
                 _soundOut.Play();
 
             PlayerState = PlayerState.Playing;
@@ -241,7 +239,7 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         public void Pause()
         {
-            if(_soundOut.PlaybackState != PlaybackState.Paused)
+            if(_soundOut.GetPlayerState() != PlayerState.Paused)
                 _soundOut.Pause();
 
             PlayerState = PlayerState.Paused;
@@ -252,7 +250,7 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         public void Stop()
         {
-            if(_soundOut.PlaybackState != PlaybackState.Stopped)
+            if(_soundOut.GetPlayerState() != PlayerState.Stopped)
                 _soundOut.Stop();
 
             PlayerState = PlayerState.Stopped;
@@ -368,8 +366,14 @@ namespace RedBookPlayer.Models.Hardware
             if(_source == null)
             {
                 _source = new PlayerSource(ProviderRead);
-                _soundOut = new ALSoundOut(100);
-                _soundOut.Initialize(_source);
+
+#if LINUX
+                _soundOut = new Linux.AudioBackend(_source);
+#elif MACOS
+                _soundOut = new Mac.AudioBackend(_source);
+#elif WINDOWS
+                _soundOut = new Windows.AudioBackend(_source);
+#endif
             }
             else
             {
