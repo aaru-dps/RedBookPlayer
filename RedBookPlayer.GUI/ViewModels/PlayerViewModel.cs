@@ -17,6 +17,7 @@ using RedBookPlayer.Models.Hardware;
 
 namespace RedBookPlayer.GUI.ViewModels
 {
+    // TODO: Add direct index selection by number
     public class PlayerViewModel : ReactiveObject
     {
         /// <summary>
@@ -583,11 +584,28 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public async void ExecuteLoad()
         {
-            string path = await GetPath();
-            if(path == null)
+            string[] paths = await GetPaths();
+            if(paths == null || paths.Length == 0)
+            {
                 return;
+            }
+            else if(paths.Length == 1)
+            {
+                await LoadImage(paths[0]);
+            }
+            else
+            {
+                int lastDisc = CurrentDisc;
+                foreach(string path in paths)
+                {
+                    await LoadImage(path);
+                    
+                    if(Initialized)
+                        ExecuteNextDisc();
+                }
 
-            await LoadImage(path);
+                SelectDisc(lastDisc);
+            }
         }
 
         /// <summary>
@@ -679,6 +697,16 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         /// <param name="outputDirectory">Output path to write data to</param>
         public void ExtractAllTracksToWav(string outputDirectory) => _player?.ExtractAllTracksToWav(outputDirectory);
+
+        /// <summary>
+        /// Select a particular disc by number
+        /// </summary>
+        public void SelectDisc(int discNumber) => _player?.SelectDisc(discNumber);
+
+        /// <summary>
+        /// Select a particular track by number
+        /// </summary>
+        public void SelectTrack(int trackNumber) => _player?.SelectTrack(trackNumber);
 
         /// <summary>
         /// Set data playback method [CompactDisc only]
@@ -780,12 +808,12 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Generate a path selection dialog box
         /// </summary>
-        /// <returns>User-selected path, if possible</returns>
-        private async Task<string> GetPath()
+        /// <returns>User-selected paths, if possible</returns>
+        private async Task<string[]> GetPaths()
         {
             return await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                var dialog = new OpenFileDialog { AllowMultiple = false };
+                var dialog = new OpenFileDialog { AllowMultiple = true };
                 List<string> knownExtensions = new Aaru.DiscImages.AaruFormat().KnownExtensions.ToList();
                 dialog.Filters.Add(new FileDialogFilter()
                 {
@@ -793,7 +821,7 @@ namespace RedBookPlayer.GUI.ViewModels
                     Extensions = knownExtensions.ConvertAll(e => e.TrimStart('.'))
                 });
 
-                return (await dialog.ShowAsync(App.MainWindow))?.FirstOrDefault();
+                return (await dialog.ShowAsync(App.MainWindow));
             });
         }
 

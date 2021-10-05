@@ -6,6 +6,7 @@ using RedBookPlayer.Models.Factories;
 
 namespace RedBookPlayer.Models.Hardware
 {
+    // TODO: Add direct index selection by number
     public class Player : ReactiveObject
     {
         /// <summary>
@@ -405,6 +406,32 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Select a particular disc by number
+        /// </summary>
+        public void SelectDisc(int discNumber)
+        {
+            PlayerState wasPlaying = PlayerState;
+            if (wasPlaying == PlayerState.Playing)
+                Stop();
+
+            CurrentDisc = discNumber;
+            if (_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
+            {
+                Initialized = true;
+                OpticalDiscStateChanged(this, null);
+                SoundOutputStateChanged(this, null);
+
+                if(wasPlaying == PlayerState.Playing)
+                    Play();
+            }
+            else
+            {
+                PlayerState = PlayerState.NoDisc;
+                Initialized = false;
+            }
+        }
+
+        /// <summary>
         /// Move to the next disc
         /// </summary>
         public void NextDisc()
@@ -454,6 +481,30 @@ namespace RedBookPlayer.Models.Hardware
                 PlayerState = PlayerState.NoDisc;
                 Initialized = false;
             }
+        }
+
+        /// <summary>
+        /// Select a particular track by number
+        /// </summary>
+        public void SelectTrack(int trackNumber)
+        {
+            if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
+                return;
+
+            PlayerState wasPlaying = PlayerState;
+            if(wasPlaying == PlayerState.Playing)
+                Pause();
+
+            if(trackNumber < (HiddenTrack ? 0 : 1) || trackNumber > TotalTracks)
+                _opticalDiscs[CurrentDisc].LoadFirstTrack();
+            else
+                _opticalDiscs[CurrentDisc].LoadTrack(trackNumber);
+            
+            if(_opticalDiscs[CurrentDisc] is CompactDisc compactDisc)
+                _soundOutputs[CurrentDisc].SetDeEmphasis(compactDisc.TrackHasEmphasis);
+
+            if(wasPlaying == PlayerState.Playing)
+                Play();
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 using RedBookPlayer.GUI.Views;
@@ -163,19 +164,35 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
-        /// Load the first valid drag-and-dropped disc image
+        /// Load the all valid drag-and-dropped disc images
         /// </summary>
+        /// <remarks>If more than the number of discs in the changer are added, it will begin to overwrite</remarks>
         public async void ExecuteLoadDragDrop(object sender, DragEventArgs e)
         {
             if(PlayerView?.ViewModel == null)
                 return;
 
             IEnumerable<string> fileNames = e.Data.GetFileNames();
-            foreach(string filename in fileNames)
+            if(fileNames == null || fileNames.Count() == 0)
             {
-                bool loaded = await PlayerView.ViewModel.LoadImage(filename);
-                if(loaded)
-                    break;
+                return;
+            }
+            else if(fileNames.Count() == 1)
+            {
+                await PlayerView.ViewModel.LoadImage(fileNames.FirstOrDefault());
+            }
+            else
+            {
+                int lastDisc = PlayerView.ViewModel.CurrentDisc;
+                foreach(string path in fileNames)
+                {
+                    await PlayerView.ViewModel.LoadImage(path);
+                    
+                    if(PlayerView.ViewModel.Initialized)
+                        PlayerView.ViewModel.ExecuteNextDisc();
+                }
+
+                PlayerView.ViewModel.SelectDisc(lastDisc);
             }
         }
 
