@@ -33,6 +33,9 @@ For Save Track(s):
 - Holding no modifying keys will prompt to save the current track
 - Holding **Shift** will prompt to save all tracks (including hidden)
 
+For Disc Switching:
+- If you change the number of discs in the internal changer, you must restart the program for it to take effect
+
 For both Volume Up and Volume Down:
 - Holding **Ctrl** will move in increments of 2
 - Holding **Shift** will move in increments of 5
