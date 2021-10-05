@@ -26,9 +26,9 @@ namespace RedBookPlayer.Models.Hardware
             private set
             {
                 int temp = value;
-                if (temp < 4)
-                    temp = 0;
-                else if (temp >= 5)
+                if (temp < 0)
+                    temp = _numberOfDiscs - 1;
+                else if (temp >= _numberOfDiscs)
                     temp = 0;
                 
                 this.RaiseAndSetIfChanged(ref _currentDisc, temp);
@@ -36,6 +36,7 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         private bool _initialized;
+        private int _numberOfDiscs;
         private int _currentDisc;
 
         #region OpticalDisc Passthrough
@@ -229,14 +230,12 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Sound output handling class
         /// </summary>
-        /// <remarks>TODO: Link sound outputs to discs in a 1:1 configuration</remarks>
-        private readonly SoundOutput[] _soundOutputs = new SoundOutput[5];
+        private readonly SoundOutput[] _soundOutputs;
 
         /// <summary>
         /// OpticalDisc object
         /// </summary>
-        /// <remarks>TODO: Make the number of discs in the changer configurable</remarks>
-        private OpticalDiscBase[] _opticalDiscs = new OpticalDiscBase[5];
+        private OpticalDiscBase[] _opticalDiscs;
 
         /// <summary>
         /// Last volume for mute toggling
@@ -248,12 +247,21 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="numberOfDiscs">Number of discs to allow loading</param>
         /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public Player(int defaultVolume)
+        public Player(int numberOfDiscs, int defaultVolume)
         {
             Initialized = false;
+
+            if (numberOfDiscs <= 0)
+                numberOfDiscs = 1;
+
+            _numberOfDiscs = numberOfDiscs;
+            _soundOutputs = new SoundOutput[_numberOfDiscs];
+            _opticalDiscs = new OpticalDiscBase[numberOfDiscs];
+
             _currentDisc = 0;
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < _numberOfDiscs; i++)
             {
                 _soundOutputs[i] = new SoundOutput(defaultVolume);
                 _soundOutputs[i].SetDeEmphasis(false);
@@ -387,7 +395,7 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
-        /// Move to the next loaded disc
+        /// Move to the next disc
         /// </summary>
         public void NextDisc()
         {
@@ -395,24 +403,25 @@ namespace RedBookPlayer.Models.Hardware
             if (wasPlaying == PlayerState.Playing)
                 Stop();
 
-            int lastdisc = CurrentDisc++;
-            while (CurrentDisc != lastdisc)
+            CurrentDisc++;
+            if (_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
             {
-                if (_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
-                    break;
+                Initialized = true;
+                OpticalDiscStateChanged(this, null);
+                SoundOutputStateChanged(this, null);
 
-                CurrentDisc++;
+                if(wasPlaying == PlayerState.Playing)
+                    Play();
             }
-
-            OpticalDiscStateChanged(this, null);
-            SoundOutputStateChanged(this, null);
-
-            if(wasPlaying == PlayerState.Playing)
-                Play();
+            else
+            {
+                PlayerState = PlayerState.NoDisc;
+                Initialized = false;
+            }
         }
 
         /// <summary>
-        /// Move to the previous loaded disc
+        /// Move to the previous disc
         /// </summary>
         public void PreviousDisc()
         {
@@ -420,20 +429,21 @@ namespace RedBookPlayer.Models.Hardware
             if (wasPlaying == PlayerState.Playing)
                 Stop();
 
-            int lastdisc = CurrentDisc--;
-            while (CurrentDisc != lastdisc)
+            CurrentDisc--;
+            if (_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
             {
-                if (_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
-                    break;
+                Initialized = true;
+                OpticalDiscStateChanged(this, null);
+                SoundOutputStateChanged(this, null);
 
-                CurrentDisc--;
+                if(wasPlaying == PlayerState.Playing)
+                    Play();
             }
-
-            OpticalDiscStateChanged(this, null);
-            SoundOutputStateChanged(this, null);
-
-            if(wasPlaying == PlayerState.Playing)
-                Play();
+            else
+            {
+                PlayerState = PlayerState.NoDisc;
+                Initialized = false;
+            }
         }
 
         /// <summary>

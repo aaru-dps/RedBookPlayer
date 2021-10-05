@@ -364,7 +364,7 @@ namespace RedBookPlayer.GUI.ViewModels
             ToggleDeEmphasisCommand = ReactiveCommand.Create(ExecuteToggleDeEmphasis);
 
             // Initialize Player
-            _player = new Player(App.Settings.Volume);
+            _player = new Player(App.Settings.NumberOfDiscs, App.Settings.Volume);
             PlayerState = PlayerState.NoDisc;
         }
 

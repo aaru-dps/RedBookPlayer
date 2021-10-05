@@ -45,6 +45,11 @@ namespace RedBookPlayer.GUI.ViewModels
         public bool AutoPlay { get; set; } = false;
 
         /// <summary>
+        /// Indicates the number of discs to allow loading and changing
+        /// </summary>
+        public int NumberOfDiscs { get; set; } = 1;
+
+        /// <summary>
         /// Indicates if an index change can trigger a track change
         /// </summary>
         public bool IndexButtonChangeTrack { get; set; } = false;
@@ -143,6 +148,16 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Key assigned to eject the disc
         /// </summary>
         public Key EjectKey { get; set; } = Key.OemTilde;
+
+        /// <summary>
+        /// Key assigned to move to the next disc
+        /// </summary>
+        public Key NextDiscKey { get; set; } = Key.PageUp;
+
+        /// <summary>
+        /// Key assigned to move to the previous disc
+        /// </summary>
+        public Key PreviousDiscKey { get; set; } = Key.PageDown;
 
         /// <summary>
         /// Key assigned to move to the next track
