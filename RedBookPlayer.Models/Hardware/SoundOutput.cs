@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using ReactiveUI;
 using RedBookPlayer.Models.Discs;
@@ -118,7 +119,6 @@ namespace RedBookPlayer.Models.Hardware
             Volume = defaultVolume;
             _filterStage = new FilterStage();
         }
-        
 
         /// <summary>
         /// Initialize the output with a given image
@@ -367,13 +367,10 @@ namespace RedBookPlayer.Models.Hardware
             {
                 _source = new PlayerSource(ProviderRead);
 
-#if LINUX
-                _soundOut = new Linux.AudioBackend(_source);
-#elif MACOS
-                _soundOut = new Mac.AudioBackend(_source);
-#elif WINDOWS
-                _soundOut = new Windows.AudioBackend(_source);
-#endif
+                if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    _soundOut = new Linux.AudioBackend(_source);
+                else if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    _soundOut = new Windows.AudioBackend(_source);
             }
             else
             {

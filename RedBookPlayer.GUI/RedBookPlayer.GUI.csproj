@@ -9,6 +9,7 @@
   <PropertyGroup Condition="'$(RuntimeIdentifier)|$(Configuration)' == 'win-x64|Debug'">
     <DefineConstants>WindowsDebug</DefineConstants>
   </PropertyGroup>
+
   <ItemGroup>
     <Compile Update="**\*.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>

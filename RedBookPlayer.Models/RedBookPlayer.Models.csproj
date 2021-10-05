@@ -2,17 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
-    <DefineConstants>LINUX</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
-    <DefineConstants>MAC</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-    <DefineConstants>WINDOWS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
