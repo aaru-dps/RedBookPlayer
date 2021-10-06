@@ -26,19 +26,24 @@
                             <TextBlock VerticalAlignment="Center">Play hidden tracks</TextBlock>
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Width="120">Data Track Playback</TextBlock>
-                            <ComboBox Grid.Row="0" Grid.Column="1" Name="DataPlayback" Margin="8,0,0,0" Width="120"
+                            <TextBlock Width="120">Data Track Playback</TextBlock>
+                            <ComboBox Name="DataPlayback" Margin="8,0,0,0" Width="120"
                                       Items="{Binding DataPlaybackValues}" SelectedItem="{Binding DataPlayback, Mode=TwoWay}" />
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Width="120">Session Handling</TextBlock>
-                            <ComboBox Grid.Row="0" Grid.Column="1" Name="SessionHandling" Margin="8,0,0,0" Width="120"
+                            <TextBlock Width="120">Session Handling</TextBlock>
+                            <ComboBox Name="SessionHandling" Margin="8,0,0,0" Width="120"
                                       Items="{Binding SessionHandlingValues}" SelectedItem="{Binding SessionHandling, Mode=TwoWay}" />
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Width="120">Repeat Mode</TextBlock>
-                            <ComboBox Grid.Row="0" Grid.Column="1" Name="RepeatMode" Margin="8,0,0,0" Width="120"
+                            <TextBlock Width="120">Repeat Mode</TextBlock>
+                            <ComboBox Name="RepeatMode" Margin="8,0,0,0" Width="120"
                                       Items="{Binding RepeatModeValues}" SelectedItem="{Binding RepeatMode, Mode=TwoWay}" />
+                        </WrapPanel>
+                        <WrapPanel Margin="0,0,0,16">
+                            <TextBlock Width="120" VerticalAlignment="Center">Discs in Changer</TextBlock>
+                            <NumericUpDown Name="NumberOfDiscs" Margin="8,0,0,0" Width="120"
+                                           Value="{Binding NumberOfDiscs, Mode=TwoWay}" Minimum="1" Maximum="100" />
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
                             <CheckBox IsChecked="{Binding GenerateMissingTOC}" Margin="0,0,8,0"/>
