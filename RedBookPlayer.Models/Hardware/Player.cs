@@ -607,13 +607,13 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Move to the next playable track
         /// </summary>
-        /// <remarks>This should follow the track playback order</remarks>
+        /// <remarks>TODO: This should follow the track playback order</remarks>
         public void NextTrack() => SelectTrack(CurrentTrackNumber + 1);
 
         /// <summary>
         /// Move to the previous playable track
         /// </summary>
-        /// <remarks>This should follow the track playback order</remarks>
+        /// <remarks>TODO: This should follow the track playback order</remarks>
         public void PreviousTrack() => SelectTrack(CurrentTrackNumber - 1);
 
         /// <summary>
@@ -727,6 +727,7 @@ namespace RedBookPlayer.Models.Hardware
         /// Select a disc by number
         /// </summary>
         /// <param name="discNumber">Disc number to attempt to load</param>
+        /// <remarks>TODO: This needs to reset the pointer in the track playback order</remarks>
         public void SelectDisc(int discNumber)
         {
             PlayerState wasPlaying = PlayerState;
@@ -827,6 +828,8 @@ namespace RedBookPlayer.Models.Hardware
         /// Select a track by number
         /// </summary>
         /// <param name="trackNumber">Track number to attempt to load</param>
+        /// <remarks>TODO: This needs to reset the pointer in the track playback order</remarks>
+        /// <remarks>TODO: There needs to be a SelectRelativeTrack variant that follows order and then invokes this</remarks>
         public void SelectTrack(int trackNumber)
         {
             if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
