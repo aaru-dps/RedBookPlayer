@@ -730,7 +730,7 @@ namespace RedBookPlayer.Models.Hardware
                 }
 
                 // If we are supposed to change tracks, get the next one from the list
-                if(CurrentTrackNumber != previousTrack)
+                if(CurrentTrackNumber != previousTrack && !ShouldInvokePlaybackModes)
                     NextTrack();
             }
 
@@ -1219,20 +1219,20 @@ namespace RedBookPlayer.Models.Hardware
             if(e.PropertyName != nameof(ShouldInvokePlaybackModes))
                 return;
 
-            // Always stop before doing anything else
+            // Always pause before doing anything else
             PlayerState wasPlaying = PlayerState;
-            await Dispatcher.UIThread.InvokeAsync(Stop);
+            await Dispatcher.UIThread.InvokeAsync(Pause);
 
             switch(RepeatMode)
             {
                 case RepeatMode.None:
-                    // No-op
+                    await Dispatcher.UIThread.InvokeAsync(Stop);
                     break;
                 case RepeatMode.Single:
                     _opticalDiscs[CurrentDisc].LoadTrack(CurrentTrackNumber);
                     break;
                 case RepeatMode.All:
-                    SelectRelativeTrack(0);
+                    NextTrack();
                     break;
             }
 
