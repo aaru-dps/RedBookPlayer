@@ -765,9 +765,19 @@ namespace RedBookPlayer.Models.Hardware
             if (wasPlaying == PlayerState.Playing)
                 Stop();
 
+            if(discNumber >= _numberOfDiscs)
+                discNumber = 0;
+            else if(discNumber < 0)
+                discNumber = _numberOfDiscs - 1;
+
             _currentSectorReadPosition = 0;
 
             CurrentDisc = discNumber;
+
+            // If we're in single disc mode, we need to reload the full track list
+            if(DiscHandling == DiscHandling.SingleDisc)
+                LoadTrackList();
+
             if (_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
             {
                 Initialized = true;
