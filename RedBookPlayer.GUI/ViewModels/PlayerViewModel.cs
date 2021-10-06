@@ -423,7 +423,7 @@ namespace RedBookPlayer.GUI.ViewModels
             }
         }
 
-        #region Playback
+        #region Playback (UI)
 
         /// <summary>
         /// Begin playback
@@ -439,6 +439,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Toggle playback
         /// </summary>
         public void ExecuteTogglePlayPause() => _player?.TogglePlayback();
+
+        /// <summary>
+        /// Shuffle the current track list
+        /// </summary>
+        public void ExecuteShuffle() => _player?.ShuffleTracks();
 
         /// <summary>
         /// Stop current playback
@@ -471,11 +476,6 @@ namespace RedBookPlayer.GUI.ViewModels
         public void ExecutePreviousTrack() => _player?.PreviousTrack();
 
         /// <summary>
-        /// Shuffle the current track list
-        /// </summary>
-        public void ExecuteShuffle() => _player?.ShuffleTracks();
-
-        /// <summary>
         /// Move to the next index
         /// </summary>
         public void ExecuteNextIndex() => _player?.NextIndex(App.Settings.IndexButtonChangeTrack);
@@ -494,6 +494,29 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Rewind playback by 75 sectors, if possible
         /// </summary>
         public void ExecuteRewind() => _player?.Rewind();
+
+        #endregion
+
+        #region Playback (Internal)
+
+        /// <summary>
+        /// Select a particular disc by number
+        /// </summary>
+        /// <param name="discNumber">Disc number to attempt to load</param>
+        public void SelectDisc(int discNumber) => _player?.SelectDisc(discNumber);
+
+        /// <summary>
+        /// Select a particular index by number
+        /// </summary>
+        /// <param name="index">Track index to attempt to load</param>
+        /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
+        public void SelectIndex(ushort index, bool changeTrack) => _player?.SelectIndex(index, changeTrack);
+
+        /// <summary>
+        /// Select a particular track by number
+        /// </summary>
+        /// <param name="trackNumber">Track number to attempt to load</param>
+        public void SelectTrack(int trackNumber) => _player?.SelectTrack(trackNumber);
 
         #endregion
 
@@ -538,6 +561,111 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Toggle de-emphasis
         /// </summary>
         public void ExecuteToggleDeEmphasis() => _player?.ToggleDeEmphasis();
+
+        #endregion
+
+        #region Extraction
+
+        /// <summary>
+        /// Extract a single track from the image to WAV
+        /// </summary>
+        /// <param name="trackNumber"></param>
+        /// <param name="outputDirectory">Output path to write data to</param>
+        public void ExtractSingleTrackToWav(uint trackNumber, string outputDirectory) => _player?.ExtractSingleTrackToWav(trackNumber, outputDirectory);
+
+        /// <summary>
+        /// Extract all tracks from the image to WAV
+        /// </summary>
+        /// <param name="outputDirectory">Output path to write data to</param>
+        public void ExtractAllTracksToWav(string outputDirectory) => _player?.ExtractAllTracksToWav(outputDirectory);
+
+        #endregion
+
+        #region Setters
+
+        /// <summary>
+        /// Set data playback method [CompactDisc only]
+        /// </summary>
+        /// <param name="dataPlayback">New playback value</param>
+        public void SetDataPlayback(DataPlayback dataPlayback) => _player?.SetDataPlayback(dataPlayback);
+
+        /// <summary>
+        /// Set disc handling method
+        /// </summary>
+        /// <param name="discHandling">New playback value</param>
+        public void SetDiscHandling(DiscHandling discHandling) => _player?.SetDiscHandling(discHandling);
+
+        /// <summary>
+        /// Set the value for loading hidden tracks [CompactDisc only]
+        /// </summary>
+        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
+        public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
+
+        /// <summary>
+        /// Set repeat mode
+        /// </summary>
+        /// <param name="repeatMode">New repeat mode value</param>
+        public void SetRepeatMode(RepeatMode repeatMode) => _player?.SetRepeatMode(repeatMode);
+
+        /// <summary>
+        /// Set session handling
+        /// </summary>
+        /// <param name="sessionHandling">New session handling value</param>
+        public void SetSessionHandling(SessionHandling sessionHandling) => _player?.SetSessionHandling(sessionHandling);
+
+        #endregion
+
+        #region State Change Event Handlers
+
+        /// <summary>
+        /// Update the view-model from the Player
+        /// </summary>
+        private void PlayerStateChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if(_player == null)
+                return;
+
+            if(!_player.Initialized)
+            {
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    App.MainWindow.Title = "RedBookPlayer";
+                });
+            }
+
+            ImagePath = _player.ImagePath;
+            Initialized = _player.Initialized;
+
+            if (!string.IsNullOrWhiteSpace(ImagePath) && Initialized)
+            {
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    App.MainWindow.Title = "RedBookPlayer - " + ImagePath.Split('/').Last().Split('\\').Last();
+                });
+            }
+
+            CurrentDisc = _player.CurrentDisc;
+            CurrentTrackNumber = _player.CurrentTrackNumber;
+            CurrentTrackIndex = _player.CurrentTrackIndex;
+            CurrentTrackSession = _player.CurrentTrackSession;
+            CurrentSector = _player.CurrentSector;
+            SectionStartSector = _player.SectionStartSector;
+
+            HiddenTrack = _player.HiddenTrack;
+
+            QuadChannel = _player.QuadChannel;
+            IsDataTrack = _player.IsDataTrack;
+            CopyAllowed = _player.CopyAllowed;
+            TrackHasEmphasis = _player.TrackHasEmphasis;
+
+            PlayerState = _player.PlayerState;
+            DataPlayback = _player.DataPlayback;
+            RepeatMode = _player.RepeatMode;
+            ApplyDeEmphasis = _player.ApplyDeEmphasis;
+            Volume = _player.Volume;
+
+            UpdateDigits();
+        }
 
         #endregion
 
@@ -697,68 +825,6 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
-        /// Extract a single track from the image to WAV
-        /// </summary>
-        /// <param name="trackNumber"></param>
-        /// <param name="outputDirectory">Output path to write data to</param>
-        public void ExtractSingleTrackToWav(uint trackNumber, string outputDirectory) => _player?.ExtractSingleTrackToWav(trackNumber, outputDirectory);
-
-        /// <summary>
-        /// Extract all tracks from the image to WAV
-        /// </summary>
-        /// <param name="outputDirectory">Output path to write data to</param>
-        public void ExtractAllTracksToWav(string outputDirectory) => _player?.ExtractAllTracksToWav(outputDirectory);
-
-        /// <summary>
-        /// Select a particular disc by number
-        /// </summary>
-        /// <param name="discNumber">Disc number to attempt to load</param>
-        public void SelectDisc(int discNumber) => _player?.SelectDisc(discNumber);
-
-        /// <summary>
-        /// Select a particular index by number
-        /// </summary>
-        /// <param name="index">Track index to attempt to load</param>
-        /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
-        public void SelectIndex(ushort index, bool changeTrack) => _player?.SelectIndex(index, changeTrack);
-
-        /// <summary>
-        /// Select a particular track by number
-        /// </summary>
-        /// <param name="trackNumber">Track number to attempt to load</param>
-        public void SelectTrack(int trackNumber) => _player?.SelectTrack(trackNumber);
-
-        /// <summary>
-        /// Set data playback method [CompactDisc only]
-        /// </summary>
-        /// <param name="dataPlayback">New playback value</param>
-        public void SetDataPlayback(DataPlayback dataPlayback) => _player?.SetDataPlayback(dataPlayback);
-
-        /// <summary>
-        /// Set disc handling method
-        /// </summary>
-        /// <param name="discHandling">New playback value</param>
-        public void SetDiscHandling(DiscHandling discHandling) => _player?.SetDiscHandling(discHandling);
-
-        /// <summary>
-        /// Set the value for loading hidden tracks [CompactDisc only]
-        /// </summary>
-        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
-        public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
-
-        /// <summary>
-        /// Set repeat mode
-        /// </summary>
-        /// <param name="repeatMode">New repeat mode value</param>
-        public void SetRepeatMode(RepeatMode repeatMode) => _player?.SetRepeatMode(repeatMode);
-
-        /// <summary>
-        /// Set session handling
-        /// </summary>
-        /// <param name="sessionHandling">New session handling value</param>
-        public void SetSessionHandling(SessionHandling sessionHandling) => _player?.SetSessionHandling(sessionHandling);
-
-        /// <summary>
         /// Generate the digit string to be interpreted by the frontend
         /// </summary>
         /// <returns>String representing the digits for the frontend</returns>
@@ -876,56 +942,6 @@ namespace RedBookPlayer.GUI.ViewModels
             // Ensure the context and view model are set
             App.PlayerView.DataContext = this;
             App.PlayerView.ViewModel = this;
-            UpdateDigits();
-        }
-
-        /// <summary>
-        /// Update the view-model from the Player
-        /// </summary>
-        private void PlayerStateChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if(_player == null)
-                return;
-
-            if(!_player.Initialized)
-            {
-                Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    App.MainWindow.Title = "RedBookPlayer";
-                });
-            }
-
-            ImagePath = _player.ImagePath;
-            Initialized = _player.Initialized;
-
-            if (!string.IsNullOrWhiteSpace(ImagePath) && Initialized)
-            {
-                Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    App.MainWindow.Title = "RedBookPlayer - " + ImagePath.Split('/').Last().Split('\\').Last();
-                });
-            }
-
-            CurrentDisc = _player.CurrentDisc;
-            CurrentTrackNumber = _player.CurrentTrackNumber;
-            CurrentTrackIndex = _player.CurrentTrackIndex;
-            CurrentTrackSession = _player.CurrentTrackSession;
-            CurrentSector = _player.CurrentSector;
-            SectionStartSector = _player.SectionStartSector;
-
-            HiddenTrack = _player.HiddenTrack;
-
-            QuadChannel = _player.QuadChannel;
-            IsDataTrack = _player.IsDataTrack;
-            CopyAllowed = _player.CopyAllowed;
-            TrackHasEmphasis = _player.TrackHasEmphasis;
-
-            PlayerState = _player.PlayerState;
-            DataPlayback = _player.DataPlayback;
-            RepeatMode = _player.RepeatMode;
-            ApplyDeEmphasis = _player.ApplyDeEmphasis;
-            Volume = _player.Volume;
-
             UpdateDigits();
         }
 
