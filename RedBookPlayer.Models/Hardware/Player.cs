@@ -418,7 +418,7 @@ namespace RedBookPlayer.Models.Hardware
             // If the disc exists, add it to the dictionary
             if(_opticalDiscs[CurrentDisc] != null)
             {
-                if (opticalDisc is CompactDisc compactDisc)
+                if(opticalDisc is CompactDisc compactDisc)
                     _availableTrackList[CurrentDisc] = compactDisc.Tracks.Select(t => (int)t.TrackSequence).OrderBy(s => s).ToList();
                 else
                     _availableTrackList[CurrentDisc] = Enumerable.Range(1, opticalDisc.TotalTracks).ToList();
@@ -430,14 +430,22 @@ namespace RedBookPlayer.Models.Hardware
                 _availableTrackList[CurrentDisc] = new List<int>();
             }
 
-            // Loop through the dictionary and repopulate the playback order
-            for(int i = 0; i < _numberOfDiscs; i++)
+            // Repopulate the playback order
+            _trackPlaybackOrder = new List<KeyValuePair<int, int>>();
+            if(DiscHandling == DiscHandling.SingleDisc)
             {
-                if(_availableTrackList[i] == null || _availableTrackList[i].Count == 0)
-                    continue;
-
-                List<int> availableTracks = _availableTrackList[i];
-                _trackPlaybackOrder.AddRange(availableTracks.Select(t => new KeyValuePair<int, int>(i, t)));
+                List<int> availableTracks = _availableTrackList[CurrentDisc];
+                if(availableTracks != null && availableTracks.Count > 0)
+                    _trackPlaybackOrder.AddRange(availableTracks.Select(t => new KeyValuePair<int, int>(CurrentDisc, t)));
+            }
+            else if(DiscHandling == DiscHandling.MultiDisc)
+            {
+                for(int i = 0; i < _numberOfDiscs; i++)
+                {
+                    List<int> availableTracks = _availableTrackList[i];
+                    if(availableTracks != null && availableTracks.Count > 0)
+                        _trackPlaybackOrder.AddRange(availableTracks.Select(t => new KeyValuePair<int, int>(i, t)));
+                }
             }
         }
 
@@ -495,6 +503,24 @@ namespace RedBookPlayer.Models.Hardware
                     Pause();
                     break;
             }
+        }
+
+        /// <summary>
+        /// Shuffle the current track order
+        /// </summary>
+        public void ShuffleTracks()
+        {
+            List<KeyValuePair<int, int>> newPlaybackOrder = new List<KeyValuePair<int, int>>();
+            Random random = new Random();
+
+            while(_trackPlaybackOrder.Count > 0)
+            {
+                int next = random.Next(0, _trackPlaybackOrder.Count - 1);
+                newPlaybackOrder.Add(_trackPlaybackOrder[next]);
+                _trackPlaybackOrder.RemoveAt(next);
+            }
+
+            _trackPlaybackOrder = newPlaybackOrder;
         }
 
         /// <summary>
@@ -1127,7 +1153,11 @@ namespace RedBookPlayer.Models.Hardware
         /// Set disc handling method
         /// </summary>
         /// <param name="discHandling">New playback value</param>
-        public void SetDiscHandling(DiscHandling discHandling) => DiscHandling = discHandling;
+        public void SetDiscHandling(DiscHandling discHandling)
+        {
+            DiscHandling = discHandling;
+            LoadTrackList();
+        }
 
         /// <summary>
         /// Set the value for loading hidden tracks [CompactDisc only]
