@@ -308,6 +308,11 @@ namespace RedBookPlayer.Models.Hardware
         private List<KeyValuePair<int, int>> _trackPlaybackOrder;
 
         /// <summary>
+        /// Current track in playback order list
+        /// </summary>
+        private int _currentTrackInOrder;
+
+        /// <summary>
         /// Last volume for mute toggling
         /// </summary>
         private int? _lastVolume = null;
@@ -355,6 +360,7 @@ namespace RedBookPlayer.Models.Hardware
             }
 
             _trackPlaybackOrder = new List<KeyValuePair<int, int>>();
+            _currentTrackInOrder = 0;
 
             PropertyChanged += HandlePlaybackModes;
         }
@@ -447,6 +453,26 @@ namespace RedBookPlayer.Models.Hardware
                         _trackPlaybackOrder.AddRange(availableTracks.Select(t => new KeyValuePair<int, int>(i, t)));
                 }
             }
+
+            // Try to get back to the last loaded track
+            int currentFoundTrack = 0;
+            if(_trackPlaybackOrder == null || _trackPlaybackOrder.Count == 0)
+            {
+                currentFoundTrack = 0;
+            }
+            else if(_trackPlaybackOrder.Any(kvp => kvp.Key == CurrentDisc))
+            {
+                currentFoundTrack = _trackPlaybackOrder.FindIndex(kvp => kvp.Key == CurrentDisc && kvp.Value == CurrentTrackNumber);
+                if(currentFoundTrack == -1)
+                    currentFoundTrack = _trackPlaybackOrder.Where(kvp => kvp.Key == CurrentDisc).Min(kvp => kvp.Value);
+            }
+            else
+            {
+                int lowestDiscNumber = _trackPlaybackOrder.Min(kvp => kvp.Key);
+                currentFoundTrack = _trackPlaybackOrder.Where(kvp => kvp.Key == lowestDiscNumber).Min(kvp => kvp.Value);
+            }
+
+            _currentTrackInOrder = currentFoundTrack;
         }
 
         #region Playback (UI)
@@ -581,11 +607,13 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Move to the next playable track
         /// </summary>
+        /// <remarks>This should follow the track playback order</remarks>
         public void NextTrack() => SelectTrack(CurrentTrackNumber + 1);
 
         /// <summary>
         /// Move to the previous playable track
         /// </summary>
+        /// <remarks>This should follow the track playback order</remarks>
         public void PreviousTrack() => SelectTrack(CurrentTrackNumber - 1);
 
         /// <summary>
