@@ -656,6 +656,7 @@ namespace RedBookPlayer.GUI.ViewModels
                 PlayerOptions playerOptions = new PlayerOptions
                 {
                     DataPlayback = App.Settings.DataPlayback,
+                    DiscHandling = App.Settings.DiscHandling,
                     LoadHiddenTracks = App.Settings.PlayHiddenTracks,
                     RepeatMode = App.Settings.RepeatMode,
                     SessionHandling = App.Settings.SessionHandling,
@@ -684,6 +685,7 @@ namespace RedBookPlayer.GUI.ViewModels
         public void RefreshFromSettings()
         {
             SetDataPlayback(App.Settings.DataPlayback);
+            SetDiscHandling(App.Settings.DiscHandling);
             SetLoadHiddenTracks(App.Settings.PlayHiddenTracks);
             SetRepeatMode(App.Settings.RepeatMode);
             SetSessionHandling(App.Settings.SessionHandling);
@@ -726,6 +728,12 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         /// <param name="dataPlayback">New playback value</param>
         public void SetDataPlayback(DataPlayback dataPlayback) => _player?.SetDataPlayback(dataPlayback);
+
+        /// <summary>
+        /// Set disc handling method
+        /// </summary>
+        /// <param name="discHandling">New playback value</param>
+        public void SetDiscHandling(DiscHandling discHandling) => _player?.SetDiscHandling(discHandling);
 
         /// <summary>
         /// Set the value for loading hidden tracks [CompactDisc only]

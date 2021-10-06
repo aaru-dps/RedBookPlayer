@@ -22,6 +22,8 @@ namespace RedBookPlayer.Models.Hardware
             private set => this.RaiseAndSetIfChanged(ref _initialized, value);
         }
 
+        #region Playback Passthrough
+
         /// <summary>
         /// Currently selected disc
         /// </summary>
@@ -41,6 +43,60 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Indicates how to deal with multiple discs
+        /// </summary>
+        public DiscHandling DiscHandling
+        {
+            get => _discHandling;
+            private set => this.RaiseAndSetIfChanged(ref _discHandling, value);
+        }
+
+        /// <summary>
+        /// Indicates how to handle playback of data tracks
+        /// </summary>
+        public DataPlayback DataPlayback
+        {
+            get => _dataPlayback;
+            private set => this.RaiseAndSetIfChanged(ref _dataPlayback, value);
+        }
+
+        /// <summary>
+        /// Indicate if hidden tracks should be loaded
+        /// </summary>
+        public bool LoadHiddenTracks
+        {
+            get => _loadHiddenTracks;
+            private set => this.RaiseAndSetIfChanged(ref _loadHiddenTracks, value);
+        }
+
+        /// <summary>
+        /// Indicates the repeat mode
+        /// </summary>
+        public RepeatMode RepeatMode
+        {
+            get => _repeatMode;
+            private set => this.RaiseAndSetIfChanged(ref _repeatMode, value);
+        }
+
+        /// <summary>
+        /// Indicates how tracks on different session should be handled
+        /// </summary>
+        public SessionHandling SessionHandling
+        {
+            get => _sessionHandling;
+            private set => this.RaiseAndSetIfChanged(ref _sessionHandling, value);
+        }
+
+        /// <summary>
+        /// Indicates if de-emphasis should be applied
+        /// </summary>
+        public bool ApplyDeEmphasis
+        {
+            get => _applyDeEmphasis;
+            private set => this.RaiseAndSetIfChanged(ref _applyDeEmphasis, value);
+        }
+
+        /// <summary>
         /// Should invoke playback mode changes
         /// </summary>
         private bool ShouldInvokePlaybackModes
@@ -52,7 +108,15 @@ namespace RedBookPlayer.Models.Hardware
         private bool _initialized;
         private int _numberOfDiscs;
         private int _currentDisc;
+        private DiscHandling _discHandling;
+        private bool _loadHiddenTracks;
+        private DataPlayback _dataPlayback;
+        private RepeatMode _repeatMode;
+        private SessionHandling _sessionHandling;
+        private bool _applyDeEmphasis;
         private bool _shouldInvokePlaybackModes;
+
+        #endregion
 
         #region OpticalDisc Passthrough
 
@@ -207,51 +271,6 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
-        /// Indicates how to handle playback of data tracks
-        /// </summary>
-        public DataPlayback DataPlayback
-        {
-            get => _dataPlayback;
-            private set => this.RaiseAndSetIfChanged(ref _dataPlayback, value);
-        }
-
-        /// <summary>
-        /// Indicate if hidden tracks should be loaded
-        /// </summary>
-        public bool LoadHiddenTracks
-        {
-            get => _loadHiddenTracks;
-            private set => this.RaiseAndSetIfChanged(ref _loadHiddenTracks, value);
-        }
-
-        /// <summary>
-        /// Indicates the repeat mode
-        /// </summary>
-        public RepeatMode RepeatMode
-        {
-            get => _repeatMode;
-            private set => this.RaiseAndSetIfChanged(ref _repeatMode, value);
-        }
-
-        /// <summary>
-        /// Indicates how tracks on different session should be handled
-        /// </summary>
-        public SessionHandling SessionHandling
-        {
-            get => _sessionHandling;
-            private set => this.RaiseAndSetIfChanged(ref _sessionHandling, value);
-        }
-
-        /// <summary>
-        /// Indicates if de-emphasis should be applied
-        /// </summary>
-        public bool ApplyDeEmphasis
-        {
-            get => _applyDeEmphasis;
-            private set => this.RaiseAndSetIfChanged(ref _applyDeEmphasis, value);
-        }
-
-        /// <summary>
         /// Current playback volume
         /// </summary>
         public int Volume
@@ -261,11 +280,6 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         private PlayerState _playerState;
-        private DataPlayback _dataPlayback;
-        private bool _loadHiddenTracks;
-        private RepeatMode _repeatMode;
-        private SessionHandling _sessionHandling;
-        private bool _applyDeEmphasis;
         private int _volume;
 
         #endregion
@@ -340,6 +354,7 @@ namespace RedBookPlayer.Models.Hardware
 
             // Set player options
             DataPlayback = playerOptions.DataPlayback;
+            DiscHandling = playerOptions.DiscHandling;
             LoadHiddenTracks = playerOptions.LoadHiddenTracks;
             RepeatMode = playerOptions.RepeatMode;
             SessionHandling = playerOptions.SessionHandling;
@@ -710,7 +725,7 @@ namespace RedBookPlayer.Models.Hardware
                 int cachedTrackNumber;
 
                 // Take care of disc switching first
-                if(RepeatMode == RepeatMode.AllMultiDisc)
+                if(DiscHandling == DiscHandling.MultiDisc)
                 {
                     if(trackNumber > (int)compactDisc.Tracks.Max(t => t.TrackSequence))
                     {
@@ -800,7 +815,7 @@ namespace RedBookPlayer.Models.Hardware
             {
                 if(trackNumber >= _opticalDiscs[CurrentDisc].TotalTracks)
                 {
-                    if(RepeatMode == RepeatMode.AllMultiDisc)
+                    if(DiscHandling == DiscHandling.MultiDisc)
                     {
                         do
                         {
@@ -813,7 +828,7 @@ namespace RedBookPlayer.Models.Hardware
                 }
                 else if(trackNumber < 1)
                 {
-                    if(RepeatMode == RepeatMode.AllMultiDisc)
+                    if(DiscHandling == DiscHandling.MultiDisc)
                     {
                         do
                         {
@@ -1044,6 +1059,12 @@ namespace RedBookPlayer.Models.Hardware
         public void SetDataPlayback(DataPlayback dataPlayback) => DataPlayback = dataPlayback;
 
         /// <summary>
+        /// Set disc handling method
+        /// </summary>
+        /// <param name="discHandling">New playback value</param>
+        public void SetDiscHandling(DiscHandling discHandling) => DiscHandling = discHandling;
+
+        /// <summary>
         /// Set the value for loading hidden tracks [CompactDisc only]
         /// </summary>
         /// <param name="loadHiddenTracks">True to enable loading hidden tracks, false otherwise</param>
@@ -1085,10 +1106,10 @@ namespace RedBookPlayer.Models.Hardware
                 case RepeatMode.Single:
                     _opticalDiscs[CurrentDisc].LoadTrack(CurrentTrackNumber);
                     break;
-                case RepeatMode.AllSingleDisc:
+                case RepeatMode.All when DiscHandling == DiscHandling.SingleDisc:
                     SelectTrack(1);
                     break;
-                case RepeatMode.AllMultiDisc:
+                case RepeatMode.All when DiscHandling == DiscHandling.MultiDisc:
                     do
                     {
                         NextDisc();

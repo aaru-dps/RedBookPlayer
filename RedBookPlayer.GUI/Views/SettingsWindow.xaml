@@ -46,6 +46,11 @@
                                            Value="{Binding NumberOfDiscs, Mode=TwoWay}" Minimum="1" Maximum="100" />
                         </WrapPanel>
                         <WrapPanel Margin="0,0,0,16">
+                            <TextBlock Width="120">Disc Handling</TextBlock>
+                            <ComboBox Name="DiscHandling" Margin="8,0,0,0" Width="120"
+                                      Items="{Binding DiscHandlingValues}" SelectedItem="{Binding DiscHandling, Mode=TwoWay}" />
+                        </WrapPanel>
+                        <WrapPanel Margin="0,0,0,16">
                             <CheckBox IsChecked="{Binding GenerateMissingTOC}" Margin="0,0,8,0"/>
                             <TextBlock VerticalAlignment="Center">Generate a TOC if the disc is missing one</TextBlock>
                         </WrapPanel>

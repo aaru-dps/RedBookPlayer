@@ -22,6 +22,12 @@ namespace RedBookPlayer.GUI.ViewModels
         public List<DataPlayback> DataPlaybackValues => GenerateDataPlaybackList();
 
         /// <summary>
+        /// List of all disc handling values
+        /// </summary>
+        [JsonIgnore]
+        public List<DiscHandling> DiscHandlingValues => GenerateDiscHandlingList();
+
+        /// <summary>
         /// List of all repeat mode values
         /// </summary>
         [JsonIgnore]
@@ -48,6 +54,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Indicates the number of discs to allow loading and changing
         /// </summary>
         public int NumberOfDiscs { get; set; } = 1;
+
+        /// <summary>
+        /// Indicates how to deal with multiple discs
+        /// </summary>
+        public DiscHandling DiscHandling { get; set; } = DiscHandling.SingleDisc;
 
         /// <summary>
         /// Indicates if an index change can trigger a track change
@@ -77,7 +88,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Indicates how to repeat tracks
         /// </summary>
-        public RepeatMode RepeatMode { get; set; } = RepeatMode.AllSingleDisc;
+        public RepeatMode RepeatMode { get; set; } = RepeatMode.All;
 
         /// <summary>
         /// Indicates how to handle tracks on different sessions
@@ -289,6 +300,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Generate the list of DataPlayback values
         /// </summary>
         private List<DataPlayback> GenerateDataPlaybackList() => Enum.GetValues(typeof(DataPlayback)).Cast<DataPlayback>().ToList();
+
+        /// <summary>
+        /// Generate the list of DiscHandling values
+        /// </summary>
+        private List<DiscHandling> GenerateDiscHandlingList() => Enum.GetValues(typeof(DiscHandling)).Cast<DiscHandling>().ToList();
 
         /// <summary>
         /// Generate the list of Key values

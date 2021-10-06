@@ -8,6 +8,11 @@ namespace RedBookPlayer.Models.Discs
         public DataPlayback DataPlayback { get; set; } = DataPlayback.Skip;
 
         /// <summary>
+        /// Indicates how to deal with multiple discs
+        /// </summary>
+        public DiscHandling DiscHandling { get; set; } = DiscHandling.SingleDisc;
+
+        /// <summary>
         /// Indicate if hidden tracks should be loaded
         /// </summary>
         public bool LoadHiddenTracks { get; set; } = false;
