@@ -761,6 +761,10 @@ namespace RedBookPlayer.Models.Hardware
         /// <param name="discNumber">Disc number to attempt to load</param>
         public void SelectDisc(int discNumber)
         {
+            // If the disc didn't change, don't do anything
+            if(_currentDisc == discNumber)
+                return;
+
             PlayerState wasPlaying = PlayerState;
             if (wasPlaying == PlayerState.Playing)
                 Stop();
@@ -802,6 +806,13 @@ namespace RedBookPlayer.Models.Hardware
         /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
         public void SelectIndex(ushort index, bool changeTrack)
         {
+            if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
+                return;
+
+            // If the index didn't change, don't do anything
+            if(_currentTrackIndex == index)
+                return;
+
             PlayerState wasPlaying = PlayerState;
             if (wasPlaying == PlayerState.Playing)
                 Pause();
@@ -874,6 +885,10 @@ namespace RedBookPlayer.Models.Hardware
         public bool SelectTrack(int trackNumber)
         {
             if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
+                return false;
+
+            // If the disc didn't change, don't do anything
+            if(_currentTrackNumber == trackNumber)
                 return false;
 
             PlayerState wasPlaying = PlayerState;
