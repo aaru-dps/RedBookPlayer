@@ -465,11 +465,17 @@ namespace RedBookPlayer.Models.Hardware
                 currentFoundTrack = _trackPlaybackOrder.FindIndex(kvp => kvp.Key == CurrentDisc && kvp.Value == CurrentTrackNumber);
                 if(currentFoundTrack == -1)
                     currentFoundTrack = _trackPlaybackOrder.Where(kvp => kvp.Key == CurrentDisc).Min(kvp => kvp.Value);
+
+                CurrentDisc = _trackPlaybackOrder[currentFoundTrack].Key;
+                CurrentTrackNumber = _trackPlaybackOrder[currentFoundTrack].Value;
             }
             else
             {
                 int lowestDiscNumber = _trackPlaybackOrder.Min(kvp => kvp.Key);
                 currentFoundTrack = _trackPlaybackOrder.Where(kvp => kvp.Key == lowestDiscNumber).Min(kvp => kvp.Value);
+
+                CurrentDisc = _trackPlaybackOrder[currentFoundTrack].Key;
+                CurrentTrackNumber = _trackPlaybackOrder[currentFoundTrack].Value;
             }
 
             _currentTrackInOrder = currentFoundTrack;
@@ -562,8 +568,7 @@ namespace RedBookPlayer.Models.Hardware
                return;
 
             _soundOutput.Stop();
-            CurrentTrackNumber = 0;
-            SelectTrack(1);
+            SelectRelativeTrack(0);
             PlayerState = PlayerState.Stopped;
         }
 
@@ -580,6 +585,10 @@ namespace RedBookPlayer.Models.Hardware
             Stop();
             _opticalDiscs[CurrentDisc] = null;
             LoadTrackList();
+
+            // Force a refresh of the state information
+            OpticalDiscStateChanged(this, null);
+            SoundOutputStateChanged(this, null);
 
             // Only de-initialize the player if all discs are ejected
             if(_opticalDiscs.All(d => d == null || !d.Initialized))
@@ -608,13 +617,13 @@ namespace RedBookPlayer.Models.Hardware
         /// Move to the next playable track
         /// </summary>
         /// <remarks>TODO: This should follow the track playback order</remarks>
-        public void NextTrack() => SelectTrack(CurrentTrackNumber + 1);
+        public void NextTrack() => SelectRelativeTrack(_currentTrackInOrder + 1);
 
         /// <summary>
         /// Move to the previous playable track
         /// </summary>
         /// <remarks>TODO: This should follow the track playback order</remarks>
-        public void PreviousTrack() => SelectTrack(CurrentTrackNumber - 1);
+        public void PreviousTrack() => SelectRelativeTrack(_currentTrackInOrder - 1);
 
         /// <summary>
         /// Move to the next index
@@ -695,6 +704,7 @@ namespace RedBookPlayer.Models.Hardware
             _currentSectorReadPosition += count;
             if(_currentSectorReadPosition >= _opticalDiscs[CurrentDisc].BytesPerSector)
             {
+                int previousTrack = CurrentTrackNumber;
                 ulong newSectorValue = _opticalDiscs[CurrentDisc].CurrentSector + (ulong)(_currentSectorReadPosition / _opticalDiscs[CurrentDisc].BytesPerSector);
                 if(newSectorValue >= _opticalDiscs[CurrentDisc].TotalSectors)
                 {
@@ -718,6 +728,10 @@ namespace RedBookPlayer.Models.Hardware
                     _opticalDiscs[CurrentDisc].SetCurrentSector(newSectorValue);
                     _currentSectorReadPosition %= _opticalDiscs[CurrentDisc].BytesPerSector;
                 }
+
+                // If we are supposed to change tracks, get the next one from the list
+                if(CurrentTrackNumber != previousTrack)
+                    NextTrack();
             }
 
             return count;
@@ -727,7 +741,6 @@ namespace RedBookPlayer.Models.Hardware
         /// Select a disc by number
         /// </summary>
         /// <param name="discNumber">Disc number to attempt to load</param>
-        /// <remarks>TODO: This needs to reset the pointer in the track playback order</remarks>
         public void SelectDisc(int discNumber)
         {
             PlayerState wasPlaying = PlayerState;
@@ -740,6 +753,7 @@ namespace RedBookPlayer.Models.Hardware
             if (_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
             {
                 Initialized = true;
+                SelectTrack(1);
                 OpticalDiscStateChanged(this, null);
                 SoundOutputStateChanged(this, null);
 
@@ -825,158 +839,11 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
-        /// Select a track by number
-        /// </summary>
-        /// <param name="trackNumber">Track number to attempt to load</param>
-        /// <returns>True if the track was changed, false otherwise</returns>
-        public bool SelectTrack(int trackNumber)
-        {
-            if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
-                return false;
-
-            PlayerState wasPlaying = PlayerState;
-            if(wasPlaying == PlayerState.Playing)
-                Pause();
-
-            // CompactDisc needs special handling of track wraparound
-            if (_opticalDiscs[CurrentDisc] is CompactDisc compactDisc)
-            {
-                // Cache the value and the current track number
-                int cachedValue = trackNumber;
-                int cachedTrackNumber;
-
-                // Take care of disc switching first
-                if(DiscHandling == DiscHandling.MultiDisc)
-                {
-                    if(trackNumber > (int)compactDisc.Tracks.Max(t => t.TrackSequence))
-                    {
-                        do
-                        {
-                            NextDisc();
-                        }
-                        while(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized);
-
-                        if(wasPlaying == PlayerState.Playing)
-                            Play();
-
-                        return true;
-                    }
-                    else if((trackNumber < 1 && !LoadHiddenTracks) || (trackNumber < (int)compactDisc.Tracks.Min(t => t.TrackSequence)))
-                    {
-                        do
-                        {
-                            PreviousDisc();
-                        }
-                        while(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized);
-
-                        SelectTrack(-1);
-                        if(wasPlaying == PlayerState.Playing)
-                            Play();
-
-                        return true;
-                    }
-                }
-
-                // If we have an invalid current track number, set it to the minimum
-                if(!compactDisc.Tracks.Any(t => t.TrackSequence == _currentTrackNumber))
-                    _currentTrackNumber = (int)compactDisc.Tracks.Min(t => t.TrackSequence);
-
-                // Check if we're incrementing or decrementing the track
-                bool increment = cachedValue >= _currentTrackNumber;
-                
-                do
-                {
-                    // If we're over the last track, wrap around
-                    if(cachedValue > compactDisc.Tracks.Max(t => t.TrackSequence))
-                    {
-                        cachedValue = (int)compactDisc.Tracks.Min(t => t.TrackSequence);
-                        if(cachedValue == 0 && !LoadHiddenTracks)
-                            cachedValue++;
-                    }
-
-                    // If we're under the first track and we're not loading hidden tracks, wrap around
-                    else if(cachedValue < 1 && !LoadHiddenTracks)
-                    {
-                        cachedValue = (int)compactDisc.Tracks.Max(t => t.TrackSequence);
-                    }
-
-                    // If we're under the first valid track, wrap around
-                    else if(cachedValue < compactDisc.Tracks.Min(t => t.TrackSequence))
-                    {
-                        cachedValue = (int)compactDisc.Tracks.Max(t => t.TrackSequence);
-                    }
-
-                    cachedTrackNumber = cachedValue;
-
-                    // Cache the current track for easy access
-                    Track track = compactDisc.GetTrack(cachedTrackNumber);
-                    if(track == null)
-                        return false;
-
-                    // If the track is playable, just return
-                    if((track.TrackType == TrackType.Audio || DataPlayback != DataPlayback.Skip)
-                        && (SessionHandling == SessionHandling.AllSessions || track.TrackSession == 1))
-                    {
-                        break;
-                    }
-
-                    // If we're not playing the track, skip
-                    if(increment)
-                        cachedValue++;
-                    else
-                        cachedValue--;
-                }
-                while(cachedValue != _currentTrackNumber);
-
-                // Load the now-valid value
-                compactDisc.LoadTrack(cachedTrackNumber);
-                ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
-            }
-            else
-            {
-                if(trackNumber >= _opticalDiscs[CurrentDisc].TotalTracks)
-                {
-                    if(DiscHandling == DiscHandling.MultiDisc)
-                    {
-                        do
-                        {
-                            NextDisc();
-                        }
-                        while(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized);
-                    }
-
-                    trackNumber = 1;
-                }
-                else if(trackNumber < 1)
-                {
-                    if(DiscHandling == DiscHandling.MultiDisc)
-                    {
-                        do
-                        {
-                            PreviousDisc();
-                        }
-                        while(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized);
-                        trackNumber = 1;
-                    }
-
-                    trackNumber = _opticalDiscs[CurrentDisc].TotalTracks - 1;
-                }
-                
-                _opticalDiscs[CurrentDisc].LoadTrack(trackNumber);
-            }
-
-            if(wasPlaying == PlayerState.Playing)
-                Play();
-
-            return true;
-        }
-
-        /// <summary>
         /// Select a track by number within a disc
         /// </summary>
         /// <param name="trackNumber">Track number to attempt to load</param>
         /// <returns>True if the track was changed, false otherwise</returns>
-        public bool SelectTrackWithinDisc(int trackNumber)
+        public bool SelectTrack(int trackNumber)
         {
             if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
                 return false;
@@ -1065,38 +932,6 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
-        /// Select a track in the relative track list by number
-        /// </summary>
-        /// <param name="relativeTrackNumber">Relative track number to attempt to load</param>
-        public void SelectRelativeTrack(int relativeTrackNumber)
-        {
-            if(_trackPlaybackOrder == null || _trackPlaybackOrder.Count == 0)
-                return;
-
-            PlayerState wasPlaying = PlayerState;
-            if(wasPlaying == PlayerState.Playing)
-                Pause();
-
-            if(relativeTrackNumber < 0)
-                relativeTrackNumber = _trackPlaybackOrder.Count - 1;
-            else if(relativeTrackNumber >= _trackPlaybackOrder.Count)
-                relativeTrackNumber = 0;
-
-            do
-            {
-                _currentTrackInOrder = relativeTrackNumber;
-                KeyValuePair<int, int> discTrackPair = _trackPlaybackOrder[relativeTrackNumber];
-                SelectDisc(discTrackPair.Key);
-                if(SelectTrackWithinDisc(discTrackPair.Value))
-                    break;
-            }
-            while(true);
-
-            if(wasPlaying == PlayerState.Playing)
-                Play();
-        }
-
-        /// <summary>
         /// Determine the number of real and zero sectors to read
         /// </summary>
         /// <param name="count">Number of requested bytes to read</param>
@@ -1173,6 +1008,44 @@ namespace RedBookPlayer.Models.Hardware
                 _filterStage.ProcessAudioData(audioDataSegment);
 
             return audioDataSegment;
+        }
+
+        /// <summary>
+        /// Select a track in the relative track list by number
+        /// </summary>
+        /// <param name="relativeTrackNumber">Relative track number to attempt to load</param>
+        private void SelectRelativeTrack(int relativeTrackNumber)
+        {
+            if(_trackPlaybackOrder == null || _trackPlaybackOrder.Count == 0)
+                return;
+
+            PlayerState wasPlaying = PlayerState;
+            if(wasPlaying == PlayerState.Playing)
+                Pause();
+
+            if(relativeTrackNumber < 0)
+                relativeTrackNumber = _trackPlaybackOrder.Count - 1;
+            else if(relativeTrackNumber >= _trackPlaybackOrder.Count)
+                relativeTrackNumber = 0;
+
+            do
+            {
+                _currentTrackInOrder = relativeTrackNumber;
+                KeyValuePair<int, int> discTrackPair = _trackPlaybackOrder[relativeTrackNumber];
+                SelectDisc(discTrackPair.Key);
+                if(SelectTrack(discTrackPair.Value))
+                    break;
+
+                relativeTrackNumber++;
+                if(relativeTrackNumber < 0)
+                    relativeTrackNumber = _trackPlaybackOrder.Count - 1;
+                else if(relativeTrackNumber >= _trackPlaybackOrder.Count)
+                    relativeTrackNumber = 0;
+            }
+            while(true);
+
+            if(wasPlaying == PlayerState.Playing)
+                Play();
         }
 
         #endregion
@@ -1358,17 +1231,8 @@ namespace RedBookPlayer.Models.Hardware
                 case RepeatMode.Single:
                     _opticalDiscs[CurrentDisc].LoadTrack(CurrentTrackNumber);
                     break;
-                case RepeatMode.All when DiscHandling == DiscHandling.SingleDisc:
-                    SelectTrack(1);
-                    break;
-                case RepeatMode.All when DiscHandling == DiscHandling.MultiDisc:
-                    do
-                    {
-                        NextDisc();
-                    }
-                    while(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized);
-
-                    SelectTrack(1);
+                case RepeatMode.All:
+                    SelectRelativeTrack(0);
                     break;
             }
 
