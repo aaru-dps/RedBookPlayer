@@ -1289,6 +1289,9 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         private void OpticalDiscStateChanged(object sender, PropertyChangedEventArgs e)
         {
+            if(_opticalDiscs[CurrentDisc] == null)
+                return;
+
             ImagePath = _opticalDiscs[CurrentDisc].ImagePath;
             CurrentTrackNumber = _opticalDiscs[CurrentDisc].CurrentTrackNumber;
             CurrentTrackIndex = _opticalDiscs[CurrentDisc].CurrentTrackIndex;
