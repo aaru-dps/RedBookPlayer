@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -292,9 +293,14 @@ namespace RedBookPlayer.Models.Hardware
         private readonly SoundOutput _soundOutput;
 
         /// <summary>
-        /// OpticalDisc object
+        /// OpticalDisc objects
         /// </summary>
         private OpticalDiscBase[] _opticalDiscs;
+
+        /// <summary>
+        /// List of available tracks
+        /// </summary>
+        private Dictionary<int, List<int>> _trackList;
 
         /// <summary>
         /// Last volume for mute toggling
@@ -337,6 +343,12 @@ namespace RedBookPlayer.Models.Hardware
             _filterStage = new FilterStage();
             _soundOutput = new SoundOutput(defaultVolume);
 
+            _trackList = new Dictionary<int, List<int>>();
+            for(int i = 0; i < _numberOfDiscs; i++)
+            {
+                _trackList.Add(i, new List<int>());
+            }
+
             PropertyChanged += HandlePlaybackModes;
         }
 
@@ -378,12 +390,27 @@ namespace RedBookPlayer.Models.Hardware
             // Add event handling for the sound output
             _soundOutput.PropertyChanged += SoundOutputStateChanged;
 
+            // Load in the track list for the current disc
+            LoadTrackList();
+
             // Mark the player as ready
             Initialized = true;
 
             // Force a refresh of the state information
             OpticalDiscStateChanged(this, null);
             SoundOutputStateChanged(this, null);
+        }
+
+        /// <summary>
+        /// Load the track list into the track dictionary for the current disc
+        /// </summary>
+        private void LoadTrackList()
+        {
+            OpticalDiscBase opticalDisc = _opticalDiscs[CurrentDisc];
+            if (opticalDisc is CompactDisc compactDisc)
+                _trackList[CurrentDisc] = compactDisc.Tracks.Select(t => (int)t.TrackSequence).OrderBy(s => s).ToList();
+            else
+                _trackList[CurrentDisc] = Enumerable.Range(1, opticalDisc.TotalTracks).ToList();
         }
 
         #region Playback (UI)
