@@ -829,7 +829,6 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         /// <param name="trackNumber">Track number to attempt to load</param>
         /// <returns>True if the track was changed, false otherwise</returns>
-        /// <remarks>TODO: This needs to reset the pointer in the track playback order</remarks>
         public bool SelectTrack(int trackNumber)
         {
             if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
@@ -973,6 +972,99 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
+        /// Select a track by number within a disc
+        /// </summary>
+        /// <param name="trackNumber">Track number to attempt to load</param>
+        /// <returns>True if the track was changed, false otherwise</returns>
+        public bool SelectTrackWithinDisc(int trackNumber)
+        {
+            if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
+                return false;
+
+            PlayerState wasPlaying = PlayerState;
+            if(wasPlaying == PlayerState.Playing)
+                Pause();
+
+            // CompactDisc needs special handling of track wraparound
+            if (_opticalDiscs[CurrentDisc] is CompactDisc compactDisc)
+            {
+                // Cache the value and the current track number
+                int cachedValue = trackNumber;
+                int cachedTrackNumber;
+
+                // If we have an invalid current track number, set it to the minimum
+                if(!compactDisc.Tracks.Any(t => t.TrackSequence == _currentTrackNumber))
+                    _currentTrackNumber = (int)compactDisc.Tracks.Min(t => t.TrackSequence);
+
+                // Check if we're incrementing or decrementing the track
+                bool increment = cachedValue >= _currentTrackNumber;
+                
+                do
+                {
+                    // If we're over the last track, wrap around
+                    if(cachedValue > compactDisc.Tracks.Max(t => t.TrackSequence))
+                    {
+                        cachedValue = (int)compactDisc.Tracks.Min(t => t.TrackSequence);
+                        if(cachedValue == 0 && !LoadHiddenTracks)
+                            cachedValue++;
+                    }
+
+                    // If we're under the first track and we're not loading hidden tracks, wrap around
+                    else if(cachedValue < 1 && !LoadHiddenTracks)
+                    {
+                        cachedValue = (int)compactDisc.Tracks.Max(t => t.TrackSequence);
+                    }
+
+                    // If we're under the first valid track, wrap around
+                    else if(cachedValue < compactDisc.Tracks.Min(t => t.TrackSequence))
+                    {
+                        cachedValue = (int)compactDisc.Tracks.Max(t => t.TrackSequence);
+                    }
+
+                    cachedTrackNumber = cachedValue;
+
+                    // Cache the current track for easy access
+                    Track track = compactDisc.GetTrack(cachedTrackNumber);
+                    if(track == null)
+                        return false;
+
+                    // If the track is playable, just return
+                    if((track.TrackType == TrackType.Audio || DataPlayback != DataPlayback.Skip)
+                        && (SessionHandling == SessionHandling.AllSessions || track.TrackSession == 1))
+                    {
+                        break;
+                    }
+
+                    // If we're not playing the track, skip
+                    if(increment)
+                        cachedValue++;
+                    else
+                        cachedValue--;
+                }
+                while(cachedValue != _currentTrackNumber);
+
+                // Load the now-valid value
+                compactDisc.LoadTrack(cachedTrackNumber);
+                ApplyDeEmphasis = compactDisc.TrackHasEmphasis;
+            }
+            else
+            {
+                if(trackNumber >= _opticalDiscs[CurrentDisc].TotalTracks)
+                    trackNumber = 1;
+                else if(trackNumber < 1)
+                    trackNumber = _opticalDiscs[CurrentDisc].TotalTracks - 1;
+                
+                _opticalDiscs[CurrentDisc].LoadTrack(trackNumber);
+            }
+
+            LoadTrackList();
+            if(wasPlaying == PlayerState.Playing)
+                Play();
+
+            return true;
+        }
+
+        /// <summary>
         /// Select a track in the relative track list by number
         /// </summary>
         /// <param name="relativeTrackNumber">Relative track number to attempt to load</param>
@@ -995,7 +1087,7 @@ namespace RedBookPlayer.Models.Hardware
                 _currentTrackInOrder = relativeTrackNumber;
                 KeyValuePair<int, int> discTrackPair = _trackPlaybackOrder[relativeTrackNumber];
                 SelectDisc(discTrackPair.Key);
-                if(SelectTrack(discTrackPair.Value))
+                if(SelectTrackWithinDisc(discTrackPair.Value))
                     break;
             }
             while(true);
