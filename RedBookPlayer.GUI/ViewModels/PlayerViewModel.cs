@@ -17,7 +17,6 @@ using RedBookPlayer.Models.Hardware;
 
 namespace RedBookPlayer.GUI.ViewModels
 {
-    // TODO: Add direct index selection by number
     public class PlayerViewModel : ReactiveObject
     {
         /// <summary>
@@ -706,11 +705,20 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Select a particular disc by number
         /// </summary>
+        /// <param name="discNumber">Disc number to attempt to load</param>
         public void SelectDisc(int discNumber) => _player?.SelectDisc(discNumber);
+
+        /// <summary>
+        /// Select a particular index by number
+        /// </summary>
+        /// <param name="index">Track index to attempt to load</param>
+        /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
+        public void SelectIndex(ushort index, bool changeTrack) => _player?.SelectIndex(index, changeTrack);
 
         /// <summary>
         /// Select a particular track by number
         /// </summary>
+        /// <param name="trackNumber">Track number to attempt to load</param>
         public void SelectTrack(int trackNumber) => _player?.SelectTrack(trackNumber);
 
         /// <summary>

@@ -11,7 +11,6 @@ using RedBookPlayer.Models.Factories;
 
 namespace RedBookPlayer.Models.Hardware
 {
-    // TODO: Add direct index selection by number
     public class Player : ReactiveObject
     {
         /// <summary>
@@ -694,7 +693,6 @@ namespace RedBookPlayer.Models.Hardware
         /// Select a track by number
         /// </summary>
         /// <param name="trackNumber">Track number to attempt to load</param>
-        /// <remarks>Changing track with RepeatMode.AllMultiDisc should switch discs<remarks>
         public void SelectTrack(int trackNumber)
         {
             if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
@@ -710,6 +708,38 @@ namespace RedBookPlayer.Models.Hardware
                 // Cache the value and the current track number
                 int cachedValue = trackNumber;
                 int cachedTrackNumber;
+
+                // Take care of disc switching first
+                if(RepeatMode == RepeatMode.AllMultiDisc)
+                {
+                    if(trackNumber > (int)compactDisc.Tracks.Max(t => t.TrackSequence))
+                    {
+                        do
+                        {
+                            NextDisc();
+                        }
+                        while(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized);
+
+                        if(wasPlaying == PlayerState.Playing)
+                            Play();
+
+                        return;
+                    }
+                    else if((trackNumber < 1 && !LoadHiddenTracks) || (trackNumber < (int)compactDisc.Tracks.Min(t => t.TrackSequence)))
+                    {
+                        do
+                        {
+                            PreviousDisc();
+                        }
+                        while(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized);
+
+                        SelectTrack(-1);
+                        if(wasPlaying == PlayerState.Playing)
+                            Play();
+
+                        return;
+                    }
+                }
 
                 // If we have an invalid current track number, set it to the minimum
                 if(!compactDisc.Tracks.Any(t => t.TrackSequence == _currentTrackNumber))
@@ -769,9 +799,32 @@ namespace RedBookPlayer.Models.Hardware
             else
             {
                 if(trackNumber >= _opticalDiscs[CurrentDisc].TotalTracks)
+                {
+                    if(RepeatMode == RepeatMode.AllMultiDisc)
+                    {
+                        do
+                        {
+                            NextDisc();
+                        }
+                        while(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized);
+                    }
+
                     trackNumber = 1;
+                }
                 else if(trackNumber < 1)
+                {
+                    if(RepeatMode == RepeatMode.AllMultiDisc)
+                    {
+                        do
+                        {
+                            PreviousDisc();
+                        }
+                        while(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized);
+                        trackNumber = 1;
+                    }
+
                     trackNumber = _opticalDiscs[CurrentDisc].TotalTracks - 1;
+                }
                 
                 _opticalDiscs[CurrentDisc].LoadTrack(trackNumber);
             }
@@ -1040,7 +1093,7 @@ namespace RedBookPlayer.Models.Hardware
                     {
                         NextDisc();
                     }
-                    while(_opticalDiscs[CurrentDisc] != null && !_opticalDiscs[CurrentDisc].Initialized);
+                    while(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized);
 
                     SelectTrack(1);
                     break;

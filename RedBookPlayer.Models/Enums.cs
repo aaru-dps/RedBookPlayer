@@ -50,7 +50,6 @@ namespace RedBookPlayer.Models
     /// <summary>
     /// Playback repeat mode
     /// </summary>
-    /// <remarks>TODO: Add cross-disc repeat</remarks>
     public enum RepeatMode
     {
         /// <summary>
