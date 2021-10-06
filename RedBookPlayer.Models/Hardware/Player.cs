@@ -298,9 +298,14 @@ namespace RedBookPlayer.Models.Hardware
         private OpticalDiscBase[] _opticalDiscs;
 
         /// <summary>
-        /// List of available tracks
+        /// List of available tracks organized by disc
         /// </summary>
-        private Dictionary<int, List<int>> _trackList;
+        private Dictionary<int, List<int>> _availableTrackList;
+
+        /// <summary>
+        /// Current track playback order
+        /// </summary>
+        private List<KeyValuePair<int, int>> _trackPlaybackOrder;
 
         /// <summary>
         /// Last volume for mute toggling
@@ -343,11 +348,13 @@ namespace RedBookPlayer.Models.Hardware
             _filterStage = new FilterStage();
             _soundOutput = new SoundOutput(defaultVolume);
 
-            _trackList = new Dictionary<int, List<int>>();
+            _availableTrackList = new Dictionary<int, List<int>>();
             for(int i = 0; i < _numberOfDiscs; i++)
             {
-                _trackList.Add(i, new List<int>());
+                _availableTrackList.Add(i, new List<int>());
             }
+
+            _trackPlaybackOrder = new List<KeyValuePair<int, int>>();
 
             PropertyChanged += HandlePlaybackModes;
         }
@@ -407,10 +414,31 @@ namespace RedBookPlayer.Models.Hardware
         private void LoadTrackList()
         {
             OpticalDiscBase opticalDisc = _opticalDiscs[CurrentDisc];
-            if (opticalDisc is CompactDisc compactDisc)
-                _trackList[CurrentDisc] = compactDisc.Tracks.Select(t => (int)t.TrackSequence).OrderBy(s => s).ToList();
+
+            // If the disc exists, add it to the dictionary
+            if(_opticalDiscs[CurrentDisc] != null)
+            {
+                if (opticalDisc is CompactDisc compactDisc)
+                    _availableTrackList[CurrentDisc] = compactDisc.Tracks.Select(t => (int)t.TrackSequence).OrderBy(s => s).ToList();
+                else
+                    _availableTrackList[CurrentDisc] = Enumerable.Range(1, opticalDisc.TotalTracks).ToList();
+            }
+
+            // If the disc is null, then make sure it's removed
             else
-                _trackList[CurrentDisc] = Enumerable.Range(1, opticalDisc.TotalTracks).ToList();
+            {
+                _availableTrackList[CurrentDisc] = new List<int>();
+            }
+
+            // Loop through the dictionary and repopulate the playback order
+            for(int i = 0; i < _numberOfDiscs; i++)
+            {
+                if(_availableTrackList[i] == null || _availableTrackList[i].Count == 0)
+                    continue;
+
+                List<int> availableTracks = _availableTrackList[i];
+                _trackPlaybackOrder.AddRange(availableTracks.Select(t => new KeyValuePair<int, int>(i, t)));
+            }
         }
 
         #region Playback (UI)
@@ -498,10 +526,20 @@ namespace RedBookPlayer.Models.Hardware
                 return;
 
             Stop();
-            _soundOutput.Eject();
             _opticalDiscs[CurrentDisc] = null;
-            PlayerState = PlayerState.NoDisc;
-            Initialized = false;
+            LoadTrackList();
+
+            // Only de-initialize the player if all discs are ejected
+            if(_opticalDiscs.All(d => d == null || !d.Initialized))
+            {
+                _soundOutput.Eject();
+                PlayerState = PlayerState.NoDisc;
+                Initialized = false;
+            }
+            else
+            {
+                PlayerState = PlayerState.Stopped;
+            }
         }
 
         /// <summary>
