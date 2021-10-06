@@ -20,6 +20,7 @@
 | **Page Down** | Previous Disc |
 | **&#8594;** | Next Track |
 | **&#8592;** | Previous Track |
+| **R** | Shuffle Tracks |
 | **]** | Next Index |
 | **[** | Previous Index |
 | **.** | Fast Forward |
@@ -35,6 +36,10 @@ For Save Track(s):
 
 For Disc Switching:
 - If you change the number of discs in the internal changer, you must restart the program for it to take effect
+
+For Shuffling:
+- Shuffling only works on the current set of playable tracks
+- If you are in single disc mode and switch discs, it will not automatically shuffle the new tracks
 
 For both Volume Up and Volume Down:
 - Holding **Ctrl** will move in increments of 2

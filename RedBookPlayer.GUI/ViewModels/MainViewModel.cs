@@ -101,10 +101,10 @@ namespace RedBookPlayer.GUI.ViewModels
             }
 
             // Shuffle Track List
-            // else if(e.Key == App.Settings.ShuffleTracksKey)
-            // {
-            //     PlayerView?.ViewModel?.ExecuteShuffle();
-            // }
+            else if(e.Key == App.Settings.ShuffleTracksKey)
+            {
+                PlayerView?.ViewModel?.ExecuteShuffle();
+            }
 
             // Next Index
             else if(e.Key == App.Settings.NextIndexKey)
