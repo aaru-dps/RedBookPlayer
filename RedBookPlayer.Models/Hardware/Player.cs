@@ -828,12 +828,12 @@ namespace RedBookPlayer.Models.Hardware
         /// Select a track by number
         /// </summary>
         /// <param name="trackNumber">Track number to attempt to load</param>
+        /// <returns>True if the track was changed, false otherwise</returns>
         /// <remarks>TODO: This needs to reset the pointer in the track playback order</remarks>
-        /// <remarks>TODO: There needs to be a SelectRelativeTrack variant that follows order and then invokes this</remarks>
-        public void SelectTrack(int trackNumber)
+        public bool SelectTrack(int trackNumber)
         {
             if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
-                return;
+                return false;
 
             PlayerState wasPlaying = PlayerState;
             if(wasPlaying == PlayerState.Playing)
@@ -860,7 +860,7 @@ namespace RedBookPlayer.Models.Hardware
                         if(wasPlaying == PlayerState.Playing)
                             Play();
 
-                        return;
+                        return true;
                     }
                     else if((trackNumber < 1 && !LoadHiddenTracks) || (trackNumber < (int)compactDisc.Tracks.Min(t => t.TrackSequence)))
                     {
@@ -874,7 +874,7 @@ namespace RedBookPlayer.Models.Hardware
                         if(wasPlaying == PlayerState.Playing)
                             Play();
 
-                        return;
+                        return true;
                     }
                 }
 
@@ -912,7 +912,7 @@ namespace RedBookPlayer.Models.Hardware
                     // Cache the current track for easy access
                     Track track = compactDisc.GetTrack(cachedTrackNumber);
                     if(track == null)
-                        return;
+                        return false;
 
                     // If the track is playable, just return
                     if((track.TrackType == TrackType.Audio || DataPlayback != DataPlayback.Skip)
@@ -965,6 +965,40 @@ namespace RedBookPlayer.Models.Hardware
                 
                 _opticalDiscs[CurrentDisc].LoadTrack(trackNumber);
             }
+
+            if(wasPlaying == PlayerState.Playing)
+                Play();
+
+            return true;
+        }
+
+        /// <summary>
+        /// Select a track in the relative track list by number
+        /// </summary>
+        /// <param name="relativeTrackNumber">Relative track number to attempt to load</param>
+        public void SelectRelativeTrack(int relativeTrackNumber)
+        {
+            if(_trackPlaybackOrder == null || _trackPlaybackOrder.Count == 0)
+                return;
+
+            PlayerState wasPlaying = PlayerState;
+            if(wasPlaying == PlayerState.Playing)
+                Pause();
+
+            if(relativeTrackNumber < 0)
+                relativeTrackNumber = _trackPlaybackOrder.Count - 1;
+            else if(relativeTrackNumber >= _trackPlaybackOrder.Count)
+                relativeTrackNumber = 0;
+
+            do
+            {
+                _currentTrackInOrder = relativeTrackNumber;
+                KeyValuePair<int, int> discTrackPair = _trackPlaybackOrder[relativeTrackNumber];
+                SelectDisc(discTrackPair.Key);
+                if(SelectTrack(discTrackPair.Value))
+                    break;
+            }
+            while(true);
 
             if(wasPlaying == PlayerState.Playing)
                 Play();
