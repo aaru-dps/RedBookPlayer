@@ -181,6 +181,11 @@ namespace RedBookPlayer.GUI.ViewModels
         public Key PreviousTrackKey { get; set; } = Key.Left;
 
         /// <summary>
+        /// Key assigned to shuffling the track list
+        /// </summary>
+        // public Key ShuffleTracksKey { get; set; } = Key.R;
+
+        /// <summary>
         /// Key assigned to move to the next index
         /// </summary>
         public Key NextIndexKey { get; set; } = Key.OemCloseBrackets;

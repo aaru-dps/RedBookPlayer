@@ -471,6 +471,11 @@ namespace RedBookPlayer.GUI.ViewModels
         public void ExecutePreviousTrack() => _player?.PreviousTrack();
 
         /// <summary>
+        /// Shuffle the current track list
+        /// </summary>
+        public void ExecuteShuffle() => _player?.ShuffleTracks();
+
+        /// <summary>
         /// Move to the next index
         /// </summary>
         public void ExecuteNextIndex() => _player?.NextIndex(App.Settings.IndexButtonChangeTrack);

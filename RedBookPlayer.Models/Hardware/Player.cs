@@ -415,7 +415,7 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         /// <summary>
-        /// Load the track list into the track dictionary for the current disc
+        /// Load the track list into the track dictionary
         /// </summary>
         private void LoadTrackList()
         {
@@ -455,6 +455,14 @@ namespace RedBookPlayer.Models.Hardware
             }
 
             // Try to get back to the last loaded track
+            SetTrackOrderIndex();
+        }
+
+        /// <summary>
+        /// Set the current track order index, if possible
+        /// </summary>
+        private void SetTrackOrderIndex()
+        {
             int currentFoundTrack = 0;
             if(_trackPlaybackOrder == null || _trackPlaybackOrder.Count == 0)
             {
@@ -553,6 +561,16 @@ namespace RedBookPlayer.Models.Hardware
             }
 
             _trackPlaybackOrder = newPlaybackOrder;
+            switch(PlayerState)
+            {
+                case PlayerState.Stopped:
+                    _currentTrackInOrder = 0;
+                    break;
+                case PlayerState.Paused:
+                case PlayerState.Playing:
+                    SetTrackOrderIndex();
+                    break;
+            }
         }
 
         /// <summary>
@@ -924,7 +942,7 @@ namespace RedBookPlayer.Models.Hardware
                 _opticalDiscs[CurrentDisc].LoadTrack(trackNumber);
             }
 
-            LoadTrackList();
+            SetTrackOrderIndex();
             if(wasPlaying == PlayerState.Playing)
                 Play();
 
