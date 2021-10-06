@@ -406,17 +406,17 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Initialize the view model with a given image path
         /// </summary>
         /// <param name="path">Path to the disc image</param>
-        /// <param name="options">Options to pass to the optical disc factory</param>
-        /// <param name="repeatMode">RepeatMode for sound output</param>
+        /// <param name="playerOptions">Options to pass to the player</param>
+        /// <param name="opticalDiscOptions">Options to pass to the optical disc factory</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, OpticalDiscOptions options, RepeatMode repeatMode, bool autoPlay)
+        public void Init(string path, PlayerOptions playerOptions, OpticalDiscOptions opticalDiscOptions, bool autoPlay)
         {
             // Stop current playback, if necessary
             if(PlayerState != PlayerState.NoDisc)
                 ExecuteStop();
 
             // Attempt to initialize Player
-            _player.Init(path, options, repeatMode, autoPlay);
+            _player.Init(path, playerOptions, opticalDiscOptions, autoPlay);
             if(_player.Initialized)
             {
                 _player.PropertyChanged += PlayerStateChanged;
@@ -654,19 +654,24 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             return await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                OpticalDiscOptions options = new OpticalDiscOptions
+                PlayerOptions playerOptions = new PlayerOptions
                 {
                     DataPlayback = App.Settings.DataPlayback,
-                    GenerateMissingToc = App.Settings.GenerateMissingTOC,
                     LoadHiddenTracks = App.Settings.PlayHiddenTracks,
+                    RepeatMode = App.Settings.RepeatMode,
                     SessionHandling = App.Settings.SessionHandling,
+                };
+
+                OpticalDiscOptions opticalDiscOptions = new OpticalDiscOptions
+                {
+                    GenerateMissingToc = App.Settings.GenerateMissingTOC,
                 };
 
                 // Ensure the context and view model are set
                 App.PlayerView.DataContext = this;
                 App.PlayerView.ViewModel = this;
 
-                Init(path, options, App.Settings.RepeatMode, App.Settings.AutoPlay);
+                Init(path, playerOptions, opticalDiscOptions, App.Settings.AutoPlay);
                 if(Initialized)
                     App.MainWindow.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
 

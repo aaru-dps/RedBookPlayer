@@ -7,7 +7,7 @@ namespace RedBookPlayer.Models.Hardware.Linux
         /// <summary>
         /// Sound output instance
         /// </summary>
-        private ALSoundOut _soundOut;
+        private readonly ALSoundOut _soundOut;
 
         public AudioBackend() { }
 

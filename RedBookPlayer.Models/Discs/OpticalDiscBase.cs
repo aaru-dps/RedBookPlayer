@@ -103,34 +103,6 @@ namespace RedBookPlayer.Models.Discs
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
         public abstract void Init(string path, IOpticalMediaImage image, bool autoPlay);
 
-        #region Seeking
-
-        /// <summary>
-        /// Try to move to the next track, wrapping around if necessary
-        /// </summary>
-        public abstract void NextTrack();
-
-        /// <summary>
-        /// Try to move to the previous track, wrapping around if necessary
-        /// </summary>
-        public abstract void PreviousTrack();
-
-        /// <summary>
-        /// Try to move to the next track index
-        /// </summary>
-        /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
-        /// <returns>True if the track was changed, false otherwise</returns>
-        public abstract bool NextIndex(bool changeTrack);
-
-        /// <summary>
-        /// Try to move to the previous track index
-        /// </summary>
-        /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
-        /// <returns>True if the track was changed, false otherwise</returns>
-        public abstract bool PreviousIndex(bool changeTrack);
-
-        #endregion
-
         #region Helpers
 
         /// <summary>
@@ -141,21 +113,16 @@ namespace RedBookPlayer.Models.Discs
         public abstract void ExtractTrackToWav(uint trackNumber, string outputDirectory);
 
         /// <summary>
-        /// Extract all tracks to WAV
-        /// </summary>
-        /// <param name="outputDirectory">Output path to write data to</param>
-        public abstract void ExtractAllTracksToWav(string outputDirectory);
-
-        /// <summary>
         /// Load the desired track, if possible
         /// </summary>
         /// <param name="track">Track number to load</param>
         public abstract void LoadTrack(int track);
 
         /// <summary>
-        /// Load the first valid track in the image
+        /// Load the desired index, if possible
         /// </summary>
-        public abstract void LoadFirstTrack();
+        /// <param name="index">Index number to load</param>
+        public abstract void LoadIndex(ushort index);
 
         /// <summary>
         /// Read sector data from the base image starting from the current sector

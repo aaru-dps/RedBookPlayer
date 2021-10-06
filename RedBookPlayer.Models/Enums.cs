@@ -64,9 +64,14 @@ namespace RedBookPlayer.Models
         Single,
 
         /// <summary>
-        /// Repeat all tracks
+        /// Repeat all tracks on a single disc
         /// </summary>
-        All,
+        AllSingleDisc,
+
+        /// <summary>
+        /// Repeat all tracks on a multiple discs
+        /// </summary>
+        AllMultiDisc,
     }
 
     /// <summary>

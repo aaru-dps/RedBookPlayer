@@ -77,7 +77,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Indicates how to repeat tracks
         /// </summary>
-        public RepeatMode RepeatMode { get; set; } = RepeatMode.All;
+        public RepeatMode RepeatMode { get; set; } = RepeatMode.AllSingleDisc;
 
         /// <summary>
         /// Indicates how to handle tracks on different sessions
