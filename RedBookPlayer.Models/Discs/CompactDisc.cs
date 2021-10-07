@@ -357,6 +357,13 @@ namespace RedBookPlayer.Models.Discs
         public byte[] ReadSectors(uint sectorsToRead, DataPlayback dataPlayback) => ReadSectors(CurrentSector, sectorsToRead, dataPlayback);
 
         /// <summary>
+        /// Read subchannel data from the base image starting from the specified sector
+        /// </summary>
+        /// <param name="sectorsToRead">Current number of sectors to read</param>
+        /// <returns>Byte array representing the read subchannels, if possible</returns>
+        public byte[] ReadSubchannels(uint sectorsToRead) => ReadSubchannels(CurrentSector, sectorsToRead);
+
+        /// <summary>
         /// Read sector data from the base image starting from the specified sector
         /// </summary>
         /// <param name="startSector">Sector to start at for reading</param>
@@ -380,6 +387,15 @@ namespace RedBookPlayer.Models.Discs
                 return new byte[0];
             }
         }
+
+        /// <summary>
+        /// Read subchannel data from the base image starting from the specified sector
+        /// </summary>
+        /// <param name="startSector">Sector to start at for reading</param>
+        /// <param name="sectorsToRead">Current number of sectors to read</param>
+        /// <returns>Byte array representing the read subchannels, if possible</returns>
+        private byte[] ReadSubchannels(ulong startSector, uint sectorsToRead)
+            => _image.ReadSectorsTag(startSector, sectorsToRead, SectorTagType.CdSectorSubchannel);
 
         /// <inheritdoc/>
         public override void SetTotalIndexes()
