@@ -1332,5 +1332,110 @@ namespace RedBookPlayer.Models.Hardware
         }
 
         #endregion
+    
+        #region Helpers
+
+        /// <summary>
+        /// Reformat raw subchannel data for a single sector
+        /// </summary>
+        /// <param name="subchannelData">Raw subchannel data to format</param>
+        /// <returns>Dictionary mapping subchannel to formatted data</returns>
+        public Dictionary<char, byte[]> ConvertSingleSubchannel(byte[] subchannelData)
+        {
+            if(subchannelData == null || subchannelData.Length != 96)
+                return null;
+
+            // Create the output dictionary for the formatted data
+            Dictionary<char, byte[]> formattedData = new Dictionary<char, byte[]>
+            {
+                ['P'] = new byte[12],
+                ['Q'] = new byte[12],
+                ['R'] = new byte[12],
+                ['S'] = new byte[12],
+                ['T'] = new byte[12],
+                ['U'] = new byte[12],
+                ['V'] = new byte[12],
+                ['W'] = new byte[12],
+            };
+
+            // Loop through all bytes in the subchannel data and populate
+            int index = -1;
+            for(int i = 0; i < 96; i++)
+            {
+                // Get the modulo value of the current byte
+                int modValue = i % 8;
+                if(modValue == 0)
+                    index++;
+
+                // Retrieve the next byte
+                byte b = subchannelData[i];
+
+                // Set the respective bit in the new byte data
+                formattedData['P'][index] |= (byte)(HasBitSet(b, 7) ? 1 << modValue : 0);
+                formattedData['Q'][index] |= (byte)(HasBitSet(b, 6) ? 1 << modValue : 0);
+                formattedData['R'][index] |= (byte)(HasBitSet(b, 5) ? 1 << modValue : 0);
+                formattedData['S'][index] |= (byte)(HasBitSet(b, 4) ? 1 << modValue : 0);
+                formattedData['T'][index] |= (byte)(HasBitSet(b, 3) ? 1 << modValue : 0);
+                formattedData['U'][index] |= (byte)(HasBitSet(b, 2) ? 1 << modValue : 0);
+                formattedData['V'][index] |= (byte)(HasBitSet(b, 1) ? 1 << modValue : 0);
+                formattedData['W'][index] |= (byte)(HasBitSet(b, 0) ? 1 << modValue : 0);
+            }
+
+            return formattedData;
+        }
+
+        /// <summary>
+        /// Reformat raw subchannel data for multiple sectors
+        /// </summary>
+        /// <param name="subchannelData">Raw subchannel data to format</param>
+        /// <returns>Dictionary mapping subchannel to formatted data</returns>
+        public Dictionary<char, byte[]> ConvertSubchannels(byte[] subchannelData)
+        {
+            if(subchannelData == null || subchannelData.Length % 96 != 0)
+                return null;
+
+            // Prepare the output formatted data
+            int modValue = subchannelData.Length / 96;
+            Dictionary<char, byte[]> formattedData = new Dictionary<char, byte[]>
+            {
+                ['P'] = new byte[12 * modValue],
+                ['Q'] = new byte[12 * modValue],
+                ['R'] = new byte[12 * modValue],
+                ['S'] = new byte[12 * modValue],
+                ['T'] = new byte[12 * modValue],
+                ['U'] = new byte[12 * modValue],
+                ['V'] = new byte[12 * modValue],
+                ['W'] = new byte[12 * modValue],
+            };
+
+            // Read in 96-byte chunks
+            for(int i = 0; i < modValue; i++)
+            {
+                byte[] buffer = new byte[96];
+                Array.Copy(subchannelData, i * 96, buffer, 0, 96);
+                Dictionary<char, byte[]> singleData = ConvertSingleSubchannel(buffer);
+
+                Array.Copy(singleData['P'], 0, formattedData['P'], 12 * i, 12);
+                Array.Copy(singleData['Q'], 0, formattedData['Q'], 12 * i, 12);
+                Array.Copy(singleData['R'], 0, formattedData['R'], 12 * i, 12);
+                Array.Copy(singleData['S'], 0, formattedData['S'], 12 * i, 12);
+                Array.Copy(singleData['T'], 0, formattedData['T'], 12 * i, 12);
+                Array.Copy(singleData['U'], 0, formattedData['U'], 12 * i, 12);
+                Array.Copy(singleData['V'], 0, formattedData['V'], 12 * i, 12);
+                Array.Copy(singleData['W'], 0, formattedData['W'], 12 * i, 12);
+            }
+
+            return formattedData;
+        }
+
+        /// <summary>
+        /// Check if a bit is set in a byte
+        /// </summary>
+        /// <param name="value">Byte value to check</param>
+        /// <param name="bitIndex">Index of the bit to check</param>
+        /// <returns>True if the bit was set, false otherwise</returns>
+        private bool HasBitSet(byte value, int bitIndex) => (value & (1 << bitIndex)) != 0;
+
+        #endregion
     }
 }
