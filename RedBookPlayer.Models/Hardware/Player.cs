@@ -7,6 +7,7 @@ using Aaru.CommonTypes.Enums;
 using Aaru.CommonTypes.Structs;
 using Avalonia.Threading;
 using ReactiveUI;
+using RedBookPlayer.Models.Audio;
 using RedBookPlayer.Models.Discs;
 using RedBookPlayer.Models.Factories;
 

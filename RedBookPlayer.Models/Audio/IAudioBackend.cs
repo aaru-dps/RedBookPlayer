@@ -1,4 +1,4 @@
-namespace RedBookPlayer.Models.Hardware
+namespace RedBookPlayer.Models.Audio
 {
     public interface IAudioBackend
     {

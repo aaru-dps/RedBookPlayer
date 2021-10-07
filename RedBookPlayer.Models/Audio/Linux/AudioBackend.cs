@@ -1,6 +1,6 @@
 using CSCore.SoundOut;
 
-namespace RedBookPlayer.Models.Hardware.Windows
+namespace RedBookPlayer.Models.Audio.Linux
 {
     public class AudioBackend : IAudioBackend
     {

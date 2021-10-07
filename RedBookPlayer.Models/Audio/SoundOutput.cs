@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using ReactiveUI;
 
-namespace RedBookPlayer.Models.Hardware
+namespace RedBookPlayer.Models.Audio
 {
     public class SoundOutput : ReactiveObject
     {
