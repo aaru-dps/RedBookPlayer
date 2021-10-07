@@ -370,6 +370,7 @@ namespace RedBookPlayer.Models.Discs
         /// <param name="sectorsToRead">Current number of sectors to read</param>
         /// <param name="dataPlayback">DataPlayback value indicating how to handle data tracks</param>
         /// <returns>Byte array representing the read sectors, if possible</returns>
+        /// <remarks>Should be a multiple of 96 bytes</remarks>
         private byte[] ReadSectors(ulong startSector, uint sectorsToRead, DataPlayback dataPlayback)
         {
             if(TrackType == TrackType.Audio || dataPlayback == DataPlayback.Play)
@@ -394,6 +395,7 @@ namespace RedBookPlayer.Models.Discs
         /// <param name="startSector">Sector to start at for reading</param>
         /// <param name="sectorsToRead">Current number of sectors to read</param>
         /// <returns>Byte array representing the read subchannels, if possible</returns>
+        /// <remarks>Should be a multiple of 96 bytes</remarks>
         private byte[] ReadSubchannels(ulong startSector, uint sectorsToRead)
             => _image.ReadSectorsTag(startSector, sectorsToRead, SectorTagType.CdSectorSubchannel);
 
