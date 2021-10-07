@@ -975,7 +975,7 @@ namespace RedBookPlayer.Models.Hardware
         /// <param name="zeroSectorsAmount">Number of zeroed sectors to concatenate</param>
         private void DetermineReadAmount(out ulong sectorsToRead, out ulong zeroSectorsAmount)
         {
-            // Always attempt to read one frame of data
+            // Always attempt to read one second of data
             sectorsToRead = 75;
             zeroSectorsAmount = 0;
 
