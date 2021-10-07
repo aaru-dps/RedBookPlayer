@@ -354,7 +354,7 @@ namespace RedBookPlayer.Models.Discs
         /// <param name="sectorsToRead">Current number of sectors to read</param>
         /// <param name="dataPlayback">DataPlayback value indicating how to handle data tracks</param>
         /// <returns>Byte array representing the read sectors, if possible</returns>
-        public byte[] ReadSectors(uint sectorsToRead, DataPlayback dataPlayback) => ReadSectors(CurrentSector, sectorsToRead, DataPlayback.Skip);
+        public byte[] ReadSectors(uint sectorsToRead, DataPlayback dataPlayback) => ReadSectors(CurrentSector, sectorsToRead, dataPlayback);
 
         /// <summary>
         /// Read sector data from the base image starting from the specified sector
