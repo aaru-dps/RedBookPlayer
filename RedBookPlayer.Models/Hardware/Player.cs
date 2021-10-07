@@ -1022,9 +1022,14 @@ namespace RedBookPlayer.Models.Hardware
                     try
                     {
                         if(_opticalDiscs[CurrentDisc] is CompactDisc compactDisc)
+                        {
+                            byte[] subchannelData = compactDisc.ReadSubchannels((uint)sectorsToRead);
                             return compactDisc.ReadSectors((uint)sectorsToRead, DataPlayback).Concat(zeroSectors).ToArray();
+                        }
                         else
+                        {
                             return _opticalDiscs[CurrentDisc].ReadSectors((uint)sectorsToRead).Concat(zeroSectors).ToArray();
+                        }
                     }
                     catch { }
 
