@@ -28,9 +28,9 @@ namespace RedBookPlayer.Models.Discs
                     return;
 
                 // Invalid value means we can't do anything
-                if (value > _image.Tracks.Max(t => t.TrackSequence))
+                if(value > _image.Tracks.Max(t => t.TrackSequence))
                     return;
-                else if (value < _image.Tracks.Min(t => t.TrackSequence))
+                else if(value < _image.Tracks.Min(t => t.TrackSequence))
                     return;
 
                 // Cache the current track for easy access
@@ -65,9 +65,9 @@ namespace RedBookPlayer.Models.Discs
                     return;
 
                 // Invalid value means we can't do anything
-                if (value > track.Indexes.Keys.Max())
+                if(value > track.Indexes.Keys.Max())
                     return;
-                else if (value < track.Indexes.Keys.Min())
+                else if(value < track.Indexes.Keys.Min())
                     return;
 
                 this.RaiseAndSetIfChanged(ref _currentTrackIndex, value);
@@ -271,7 +271,7 @@ namespace RedBookPlayer.Models.Discs
 
             // Get the track with that value, if possible
             Track track = _image.Tracks.FirstOrDefault(t => t.TrackSequence == trackNumber);
-            if (track == null)
+            if(track == null)
                 return;
 
             // Get the number of sectors to read
@@ -334,7 +334,7 @@ namespace RedBookPlayer.Models.Discs
 
             // Cache the current track for easy access
             Track track = GetTrack(CurrentTrackNumber);
-            if (track == null)
+            if(track == null)
                 return;
 
             // If the index is invalid, just return

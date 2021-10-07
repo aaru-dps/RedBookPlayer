@@ -636,7 +636,7 @@ namespace RedBookPlayer.GUI.ViewModels
             ImagePath = _player.ImagePath;
             Initialized = _player.Initialized;
 
-            if (!string.IsNullOrWhiteSpace(ImagePath) && Initialized)
+            if(!string.IsNullOrWhiteSpace(ImagePath) && Initialized)
             {
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {

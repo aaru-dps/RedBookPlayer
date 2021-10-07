@@ -43,7 +43,7 @@ namespace RedBookPlayer.Models.Audio.Windows
         /// <inheritdoc/>
         public void SetVolume(float volume)
         {
-            if (_soundOut != null)
+            if(_soundOut != null)
                 _soundOut.Volume = volume;
         }
 

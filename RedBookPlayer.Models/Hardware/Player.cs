@@ -35,9 +35,9 @@ namespace RedBookPlayer.Models.Hardware
             private set
             {
                 int temp = value;
-                if (temp < 0)
+                if(temp < 0)
                     temp = _numberOfDiscs - 1;
-                else if (temp >= _numberOfDiscs)
+                else if(temp >= _numberOfDiscs)
                     temp = 0;
                 
                 this.RaiseAndSetIfChanged(ref _currentDisc, temp);
@@ -296,7 +296,7 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// OpticalDisc objects
         /// </summary>
-        private OpticalDiscBase[] _opticalDiscs;
+        private readonly OpticalDiscBase[] _opticalDiscs;
 
         /// <summary>
         /// List of available tracks organized by disc
@@ -321,7 +321,7 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Filtering stage for audio output
         /// </summary>
-        private FilterStage _filterStage;
+        private readonly FilterStage _filterStage;
 
         /// <summary>
         /// Current position in the sector for reading
@@ -344,7 +344,7 @@ namespace RedBookPlayer.Models.Hardware
         {
             Initialized = false;
 
-            if (numberOfDiscs <= 0)
+            if(numberOfDiscs <= 0)
                 numberOfDiscs = 1;
 
             _numberOfDiscs = numberOfDiscs;
@@ -467,26 +467,23 @@ namespace RedBookPlayer.Models.Hardware
             int currentFoundTrack = 0;
             if(_trackPlaybackOrder == null || _trackPlaybackOrder.Count == 0)
             {
-                currentFoundTrack = 0;
+                _currentTrackInOrder = 0;
+                return;
             }
             else if(_trackPlaybackOrder.Any(kvp => kvp.Key == CurrentDisc))
             {
                 currentFoundTrack = _trackPlaybackOrder.FindIndex(kvp => kvp.Key == CurrentDisc && kvp.Value == CurrentTrackNumber);
                 if(currentFoundTrack == -1)
-                    currentFoundTrack = _trackPlaybackOrder.Where(kvp => kvp.Key == CurrentDisc).Min(kvp => kvp.Value);
-
-                CurrentDisc = _trackPlaybackOrder[currentFoundTrack].Key;
-                CurrentTrackNumber = _trackPlaybackOrder[currentFoundTrack].Value;
+                    currentFoundTrack = _trackPlaybackOrder.FindIndex(kvp => kvp.Key == CurrentDisc && kvp.Value == _trackPlaybackOrder.Min(kvp => kvp.Value));
             }
             else
             {
                 int lowestDiscNumber = _trackPlaybackOrder.Min(kvp => kvp.Key);
-                currentFoundTrack = _trackPlaybackOrder.Where(kvp => kvp.Key == lowestDiscNumber).Min(kvp => kvp.Value);
-
-                CurrentDisc = _trackPlaybackOrder[currentFoundTrack].Key;
-                CurrentTrackNumber = _trackPlaybackOrder[currentFoundTrack].Value;
+                currentFoundTrack = _trackPlaybackOrder.FindIndex(kvp => kvp.Key == lowestDiscNumber && kvp.Value == _trackPlaybackOrder.Min(kvp => kvp.Value));
             }
 
+            CurrentDisc = _trackPlaybackOrder[currentFoundTrack].Key;
+            CurrentTrackNumber = _trackPlaybackOrder[currentFoundTrack].Value;
             _currentTrackInOrder = currentFoundTrack;
         }
 
@@ -692,7 +689,7 @@ namespace RedBookPlayer.Models.Hardware
         public int ProviderRead(byte[] buffer, int offset, int count)
         {
             // If we have an unreadable amount
-            if (count <= 0)
+            if(count <= 0)
             {
                 Array.Clear(buffer, offset, count);
                 return count;
@@ -706,7 +703,7 @@ namespace RedBookPlayer.Models.Hardware
             }
 
             // Determine how many sectors we can read
-            DetermineReadAmount(count, out ulong sectorsToRead, out ulong zeroSectorsAmount);
+            DetermineReadAmount(out ulong sectorsToRead, out ulong zeroSectorsAmount);
 
             // Get data to return
             byte[] audioDataSegment = ReadData(count, sectorsToRead, zeroSectorsAmount);
@@ -732,7 +729,7 @@ namespace RedBookPlayer.Models.Hardware
                 else if(RepeatMode == RepeatMode.Single && _opticalDiscs[CurrentDisc] is CompactDisc compactDisc)
                 {
                     ulong trackEndSector = compactDisc.GetTrack(CurrentTrackNumber).TrackEndSector;
-                    if (newSectorValue > trackEndSector)
+                    if(newSectorValue > trackEndSector)
                     {
                         ShouldInvokePlaybackModes = true;
                     }
@@ -750,7 +747,7 @@ namespace RedBookPlayer.Models.Hardware
 
                 // If we are supposed to change tracks, get the next one from the list
                 if(CurrentTrackNumber != previousTrack && !ShouldInvokePlaybackModes)
-                    NextTrack();
+                    Dispatcher.UIThread.InvokeAsync(NextTrack).ConfigureAwait(false).GetAwaiter().GetResult();
             }
 
             return count;
@@ -767,7 +764,7 @@ namespace RedBookPlayer.Models.Hardware
                 return;
 
             PlayerState wasPlaying = PlayerState;
-            if (wasPlaying == PlayerState.Playing)
+            if(wasPlaying == PlayerState.Playing)
                 Stop();
 
             if(discNumber >= _numberOfDiscs)
@@ -783,7 +780,7 @@ namespace RedBookPlayer.Models.Hardware
             if(DiscHandling == DiscHandling.SingleDisc)
                 LoadTrackList();
 
-            if (_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
+            if(_opticalDiscs[CurrentDisc] != null && _opticalDiscs[CurrentDisc].Initialized)
             {
                 Initialized = true;
                 SelectTrack(1);
@@ -815,11 +812,11 @@ namespace RedBookPlayer.Models.Hardware
                 return;
 
             PlayerState wasPlaying = PlayerState;
-            if (wasPlaying == PlayerState.Playing)
+            if(wasPlaying == PlayerState.Playing)
                 Pause();
 
             // CompactDisc needs special handling of track wraparound
-            if (_opticalDiscs[CurrentDisc] is CompactDisc compactDisc)
+            if(_opticalDiscs[CurrentDisc] is CompactDisc compactDisc)
             {
                 // Cache the current track for easy access
                 Track track = compactDisc.GetTrack(CurrentTrackNumber);
@@ -888,16 +885,12 @@ namespace RedBookPlayer.Models.Hardware
             if(_opticalDiscs[CurrentDisc] == null || !_opticalDiscs[CurrentDisc].Initialized)
                 return false;
 
-            // If the disc didn't change, don't do anything
-            if(_currentTrackNumber == trackNumber)
-                return false;
-
             PlayerState wasPlaying = PlayerState;
             if(wasPlaying == PlayerState.Playing)
                 Pause();
 
             // CompactDisc needs special handling of track wraparound
-            if (_opticalDiscs[CurrentDisc] is CompactDisc compactDisc)
+            if(_opticalDiscs[CurrentDisc] is CompactDisc compactDisc)
             {
                 // Cache the value and the current track number
                 int cachedValue = trackNumber;
@@ -978,13 +971,12 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Determine the number of real and zero sectors to read
         /// </summary>
-        /// <param name="count">Number of requested bytes to read</param>
         /// <param name="sectorsToRead">Number of sectors to read</param>
         /// <param name="zeroSectorsAmount">Number of zeroed sectors to concatenate</param>
-        private void DetermineReadAmount(int count, out ulong sectorsToRead, out ulong zeroSectorsAmount)
+        private void DetermineReadAmount(out ulong sectorsToRead, out ulong zeroSectorsAmount)
         {
-            // Attempt to read 10 more sectors than requested
-            sectorsToRead = ((ulong)count / (ulong)_opticalDiscs[CurrentDisc].BytesPerSector) + 10;
+            // Always attempt to read one frame of data
+            sectorsToRead = 75;
             zeroSectorsAmount = 0;
 
             // Avoid overreads by padding with 0-byte data at the end
@@ -1008,7 +1000,7 @@ namespace RedBookPlayer.Models.Hardware
         private byte[] ReadData(int count, ulong sectorsToRead, ulong zeroSectorsAmount)
         {
             // If the amount of zeroes being asked for is the same as the sectors, return null
-            if (sectorsToRead == zeroSectorsAmount)
+            if(sectorsToRead == zeroSectorsAmount)
                 return null;
 
             // Create padding data for overreads
@@ -1024,7 +1016,7 @@ namespace RedBookPlayer.Models.Hardware
                     {
                         if(_opticalDiscs[CurrentDisc] is CompactDisc compactDisc)
                         {
-                            byte[] subchannelData = compactDisc.ReadSubchannels((uint)sectorsToRead);
+                            //byte[] subchannelData = compactDisc.ReadSubchannels((uint)sectorsToRead);
                             return compactDisc.ReadSectors((uint)sectorsToRead, DataPlayback).Concat(zeroSectors).ToArray();
                         }
                         else
@@ -1296,7 +1288,11 @@ namespace RedBookPlayer.Models.Hardware
         private void OpticalDiscStateChanged(object sender, PropertyChangedEventArgs e)
         {
             if(_opticalDiscs[CurrentDisc] == null)
+            {
+                ImagePath = null;
+                CurrentTrackNumber = 1;
                 return;
+            }
 
             ImagePath = _opticalDiscs[CurrentDisc].ImagePath;
             CurrentTrackNumber = _opticalDiscs[CurrentDisc].CurrentTrackNumber;
@@ -1371,14 +1367,14 @@ namespace RedBookPlayer.Models.Hardware
                 byte b = subchannelData[i];
 
                 // Set the respective bit in the new byte data
-                formattedData['P'][index] |= (byte)(HasBitSet(b, 7) ? 1 << modValue : 0);
-                formattedData['Q'][index] |= (byte)(HasBitSet(b, 6) ? 1 << modValue : 0);
-                formattedData['R'][index] |= (byte)(HasBitSet(b, 5) ? 1 << modValue : 0);
-                formattedData['S'][index] |= (byte)(HasBitSet(b, 4) ? 1 << modValue : 0);
-                formattedData['T'][index] |= (byte)(HasBitSet(b, 3) ? 1 << modValue : 0);
-                formattedData['U'][index] |= (byte)(HasBitSet(b, 2) ? 1 << modValue : 0);
-                formattedData['V'][index] |= (byte)(HasBitSet(b, 1) ? 1 << modValue : 0);
-                formattedData['W'][index] |= (byte)(HasBitSet(b, 0) ? 1 << modValue : 0);
+                formattedData['P'][index] |= (byte)(HasBitSet(b, 7) ? 1 << (7 - modValue) : 0);
+                formattedData['Q'][index] |= (byte)(HasBitSet(b, 6) ? 1 << (7 - modValue) : 0);
+                formattedData['R'][index] |= (byte)(HasBitSet(b, 5) ? 1 << (7 - modValue) : 0);
+                formattedData['S'][index] |= (byte)(HasBitSet(b, 4) ? 1 << (7 - modValue) : 0);
+                formattedData['T'][index] |= (byte)(HasBitSet(b, 3) ? 1 << (7 - modValue) : 0);
+                formattedData['U'][index] |= (byte)(HasBitSet(b, 2) ? 1 << (7 - modValue) : 0);
+                formattedData['V'][index] |= (byte)(HasBitSet(b, 1) ? 1 << (7 - modValue) : 0);
+                formattedData['W'][index] |= (byte)(HasBitSet(b, 0) ? 1 << (7 - modValue) : 0);
             }
 
             return formattedData;
