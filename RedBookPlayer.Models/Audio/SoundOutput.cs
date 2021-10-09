@@ -155,7 +155,7 @@ namespace RedBookPlayer.Models.Audio
         public void SetVolume(int volume)
         {
             Volume = volume;
-            _soundOut.SetVolume((float)Volume / 100);
+            _soundOut?.SetVolume((float)Volume / 100);
         }
 
         /// <summary>
