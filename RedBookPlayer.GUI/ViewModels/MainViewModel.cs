@@ -131,7 +131,7 @@ namespace RedBookPlayer.GUI.ViewModels
             }
 
             // Volume Up
-            else if(e.Key == App.Settings.VolumeUpKey || e.Key == Key.VolumeUp)
+            else if(e.Key == App.Settings.VolumeUpKey)
             {
                 int increment = 1;
                 if(e.KeyModifiers.HasFlag(KeyModifiers.Control))
@@ -144,7 +144,7 @@ namespace RedBookPlayer.GUI.ViewModels
             }
 
             // Volume Down
-            else if(e.Key == App.Settings.VolumeDownKey || e.Key == Key.VolumeDown)
+            else if(e.Key == App.Settings.VolumeDownKey)
             {
                 int decrement = 1;
                 if(e.KeyModifiers.HasFlag(KeyModifiers.Control))
@@ -157,7 +157,7 @@ namespace RedBookPlayer.GUI.ViewModels
             }
 
             // Mute Toggle
-            else if(e.Key == App.Settings.ToggleMuteKey || e.Key == Key.VolumeMute)
+            else if(e.Key == App.Settings.ToggleMuteKey)
             {
                 PlayerView?.ViewModel?.ExecuteToggleMute();
             }
