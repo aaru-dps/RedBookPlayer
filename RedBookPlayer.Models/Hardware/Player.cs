@@ -364,6 +364,9 @@ namespace RedBookPlayer.Models.Hardware
             _currentTrackInOrder = 0;
 
             PropertyChanged += HandlePlaybackModes;
+
+            // Force a refresh of the state information
+            SoundOutputStateChanged(this, null);
         }
 
         /// <summary>
@@ -1101,7 +1104,7 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Decrement the volume value
         /// </summary>
-        public void VolumeDown() => SetVolume(Volume + 1);
+        public void VolumeDown() => SetVolume(Volume - 1);
 
         /// <summary>
         /// Set the value for the volume
