@@ -352,7 +352,8 @@ namespace RedBookPlayer.Models.Hardware
             _currentDisc = 0;
 
             _filterStage = new FilterStage();
-            _soundOutput = new SoundOutput(defaultVolume);
+            _soundOutput = new SoundOutput(ProviderRead, defaultVolume);
+            _soundOutput.PropertyChanged += SoundOutputStateChanged;
 
             _availableTrackList = new Dictionary<int, List<int>>();
             for(int i = 0; i < _numberOfDiscs; i++)
@@ -400,12 +401,9 @@ namespace RedBookPlayer.Models.Hardware
             _filterStage.SetupFilters();
 
             // Initialize the sound output
-            _soundOutput.Init(ProviderRead, autoPlay);
+            _soundOutput.Init(autoPlay);
             if(_soundOutput == null || !_soundOutput.Initialized)
                 return;
-
-            // Add event handling for the sound output
-            _soundOutput.PropertyChanged += SoundOutputStateChanged;
 
             // Load in the track list for the current disc
             LoadTrackList();

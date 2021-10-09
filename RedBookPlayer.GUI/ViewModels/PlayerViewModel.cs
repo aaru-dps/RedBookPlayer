@@ -398,6 +398,8 @@ namespace RedBookPlayer.GUI.ViewModels
 
             // Initialize Player
             _player = new Player(App.Settings.NumberOfDiscs, App.Settings.Volume);
+            _player.PropertyChanged += PlayerStateChanged;
+            PlayerStateChanged(this, null);
             PlayerState = PlayerState.NoDisc;
         }
 
@@ -417,10 +419,7 @@ namespace RedBookPlayer.GUI.ViewModels
             // Attempt to initialize Player
             _player.Init(path, playerOptions, opticalDiscOptions, autoPlay);
             if(_player.Initialized)
-            {
-                _player.PropertyChanged += PlayerStateChanged;
                 PlayerStateChanged(this, null);
-            }
         }
 
         #region Playback (UI)

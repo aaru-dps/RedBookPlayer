@@ -66,21 +66,22 @@ namespace RedBookPlayer.Models.Audio
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="read">ReadFunction to use during decoding</param>
         /// <param name="defaultVolume">Default volume between 0 and 100 to use when starting playback</param>
-        public SoundOutput(int defaultVolume = 100) => Volume = defaultVolume;
+        public SoundOutput(PlayerSource.ReadFunction read, int defaultVolume = 100)
+        {
+            Volume = defaultVolume;
+            SetupAudio(read);
+        }
 
         /// <summary>
         /// Initialize the output with a given image
         /// </summary>
-        /// <param name="read">ReadFunction to use during decoding</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(PlayerSource.ReadFunction read, bool autoPlay)
+        public void Init(bool autoPlay)
         {
             // Reset initialization
             Initialized = false;
-
-            // Setup the audio output
-            SetupAudio(read);
 
             // Initialize playback, if necessary
             if(autoPlay)
@@ -164,18 +165,11 @@ namespace RedBookPlayer.Models.Audio
         /// <param name="read">ReadFunction to use during decoding</param>
         private void SetupAudio(PlayerSource.ReadFunction read)
         {
-            if(_source == null)
-            {
-                _source = new PlayerSource(read);
-                if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                    _soundOut = new Linux.AudioBackend(_source);
-                else if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    _soundOut = new Windows.AudioBackend(_source);
-            }
-            else
-            {
-                _soundOut.Stop();
-            }
+            _source = new PlayerSource(read);
+            if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                _soundOut = new Linux.AudioBackend(_source);
+            else if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                _soundOut = new Windows.AudioBackend(_source);
         }
 
         #endregion
