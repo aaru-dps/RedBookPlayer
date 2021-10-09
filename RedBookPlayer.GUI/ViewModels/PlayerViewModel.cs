@@ -643,7 +643,7 @@ namespace RedBookPlayer.GUI.ViewModels
                 });
             }
 
-            CurrentDisc = _player.CurrentDisc;
+            CurrentDisc = _player.CurrentDisc + 1;
             CurrentTrackNumber = _player.CurrentTrackNumber;
             CurrentTrackIndex = _player.CurrentTrackIndex;
             CurrentTrackSession = _player.CurrentTrackSession;
