@@ -324,6 +324,11 @@ namespace RedBookPlayer.Models.Discs
 
             // Select the first index that has a sector offset greater than or equal to 0
             CurrentSector = (ulong)(track?.Indexes.OrderBy(kvp => kvp.Key).First(kvp => kvp.Value >= 0).Value ?? 0);
+
+            // Load and debug output
+            uint sectorCount = (uint)(track.TrackEndSector - track.TrackStartSector);
+            byte[] trackData = ReadSectors(sectorCount);
+            Console.WriteLine($"DEBUG: Track {trackNumber} - {sectorCount} sectors / {trackData.Length} bytes");
         }
 
         /// <inheritdoc/>
