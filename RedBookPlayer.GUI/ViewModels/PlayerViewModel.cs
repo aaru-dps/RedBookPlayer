@@ -31,7 +31,27 @@ namespace RedBookPlayer.GUI.ViewModels
 
         #region Player Passthrough
 
+        /// <summary>
+        /// Currently selected disc
+        /// </summary>
+        public int CurrentDisc
+        {
+            get => _currentDisc;
+            private set => this.RaiseAndSetIfChanged(ref _currentDisc, value);
+        }
+
+        private int _currentDisc;
+
         #region OpticalDisc Passthrough
+
+        /// <summary>
+        /// Path to the disc image
+        /// </summary>
+        public string ImagePath
+        {
+            get => _imagePath;
+            private set => this.RaiseAndSetIfChanged(ref _imagePath, value);
+        }
 
         /// <summary>
         /// Current track number
@@ -148,6 +168,7 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public ulong TotalTime => _player.TotalTime;
 
+        private string _imagePath;
         private int _currentTrackNumber;
         private ushort _currentTrackIndex;
         private ushort _currentTrackSession;
@@ -264,6 +285,16 @@ namespace RedBookPlayer.GUI.ViewModels
         public ReactiveCommand<Unit, Unit> EjectCommand { get; }
 
         /// <summary>
+        /// Command for moving to the next disc
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> NextDiscCommand { get; }
+
+        /// <summary>
+        /// Command for moving to the previous disc
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> PreviousDiscCommand { get; }
+
+        /// <summary>
         /// Command for moving to the next track
         /// </summary>
         public ReactiveCommand<Unit, Unit> NextTrackCommand { get; }
@@ -348,6 +379,8 @@ namespace RedBookPlayer.GUI.ViewModels
             TogglePlayPauseCommand = ReactiveCommand.Create(ExecuteTogglePlayPause);
             StopCommand = ReactiveCommand.Create(ExecuteStop);
             EjectCommand = ReactiveCommand.Create(ExecuteEject);
+            NextDiscCommand = ReactiveCommand.Create(ExecuteNextDisc);
+            PreviousDiscCommand = ReactiveCommand.Create(ExecutePreviousDisc);
             NextTrackCommand = ReactiveCommand.Create(ExecuteNextTrack);
             PreviousTrackCommand = ReactiveCommand.Create(ExecutePreviousTrack);
             NextIndexCommand = ReactiveCommand.Create(ExecuteNextIndex);
@@ -364,7 +397,9 @@ namespace RedBookPlayer.GUI.ViewModels
             ToggleDeEmphasisCommand = ReactiveCommand.Create(ExecuteToggleDeEmphasis);
 
             // Initialize Player
-            _player = new Player(App.Settings.Volume);
+            _player = new Player(App.Settings.NumberOfDiscs, App.Settings.Volume);
+            _player.PropertyChanged += PlayerStateChanged;
+            PlayerStateChanged(this, null);
             PlayerState = PlayerState.NoDisc;
         }
 
@@ -372,25 +407,22 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Initialize the view model with a given image path
         /// </summary>
         /// <param name="path">Path to the disc image</param>
-        /// <param name="options">Options to pass to the optical disc factory</param>
-        /// <param name="repeatMode">RepeatMode for sound output</param>
+        /// <param name="playerOptions">Options to pass to the player</param>
+        /// <param name="opticalDiscOptions">Options to pass to the optical disc factory</param>
         /// <param name="autoPlay">True if playback should begin immediately, false otherwise</param>
-        public void Init(string path, OpticalDiscOptions options, RepeatMode repeatMode, bool autoPlay)
+        public void Init(string path, PlayerOptions playerOptions, OpticalDiscOptions opticalDiscOptions, bool autoPlay)
         {
             // Stop current playback, if necessary
             if(PlayerState != PlayerState.NoDisc)
                 ExecuteStop();
 
             // Attempt to initialize Player
-            _player.Init(path, options, repeatMode, autoPlay);
+            _player.Init(path, playerOptions, opticalDiscOptions, autoPlay);
             if(_player.Initialized)
-            {
-                _player.PropertyChanged += PlayerStateChanged;
                 PlayerStateChanged(this, null);
-            }
         }
 
-        #region Playback
+        #region Playback (UI)
 
         /// <summary>
         /// Begin playback
@@ -408,6 +440,11 @@ namespace RedBookPlayer.GUI.ViewModels
         public void ExecuteTogglePlayPause() => _player?.TogglePlayback();
 
         /// <summary>
+        /// Shuffle the current track list
+        /// </summary>
+        public void ExecuteShuffle() => _player?.ShuffleTracks();
+
+        /// <summary>
         /// Stop current playback
         /// </summary>
         public void ExecuteStop() => _player?.Stop();
@@ -416,6 +453,16 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Eject the currently loaded disc
         /// </summary>
         public void ExecuteEject() => _player?.Eject();
+
+        /// <summary>
+        /// Move to the next disc
+        /// </summary>
+        public void ExecuteNextDisc() => _player?.NextDisc();
+
+        /// <summary>
+        /// Move to the previous disc
+        /// </summary>
+        public void ExecutePreviousDisc() => _player?.PreviousDisc();
 
         /// <summary>
         /// Move to the next playable track
@@ -446,6 +493,29 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Rewind playback by 75 sectors, if possible
         /// </summary>
         public void ExecuteRewind() => _player?.Rewind();
+
+        #endregion
+
+        #region Playback (Internal)
+
+        /// <summary>
+        /// Select a particular disc by number
+        /// </summary>
+        /// <param name="discNumber">Disc number to attempt to load</param>
+        public void SelectDisc(int discNumber) => _player?.SelectDisc(discNumber);
+
+        /// <summary>
+        /// Select a particular index by number
+        /// </summary>
+        /// <param name="index">Track index to attempt to load</param>
+        /// <param name="changeTrack">True if index changes can trigger a track change, false otherwise</param>
+        public void SelectIndex(ushort index, bool changeTrack) => _player?.SelectIndex(index, changeTrack);
+
+        /// <summary>
+        /// Select a particular track by number
+        /// </summary>
+        /// <param name="trackNumber">Track number to attempt to load</param>
+        public void SelectTrack(int trackNumber) => _player?.SelectTrack(trackNumber);
 
         #endregion
 
@@ -490,6 +560,111 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Toggle de-emphasis
         /// </summary>
         public void ExecuteToggleDeEmphasis() => _player?.ToggleDeEmphasis();
+
+        #endregion
+
+        #region Extraction
+
+        /// <summary>
+        /// Extract a single track from the image to WAV
+        /// </summary>
+        /// <param name="trackNumber"></param>
+        /// <param name="outputDirectory">Output path to write data to</param>
+        public void ExtractSingleTrackToWav(uint trackNumber, string outputDirectory) => _player?.ExtractSingleTrackToWav(trackNumber, outputDirectory);
+
+        /// <summary>
+        /// Extract all tracks from the image to WAV
+        /// </summary>
+        /// <param name="outputDirectory">Output path to write data to</param>
+        public void ExtractAllTracksToWav(string outputDirectory) => _player?.ExtractAllTracksToWav(outputDirectory);
+
+        #endregion
+
+        #region Setters
+
+        /// <summary>
+        /// Set data playback method [CompactDisc only]
+        /// </summary>
+        /// <param name="dataPlayback">New playback value</param>
+        public void SetDataPlayback(DataPlayback dataPlayback) => _player?.SetDataPlayback(dataPlayback);
+
+        /// <summary>
+        /// Set disc handling method
+        /// </summary>
+        /// <param name="discHandling">New playback value</param>
+        public void SetDiscHandling(DiscHandling discHandling) => _player?.SetDiscHandling(discHandling);
+
+        /// <summary>
+        /// Set the value for loading hidden tracks [CompactDisc only]
+        /// </summary>
+        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
+        public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
+
+        /// <summary>
+        /// Set repeat mode
+        /// </summary>
+        /// <param name="repeatMode">New repeat mode value</param>
+        public void SetRepeatMode(RepeatMode repeatMode) => _player?.SetRepeatMode(repeatMode);
+
+        /// <summary>
+        /// Set session handling
+        /// </summary>
+        /// <param name="sessionHandling">New session handling value</param>
+        public void SetSessionHandling(SessionHandling sessionHandling) => _player?.SetSessionHandling(sessionHandling);
+
+        #endregion
+
+        #region State Change Event Handlers
+
+        /// <summary>
+        /// Update the view-model from the Player
+        /// </summary>
+        private void PlayerStateChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if(_player == null)
+                return;
+
+            if(!_player.Initialized)
+            {
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    App.MainWindow.Title = "RedBookPlayer";
+                });
+            }
+
+            ImagePath = _player.ImagePath;
+            Initialized = _player.Initialized;
+
+            if(!string.IsNullOrWhiteSpace(ImagePath) && Initialized)
+            {
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    App.MainWindow.Title = "RedBookPlayer - " + ImagePath.Split('/').Last().Split('\\').Last();
+                });
+            }
+
+            CurrentDisc = _player.CurrentDisc + 1;
+            CurrentTrackNumber = _player.CurrentTrackNumber;
+            CurrentTrackIndex = _player.CurrentTrackIndex;
+            CurrentTrackSession = _player.CurrentTrackSession;
+            CurrentSector = _player.CurrentSector;
+            SectionStartSector = _player.SectionStartSector;
+
+            HiddenTrack = _player.HiddenTrack;
+
+            QuadChannel = _player.QuadChannel;
+            IsDataTrack = _player.IsDataTrack;
+            CopyAllowed = _player.CopyAllowed;
+            TrackHasEmphasis = _player.TrackHasEmphasis;
+
+            PlayerState = _player.PlayerState;
+            DataPlayback = _player.DataPlayback;
+            RepeatMode = _player.RepeatMode;
+            ApplyDeEmphasis = _player.ApplyDeEmphasis;
+            Volume = _player.Volume;
+
+            UpdateDigits();
+        }
 
         #endregion
 
@@ -540,11 +715,28 @@ namespace RedBookPlayer.GUI.ViewModels
         /// </summary>
         public async void ExecuteLoad()
         {
-            string path = await GetPath();
-            if(path == null)
+            string[] paths = await GetPaths();
+            if(paths == null || paths.Length == 0)
+            {
                 return;
+            }
+            else if(paths.Length == 1)
+            {
+                await LoadImage(paths[0]);
+            }
+            else
+            {
+                int lastDisc = CurrentDisc;
+                foreach(string path in paths)
+                {
+                    await LoadImage(path);
+                    
+                    if(Initialized)
+                        ExecuteNextDisc();
+                }
 
-            await LoadImage(path);
+                SelectDisc(lastDisc);
+            }
         }
 
         /// <summary>
@@ -593,19 +785,25 @@ namespace RedBookPlayer.GUI.ViewModels
         {
             return await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                OpticalDiscOptions options = new OpticalDiscOptions
+                PlayerOptions playerOptions = new PlayerOptions
                 {
                     DataPlayback = App.Settings.DataPlayback,
-                    GenerateMissingToc = App.Settings.GenerateMissingTOC,
+                    DiscHandling = App.Settings.DiscHandling,
                     LoadHiddenTracks = App.Settings.PlayHiddenTracks,
+                    RepeatMode = App.Settings.RepeatMode,
                     SessionHandling = App.Settings.SessionHandling,
+                };
+
+                OpticalDiscOptions opticalDiscOptions = new OpticalDiscOptions
+                {
+                    GenerateMissingToc = App.Settings.GenerateMissingTOC,
                 };
 
                 // Ensure the context and view model are set
                 App.PlayerView.DataContext = this;
                 App.PlayerView.ViewModel = this;
 
-                Init(path, options, App.Settings.RepeatMode, App.Settings.AutoPlay);
+                Init(path, playerOptions, opticalDiscOptions, App.Settings.AutoPlay);
                 if(Initialized)
                     App.MainWindow.Title = "RedBookPlayer - " + path.Split('/').Last().Split('\\').Last();
 
@@ -619,47 +817,11 @@ namespace RedBookPlayer.GUI.ViewModels
         public void RefreshFromSettings()
         {
             SetDataPlayback(App.Settings.DataPlayback);
+            SetDiscHandling(App.Settings.DiscHandling);
             SetLoadHiddenTracks(App.Settings.PlayHiddenTracks);
             SetRepeatMode(App.Settings.RepeatMode);
             SetSessionHandling(App.Settings.SessionHandling);
         }
-
-        /// <summary>
-        /// Extract a single track from the image to WAV
-        /// </summary>
-        /// <param name="trackNumber"></param>
-        /// <param name="outputDirectory">Output path to write data to</param>
-        public void ExtractSingleTrackToWav(uint trackNumber, string outputDirectory) => _player?.ExtractSingleTrackToWav(trackNumber, outputDirectory);
-
-        /// <summary>
-        /// Extract all tracks from the image to WAV
-        /// </summary>
-        /// <param name="outputDirectory">Output path to write data to</param>
-        public void ExtractAllTracksToWav(string outputDirectory) => _player?.ExtractAllTracksToWav(outputDirectory);
-
-        /// <summary>
-        /// Set data playback method [CompactDisc only]
-        /// </summary>
-        /// <param name="dataPlayback">New playback value</param>
-        public void SetDataPlayback(DataPlayback dataPlayback) => _player?.SetDataPlayback(dataPlayback);
-
-        /// <summary>
-        /// Set the value for loading hidden tracks [CompactDisc only]
-        /// </summary>
-        /// <param name="load">True to enable loading hidden tracks, false otherwise</param>
-        public void SetLoadHiddenTracks(bool load) => _player?.SetLoadHiddenTracks(load);
-
-        /// <summary>
-        /// Set repeat mode
-        /// </summary>
-        /// <param name="repeatMode">New repeat mode value</param>
-        public void SetRepeatMode(RepeatMode repeatMode) => _player?.SetRepeatMode(repeatMode);
-
-        /// <summary>
-        /// Set session handling
-        /// </summary>
-        /// <param name="sessionHandling">New session handling value</param>
-        public void SetSessionHandling(SessionHandling sessionHandling) => _player?.SetSessionHandling(sessionHandling);
 
         /// <summary>
         /// Generate the digit string to be interpreted by the frontend
@@ -737,12 +899,12 @@ namespace RedBookPlayer.GUI.ViewModels
         /// <summary>
         /// Generate a path selection dialog box
         /// </summary>
-        /// <returns>User-selected path, if possible</returns>
-        private async Task<string> GetPath()
+        /// <returns>User-selected paths, if possible</returns>
+        private async Task<string[]> GetPaths()
         {
             return await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                var dialog = new OpenFileDialog { AllowMultiple = false };
+                var dialog = new OpenFileDialog { AllowMultiple = true };
                 List<string> knownExtensions = new Aaru.DiscImages.AaruFormat().KnownExtensions.ToList();
                 dialog.Filters.Add(new FileDialogFilter()
                 {
@@ -750,7 +912,7 @@ namespace RedBookPlayer.GUI.ViewModels
                     Extensions = knownExtensions.ConvertAll(e => e.TrimStart('.'))
                 });
 
-                return (await dialog.ShowAsync(App.MainWindow))?.FirstOrDefault();
+                return (await dialog.ShowAsync(App.MainWindow));
             });
         }
 
@@ -779,46 +941,6 @@ namespace RedBookPlayer.GUI.ViewModels
             // Ensure the context and view model are set
             App.PlayerView.DataContext = this;
             App.PlayerView.ViewModel = this;
-            UpdateDigits();
-        }
-
-        /// <summary>
-        /// Update the view-model from the Player
-        /// </summary>
-        private void PlayerStateChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if(_player == null)
-                return;
-
-            if(!_player.Initialized)
-            {
-                Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    App.MainWindow.Title = "RedBookPlayer";
-                });
-            }
-
-            Initialized = _player.Initialized;
-
-            CurrentTrackNumber = _player.CurrentTrackNumber;
-            CurrentTrackIndex = _player.CurrentTrackIndex;
-            CurrentTrackSession = _player.CurrentTrackSession;
-            CurrentSector = _player.CurrentSector;
-            SectionStartSector = _player.SectionStartSector;
-
-            HiddenTrack = _player.HiddenTrack;
-
-            QuadChannel = _player.QuadChannel;
-            IsDataTrack = _player.IsDataTrack;
-            CopyAllowed = _player.CopyAllowed;
-            TrackHasEmphasis = _player.TrackHasEmphasis;
-
-            PlayerState = _player.PlayerState;
-            DataPlayback = _player.DataPlayback;
-            RepeatMode = _player.RepeatMode;
-            ApplyDeEmphasis = _player.ApplyDeEmphasis;
-            Volume = _player.Volume;
-
             UpdateDigits();
         }
 

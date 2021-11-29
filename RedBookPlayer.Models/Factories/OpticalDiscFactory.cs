@@ -32,7 +32,7 @@ namespace RedBookPlayer.Models.Factories
                 image.Open(filter);
 
                 // Generate and instantiate the disc
-                return GenerateFromImage(image, options, autoPlay);
+                return GenerateFromImage(path, image, options, autoPlay);
             }
             catch
             {
@@ -44,11 +44,12 @@ namespace RedBookPlayer.Models.Factories
         /// <summary>
         /// Generate an OpticalDisc from an input IOpticalMediaImage
         /// </summary>
+        /// <param name="path">Path of the image</param>
         /// <param name="image">IOpticalMediaImage to create from</param>
         /// <param name="options">Options to pass to the optical disc factory</param>
         /// <param name="autoPlay">True if the image should be playable immediately, false otherwise</param>
         /// <returns>Instantiated OpticalDisc, if possible</returns>
-        public static OpticalDiscBase GenerateFromImage(IOpticalMediaImage image, OpticalDiscOptions options, bool autoPlay)
+        public static OpticalDiscBase GenerateFromImage(string path, IOpticalMediaImage image, OpticalDiscOptions options, bool autoPlay)
         {
             // If the image is not usable, we don't do anything
             if(!IsUsableImage(image))
@@ -74,7 +75,7 @@ namespace RedBookPlayer.Models.Factories
                 return opticalDisc;
 
             // Instantiate the disc and return
-            opticalDisc.Init(image, autoPlay);
+            opticalDisc.Init(path, image, autoPlay);
             return opticalDisc;
         }
 

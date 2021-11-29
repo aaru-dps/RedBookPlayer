@@ -22,6 +22,23 @@ namespace RedBookPlayer.Models
     }
 
     /// <summary>
+    /// Determine how to handle multiple discs
+    /// </summary>
+    /// <remarks>Used with both repeat and shuffle</remarks>
+    public enum DiscHandling
+    {
+        /// <summary>
+        /// Only deal with tracks on the current disc
+        /// </summary>
+        SingleDisc = 0,
+
+        /// <summary>
+        /// Deal with tracks on all loaded discs
+        /// </summary>
+        MultiDisc = 1,
+    }
+
+    /// <summary>
     /// Current player state
     /// </summary>
     public enum PlayerState

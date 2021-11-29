@@ -8,19 +8,19 @@
         <viewModels:PlayerViewModel/>
     </ReactiveUserControl.ViewModel>
     <StackPanel Margin="16" VerticalAlignment="Center">
-        <Button Command="{Binding LoadCommand}" Margin="32,0,32,16">Load</Button>
+        <Button Command="{Binding LoadCommand}" Focusable="False" Margin="32,0,32,16">Load</Button>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-            <Button Command="{Binding PlayCommand}" Width="100" Margin="0,0,16,0">Play</Button>
-            <Button Command="{Binding PauseCommand}" Width="100" Margin="0,0,16,0">Pause</Button>
-            <Button Command="{Binding StopCommand}" Width="100" Margin="0,0,16,0">Stop</Button>
+            <Button Command="{Binding PlayCommand}" Focusable="False" Width="100" Margin="0,0,16,0">Play</Button>
+            <Button Command="{Binding PauseCommand}" Focusable="False" Width="100" Margin="0,0,16,0">Pause</Button>
+            <Button Command="{Binding StopCommand}" Focusable="False" Width="100" Margin="0,0,16,0">Stop</Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-            <Button Command="{Binding PreviousTrackCommand}" Width="100" Margin="0,0,16,0">Previous Track</Button>
-            <Button Command="{Binding NextTrackCommand}" Width="100" Margin="0,0,16,0">Next Track</Button>
-            <Button Command="{Binding PreviousIndexCommand}" Width="100" Margin="0,0,16,0">Previous Index</Button>
-            <Button Command="{Binding NextIndexCommand}" Width="100" Margin="0,0,16,0">Next Index</Button>
-            <RepeatButton Command="{Binding RewindCommand}" Width="100" Margin="0,0,16,0">Rewind</RepeatButton>
-            <RepeatButton Command="{Binding FastForwardCommand}" Width="100">Fast Forward</RepeatButton>
+            <Button Command="{Binding PreviousTrackCommand}" Focusable="False" Width="100" Margin="0,0,16,0">Previous Track</Button>
+            <Button Command="{Binding NextTrackCommand}" Focusable="False" Width="100" Margin="0,0,16,0">Next Track</Button>
+            <Button Command="{Binding PreviousIndexCommand}" Focusable="False" Width="100" Margin="0,0,16,0">Previous Index</Button>
+            <Button Command="{Binding NextIndexCommand}" Focusable="False" Width="100" Margin="0,0,16,0">Next Index</Button>
+            <RepeatButton Command="{Binding RewindCommand}" Focusable="False" Width="100" Margin="0,0,16,0">Rewind</RepeatButton>
+            <RepeatButton Command="{Binding FastForwardCommand}" Focusable="False" Width="100">Fast Forward</RepeatButton>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
             <StackPanel Margin="0,0,32,0">
@@ -81,12 +81,12 @@
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-            <Button Command="{Binding EnableDeEmphasisCommand}" IsVisible="{Binding !ApplyDeEmphasis}" Width="200"
-                    Margin="0,0,16,0">
+            <Button Command="{Binding EnableDeEmphasisCommand}" Focusable="False" IsVisible="{Binding !ApplyDeEmphasis}"
+                    Width="200" Margin="0,0,16,0">
                 Enable De-Emphasis
             </Button>
-            <Button Command="{Binding DisableDeEmphasisCommand}" IsVisible="{Binding ApplyDeEmphasis}" Width="200"
-                    Margin="0,0,16,0">
+            <Button Command="{Binding DisableDeEmphasisCommand}" Focusable="False" IsVisible="{Binding ApplyDeEmphasis}"
+                    Width="200" Margin="0,0,16,0">
                 Disable De-Emphasis
             </Button>
         </StackPanel>
@@ -103,7 +103,8 @@
             <TextBlock Margin="0,0,16,0" IsVisible="{Binding QuadChannel}">4CH</TextBlock>
             <TextBlock Margin="0,0,16,0" Foreground="LightGray" IsVisible="{Binding !HiddenTrack}">HIDDEN</TextBlock>
             <TextBlock Margin="0,0,16,0" IsVisible="{Binding HiddenTrack}">HIDDEN</TextBlock>
-            <TextBlock Margin="0,0,16,0" Text="{Binding Volume}"/>
+            <TextBlock Margin="0,0,16,0" Text="{Binding Volume, StringFormat='Volume {0}%'}"/>
+            <TextBlock Margin="0,0,16,0" Text="{Binding CurrentDisc, StringFormat='Disc Number: {0}'}"/>
         </StackPanel>
     </StackPanel>
 </ReactiveUserControl>

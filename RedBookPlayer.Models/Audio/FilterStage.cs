@@ -1,7 +1,7 @@
 using NWaves.Audio;
 using NWaves.Filters.BiQuad;
 
-namespace RedBookPlayer.Models.Hardware
+namespace RedBookPlayer.Models.Audio
 {
     /// <summary>
     /// Output stage that represents all filters on the audio

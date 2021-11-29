@@ -2,7 +2,7 @@ using System;
 using CSCore;
 using WaveFormat = CSCore.WaveFormat;
 
-namespace RedBookPlayer.Models.Hardware
+namespace RedBookPlayer.Models.Audio
 {
     public class PlayerSource : IWaveSource
     {

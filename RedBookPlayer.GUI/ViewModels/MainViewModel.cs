@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 using RedBookPlayer.GUI.Views;
@@ -75,6 +76,18 @@ namespace RedBookPlayer.GUI.ViewModels
                 PlayerView?.ViewModel?.ExecuteEject();
             }
 
+            // Next Disc
+            else if(e.Key == App.Settings.NextDiscKey)
+            {
+                PlayerView?.ViewModel?.ExecuteNextDisc();
+            }
+
+            // Previous Disc
+            else if(e.Key == App.Settings.PreviousDiscKey)
+            {
+                PlayerView?.ViewModel?.ExecutePreviousDisc();
+            }
+
             // Next Track
             else if(e.Key == App.Settings.NextTrackKey || e.Key == Key.MediaNextTrack)
             {
@@ -85,6 +98,12 @@ namespace RedBookPlayer.GUI.ViewModels
             else if(e.Key == App.Settings.PreviousTrackKey || e.Key == Key.MediaPreviousTrack)
             {
                 PlayerView?.ViewModel?.ExecutePreviousTrack();
+            }
+
+            // Shuffle Track List
+            else if(e.Key == App.Settings.ShuffleTracksKey)
+            {
+                PlayerView?.ViewModel?.ExecuteShuffle();
             }
 
             // Next Index
@@ -112,7 +131,7 @@ namespace RedBookPlayer.GUI.ViewModels
             }
 
             // Volume Up
-            else if(e.Key == App.Settings.VolumeUpKey || e.Key == Key.VolumeUp)
+            else if(e.Key == App.Settings.VolumeUpKey)
             {
                 int increment = 1;
                 if(e.KeyModifiers.HasFlag(KeyModifiers.Control))
@@ -125,7 +144,7 @@ namespace RedBookPlayer.GUI.ViewModels
             }
 
             // Volume Down
-            else if(e.Key == App.Settings.VolumeDownKey || e.Key == Key.VolumeDown)
+            else if(e.Key == App.Settings.VolumeDownKey)
             {
                 int decrement = 1;
                 if(e.KeyModifiers.HasFlag(KeyModifiers.Control))
@@ -138,7 +157,7 @@ namespace RedBookPlayer.GUI.ViewModels
             }
 
             // Mute Toggle
-            else if(e.Key == App.Settings.ToggleMuteKey || e.Key == Key.VolumeMute)
+            else if(e.Key == App.Settings.ToggleMuteKey)
             {
                 PlayerView?.ViewModel?.ExecuteToggleMute();
             }
@@ -151,19 +170,35 @@ namespace RedBookPlayer.GUI.ViewModels
         }
 
         /// <summary>
-        /// Load the first valid drag-and-dropped disc image
+        /// Load the all valid drag-and-dropped disc images
         /// </summary>
+        /// <remarks>If more than the number of discs in the changer are added, it will begin to overwrite</remarks>
         public async void ExecuteLoadDragDrop(object sender, DragEventArgs e)
         {
             if(PlayerView?.ViewModel == null)
                 return;
 
             IEnumerable<string> fileNames = e.Data.GetFileNames();
-            foreach(string filename in fileNames)
+            if(fileNames == null || fileNames.Count() == 0)
             {
-                bool loaded = await PlayerView.ViewModel.LoadImage(filename);
-                if(loaded)
-                    break;
+                return;
+            }
+            else if(fileNames.Count() == 1)
+            {
+                await PlayerView.ViewModel.LoadImage(fileNames.FirstOrDefault());
+            }
+            else
+            {
+                int lastDisc = PlayerView.ViewModel.CurrentDisc;
+                foreach(string path in fileNames)
+                {
+                    await PlayerView.ViewModel.LoadImage(path);
+                    
+                    if(PlayerView.ViewModel.Initialized)
+                        PlayerView.ViewModel.ExecuteNextDisc();
+                }
+
+                PlayerView.ViewModel.SelectDisc(lastDisc);
             }
         }
 

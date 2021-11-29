@@ -22,6 +22,12 @@ namespace RedBookPlayer.GUI.ViewModels
         public List<DataPlayback> DataPlaybackValues => GenerateDataPlaybackList();
 
         /// <summary>
+        /// List of all disc handling values
+        /// </summary>
+        [JsonIgnore]
+        public List<DiscHandling> DiscHandlingValues => GenerateDiscHandlingList();
+
+        /// <summary>
         /// List of all repeat mode values
         /// </summary>
         [JsonIgnore]
@@ -43,6 +49,16 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Indicates if discs should start playing on load
         /// </summary>
         public bool AutoPlay { get; set; } = false;
+
+        /// <summary>
+        /// Indicates the number of discs to allow loading and changing
+        /// </summary>
+        public int NumberOfDiscs { get; set; } = 1;
+
+        /// <summary>
+        /// Indicates how to deal with multiple discs
+        /// </summary>
+        public DiscHandling DiscHandling { get; set; } = DiscHandling.SingleDisc;
 
         /// <summary>
         /// Indicates if an index change can trigger a track change
@@ -145,6 +161,16 @@ namespace RedBookPlayer.GUI.ViewModels
         public Key EjectKey { get; set; } = Key.OemTilde;
 
         /// <summary>
+        /// Key assigned to move to the next disc
+        /// </summary>
+        public Key NextDiscKey { get; set; } = Key.PageUp;
+
+        /// <summary>
+        /// Key assigned to move to the previous disc
+        /// </summary>
+        public Key PreviousDiscKey { get; set; } = Key.PageDown;
+
+        /// <summary>
         /// Key assigned to move to the next track
         /// </summary>
         public Key NextTrackKey { get; set; } = Key.Right;
@@ -153,6 +179,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Key assigned to move to the previous track
         /// </summary>
         public Key PreviousTrackKey { get; set; } = Key.Left;
+
+        /// <summary>
+        /// Key assigned to shuffling the track list
+        /// </summary>
+        public Key ShuffleTracksKey { get; set; } = Key.R;
 
         /// <summary>
         /// Key assigned to move to the next index
@@ -274,6 +305,11 @@ namespace RedBookPlayer.GUI.ViewModels
         /// Generate the list of DataPlayback values
         /// </summary>
         private List<DataPlayback> GenerateDataPlaybackList() => Enum.GetValues(typeof(DataPlayback)).Cast<DataPlayback>().ToList();
+
+        /// <summary>
+        /// Generate the list of DiscHandling values
+        /// </summary>
+        private List<DiscHandling> GenerateDiscHandlingList() => Enum.GetValues(typeof(DiscHandling)).Cast<DiscHandling>().ToList();
 
         /// <summary>
         /// Generate the list of Key values
