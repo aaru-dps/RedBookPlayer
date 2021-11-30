@@ -220,118 +220,98 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
         /// </summary>
         /// <param name="scroll">Scroll with the new data</param>
         /// <param name="copy">True if data wraps around on scroll, false if filled by a solid color</param>
-        /// <remarks>
-        /// Based on the documentation, there's a bit of ambiguity how the Offset fields are used.
-        /// The current best understanding is that the offset can be combined with any scroll command
-        /// to add (or subtract) between 0 and 5 pixels in a particular axis.
-        /// TODO: Offsets are not currently implemented in the code below
-        /// </remarks>
         private void ScrollDisplay(Scroll scroll, bool copy)
         {
             if(scroll == null)
                 return;
 
+            // Derive the scroll values based on offsets
+            int hOffsetTotal = 6  + scroll.HScrollOffset;
+            int vOffsetTotal = 12 + scroll.VScrollOffset;
+
             // If we're scrolling horizontally
-            if(scroll.HScrollCommand == ScrollCommand.Positive)
+            if(scroll.HScrollCommand == ScrollCommand.Positive
+                || (scroll.HScrollCommand == ScrollCommand.NoScroll && scroll.HScrollOffset > 0))
             {
                 for(int y = 0; y < 216; y++)
                 {
-                    byte[] overflow = new byte[6];
+                    byte[] overflow = new byte[hOffsetTotal];
                     for(int x = 299; x >= 0; x--)
                     {
-                        if(x + 6 >= 300)
-                            overflow[(x + 6) % 300] = this.DisplayData[x,y];
+                        if(x + hOffsetTotal >= 300)
+                            overflow[(x + hOffsetTotal) % 300] = this.DisplayData[x,y];
                         else
-                            this.DisplayData[x + 6, y] = this.DisplayData[x,y];
+                            this.DisplayData[x + hOffsetTotal, y] = this.DisplayData[x,y];
                     }
 
                     // Fill in the now-empty pixels
-                    this.DisplayData[0,y] = copy ? overflow[0] : scroll.Color;
-                    this.DisplayData[1,y] = copy ? overflow[1] : scroll.Color;
-                    this.DisplayData[2,y] = copy ? overflow[2] : scroll.Color;
-                    this.DisplayData[3,y] = copy ? overflow[3] : scroll.Color;
-                    this.DisplayData[4,y] = copy ? overflow[4] : scroll.Color;
-                    this.DisplayData[5,y] = copy ? overflow[5] : scroll.Color;
+                    for(int i = 0; i < hOffsetTotal; i++)
+                    {
+                        this.DisplayData[i,y] = copy ? overflow[i] : scroll.Color;
+                    }
                 }
             }
             else if(scroll.HScrollCommand == ScrollCommand.Negative)
             {
                 for(int y = 0; y < 216; y++)
                 {
-                    byte[] overflow = new byte[6];
+                    byte[] overflow = new byte[hOffsetTotal];
                     for(int x = 0; x < 300; x++)
                     {
-                        if(x - 6 < 0)
+                        if(x - hOffsetTotal < 0)
                             overflow[x] = this.DisplayData[x,y];
                         else
-                            this.DisplayData[x - 6, y] = this.DisplayData[x,y];
+                            this.DisplayData[x - hOffsetTotal, y] = this.DisplayData[x,y];
                     }
 
                     // Fill in the now-empty pixels
-                    this.DisplayData[294,y] = copy ? overflow[0] : scroll.Color;
-                    this.DisplayData[295,y] = copy ? overflow[1] : scroll.Color;
-                    this.DisplayData[296,y] = copy ? overflow[2] : scroll.Color;
-                    this.DisplayData[297,y] = copy ? overflow[3] : scroll.Color;
-                    this.DisplayData[298,y] = copy ? overflow[4] : scroll.Color;
-                    this.DisplayData[299,y] = copy ? overflow[5] : scroll.Color;
+                    for(int i = 299; i > 299 - hOffsetTotal; i++)
+                    {
+                        this.DisplayData[i,y] = copy ? overflow[i] : scroll.Color;
+                    }
                 }
             }
 
             // If we're scrolling vertically
-            if(scroll.VScrollCommand == ScrollCommand.Positive)
+            if(scroll.VScrollCommand == ScrollCommand.Positive
+                || (scroll.VScrollCommand == ScrollCommand.NoScroll && scroll.VScrollOffset > 0))
             {
                 for(int x = 0; x < 300; x++)
                 {
-                    byte[] overflow = new byte[12];
+                    byte[] overflow = new byte[vOffsetTotal];
                     for(int y = 215; y >= 0; y--)
                     {
-                        if(y + 12 >= 216)
-                            overflow[(y + 12) % 216] = this.DisplayData[x,y];
+                        if(y + vOffsetTotal >= 216)
+                            overflow[(y + vOffsetTotal) % 216] = this.DisplayData[x,y];
                         else
-                            this.DisplayData[x, y + 12] = this.DisplayData[x,y];
+                            this.DisplayData[x, y + vOffsetTotal] = this.DisplayData[x,y];
                     }
 
                     // Fill in the now-empty pixels
-                    this.DisplayData[x,0]  = copy ? overflow[0]  : scroll.Color;
-                    this.DisplayData[x,1]  = copy ? overflow[1]  : scroll.Color;
-                    this.DisplayData[x,2]  = copy ? overflow[2]  : scroll.Color;
-                    this.DisplayData[x,3]  = copy ? overflow[3]  : scroll.Color;
-                    this.DisplayData[x,4]  = copy ? overflow[4]  : scroll.Color;
-                    this.DisplayData[x,5]  = copy ? overflow[5]  : scroll.Color;
-                    this.DisplayData[x,6]  = copy ? overflow[6]  : scroll.Color;
-                    this.DisplayData[x,7]  = copy ? overflow[7]  : scroll.Color;
-                    this.DisplayData[x,8]  = copy ? overflow[8]  : scroll.Color;
-                    this.DisplayData[x,9]  = copy ? overflow[9]  : scroll.Color;
-                    this.DisplayData[x,10] = copy ? overflow[10] : scroll.Color;
-                    this.DisplayData[x,11] = copy ? overflow[11] : scroll.Color;
+                    for(int i = 0; i < vOffsetTotal; i++)
+                    {
+                        this.DisplayData[x,i] = copy ? overflow[i] : scroll.Color;
+                    }
                 }
             }
             else if(scroll.VScrollCommand == ScrollCommand.Negative)
             {
                 for(int x = 0; x < 300; x++)
                 {
-                    byte[] overflow = new byte[12];
+                    byte[] overflow = new byte[vOffsetTotal];
                     for(int y = 0; y < 216; y++)
                     {
-                        if(y - 12 < 0)
+                        if(y - vOffsetTotal < 0)
                             overflow[y] = this.DisplayData[x,y];
                         else
-                            this.DisplayData[x, y - 12] = this.DisplayData[x,y];
+                            this.DisplayData[x, y - vOffsetTotal] = this.DisplayData[x,y];
                     }
 
                     // Fill in the now-empty pixels
-                    this.DisplayData[x,204] = copy ? overflow[0]  : scroll.Color;
-                    this.DisplayData[x,205] = copy ? overflow[1]  : scroll.Color;
-                    this.DisplayData[x,206] = copy ? overflow[2]  : scroll.Color;
-                    this.DisplayData[x,207] = copy ? overflow[3]  : scroll.Color;
-                    this.DisplayData[x,208] = copy ? overflow[4]  : scroll.Color;
-                    this.DisplayData[x,209] = copy ? overflow[5]  : scroll.Color;
-                    this.DisplayData[x,210] = copy ? overflow[6]  : scroll.Color;
-                    this.DisplayData[x,211] = copy ? overflow[7]  : scroll.Color;
-                    this.DisplayData[x,212] = copy ? overflow[8]  : scroll.Color;
-                    this.DisplayData[x,213] = copy ? overflow[9]  : scroll.Color;
-                    this.DisplayData[x,214] = copy ? overflow[10] : scroll.Color;
-                    this.DisplayData[x,215] = copy ? overflow[11] : scroll.Color;
+                    for(int i = 215; i > 215 - vOffsetTotal; i++)
+                    {
+                        this.DisplayData[x,i] = copy ? overflow[i] : scroll.Color;
+                    }
                 }
             }
         }
