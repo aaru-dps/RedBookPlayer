@@ -333,6 +333,15 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         private readonly object _readingImage = new object();
 
+        /// <summary>
+        /// Internal representation of a Karaoke (CD+G) display
+        /// </summary>
+        /// <remarks>
+        /// Uses a 300x216 display capable of 16 colors
+        /// See https://jbum.com//cdg_revealed.html for more details
+        /// </remarks>
+        private readonly byte[,] _karaokeDisplay = new byte[300,216];
+
         #endregion
 
         /// <summary>
