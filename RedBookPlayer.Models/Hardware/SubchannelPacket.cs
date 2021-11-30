@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using RedBookPlayer.Models.Hardware.Karaoke;
 
 namespace RedBookPlayer.Models.Hardware
 {
@@ -104,30 +103,6 @@ namespace RedBookPlayer.Models.Hardware
         {
             byte lowerSixBits = (byte)(this.Command & 0x3F);
             return lowerSixBits == 0x09;
-        }
-
-        /// <summary>
-        /// Read packet data according to the instruction, if possible
-        /// </summary>
-        /// <returns>Supported object created from data, null on error</returns>
-        public object ReadData()
-        {
-            if(!IsCDGPacket())
-                return null;
-
-            return (this.Instruction) switch
-            {
-                SubchannelInstruction.MemoryPreset              => new MemPreset(this.Data),
-                SubchannelInstruction.BorderPreset              => new BorderPreset(this.Data),
-                SubchannelInstruction.TileBlockNormal           => new TileBlock(this.Data),
-                SubchannelInstruction.ScrollPreset              => new Scroll(this.Data),
-                SubchannelInstruction.ScrollCopy                => new Scroll(this.Data),
-                SubchannelInstruction.DefineTransparentColor    => null, // Undefined in documentation
-                SubchannelInstruction.LoadColorTableLower       => new LoadCLUT(this.Data),
-                SubchannelInstruction.LoadColorTableUpper       => new LoadCLUT(this.Data),
-                SubchannelInstruction.TileBlockXOR              => new TileBlock(this.Data),
-                _ => null,
-            };
         }
 
         #endregion

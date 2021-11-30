@@ -10,6 +10,7 @@ using ReactiveUI;
 using RedBookPlayer.Models.Audio;
 using RedBookPlayer.Models.Discs;
 using RedBookPlayer.Models.Factories;
+using RedBookPlayer.Models.Hardware.Karaoke;
 
 namespace RedBookPlayer.Models.Hardware
 {
@@ -336,11 +337,7 @@ namespace RedBookPlayer.Models.Hardware
         /// <summary>
         /// Internal representation of a Karaoke (CD+G) display
         /// </summary>
-        /// <remarks>
-        /// Uses a 300x216 display capable of 16 colors
-        /// See https://jbum.com//cdg_revealed.html for more details
-        /// </remarks>
-        private readonly byte[,] _karaokeDisplay = new byte[300,216];
+        private readonly KaraokeDisplay _karaokeDisplay = new KaraokeDisplay();
 
         #endregion
 
@@ -1426,6 +1423,37 @@ namespace RedBookPlayer.Models.Hardware
             }
 
             return formattedData;
+        }
+
+        /// <summary>
+        /// Process subchannel object data
+        /// </summary>
+        /// <param name="subchannelData">Subchannel object data to format</param>
+        private void ProcessKaraokeData(List<SubchannelData> subchannelData)
+        {
+            if(subchannelData == null)
+                return;
+
+            // Process each subchannel data object in order
+            foreach(var subchannelDataObj in subchannelData)
+            {
+                if(subchannelDataObj == null)
+                    continue;
+
+                // Check that the packets are valid
+                var packets = subchannelDataObj.Packets;
+                if(packets == null)
+                    continue;
+
+                // Each packet has to be separately run
+                foreach(var packet in packets)
+                {
+                    if(packet == null || !packet.IsCDGPacket())
+                        continue;
+
+                    _karaokeDisplay.ProcessData(packet);
+                }
+            }
         }
 
         #endregion
