@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using RedBookPlayer.Models.Hardware.Karaoke;
 
 namespace RedBookPlayer.Models.Hardware
 {
@@ -10,9 +11,13 @@ namespace RedBookPlayer.Models.Hardware
     internal class SubchannelPacket
     {
         public byte Command { get; private set; }
-        public byte Instruction { get; private set; }
+        
+        public SubchannelInstruction Instruction { get; private set; }
+        
         public byte[] ParityQ { get; private set; } = new byte[2];
+        
         public byte[] Data { get; private set; } = new byte[16];
+        
         public byte[] ParityP { get; private set; } = new byte[4];
 
         /// <summary>
@@ -24,12 +29,14 @@ namespace RedBookPlayer.Models.Hardware
                 return;
 
             this.Command        = bytes[0];
-            this.Instruction    = bytes[1];
+            this.Instruction    = (SubchannelInstruction)bytes[1];
 
             Array.Copy(bytes, 2,  this.ParityQ, 0, 2);
             Array.Copy(bytes, 4,  this.Data,    0, 16);
             Array.Copy(bytes, 20, this.ParityP, 0, 4);
         }
+
+        #region Standard Handling
 
         /// <summary>
         /// Convert the data into separate named subchannels
@@ -85,5 +92,44 @@ namespace RedBookPlayer.Models.Hardware
         /// <param name="bitIndex">Index of the bit to check</param>
         /// <returns>True if the bit was set, false otherwise</returns>
         private bool HasBitSet(byte value, int bitIndex) => (value & (1 << bitIndex)) != 0;
+    
+        #endregion
+
+        #region CD+G Handling
+
+        /// <summary>
+        /// Determine if a packet is CD+G data
+        /// </summary>
+        public bool IsCDGPacket()
+        {
+            byte lowerSixBits = (byte)(this.Command & 0x3F);
+            return lowerSixBits == 0x09;
+        }
+
+        /// <summary>
+        /// Read packet data according to the instruction, if possible
+        /// </summary>
+        /// <returns>Supported object created from data, null on error</returns>
+        public object ReadData()
+        {
+            if(!IsCDGPacket())
+                return null;
+
+            return (this.Instruction) switch
+            {
+                SubchannelInstruction.MemoryPreset              => new MemPreset(this.Data),
+                SubchannelInstruction.BorderPreset              => new BorderPreset(this.Data),
+                SubchannelInstruction.TileBlockNormal           => new TileBlock(this.Data),
+                SubchannelInstruction.ScrollPreset              => new Scroll(this.Data),
+                SubchannelInstruction.ScrollCopy                => new Scroll(this.Data),
+                SubchannelInstruction.DefineTransparentColor    => null, // Undefined in documentation
+                SubchannelInstruction.LoadColorTableLower       => new LoadCLUT(this.Data),
+                SubchannelInstruction.LoadColorTableUpper       => new LoadCLUT(this.Data),
+                SubchannelInstruction.TileBlockXOR              => new TileBlock(this.Data),
+                _ => null,
+            };
+        }
+
+        #endregion
     }
 }
