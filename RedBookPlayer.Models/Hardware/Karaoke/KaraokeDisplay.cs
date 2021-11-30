@@ -28,15 +28,19 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
         public byte[,] DisplayData { get; private set; }
 
         /// <summary>
-        /// Current 8-entry color table
+        /// Current 16-entry color table
         /// </summary>
         /// <remarks>
-        /// In practice, this should be 8 colors, probably similar to the CGA palette,
-        /// including the "bright" or "dark" variant (possibly mapping from "high" to "low").
-        /// The current interpretation of this may be incorrect, as the internal color table
-        /// may actually include all 16 RGB values immediately.
+        /// Each color entry has the following format:
+        ///
+        /// [---high byte---]   [---low byte----]
+        ///  7 6 5 4 3 2 1 0     7 6 5 4 3 2 1 0
+        ///  X X r r r r g g     X X g g b b b b
+        /// 
+        /// Note that P and Q channel bits need to be masked off (they are marked
+        /// here with Xs.
         /// </remarks>
-        public byte[] ColorTable { get; private set; }
+        public short[] ColorTable { get; private set; }
 
         /// <summary>
         /// Color currently defined as transparent
@@ -49,7 +53,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
         public KaraokeDisplay()
         {
             this.DisplayData        = new byte[300,216];
-            this.ColorTable         = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+            this.ColorTable         = new short[16];
             this.TransparentColor   = 0x00;
         }
 
@@ -90,11 +94,11 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                     break;
                 case SubchannelInstruction.LoadColorTableLower:
                     var loadColorTableLower = new LoadCLUT(packet.Data);
-                    // TODO: Load color table data
+                    LoadColorTable(loadColorTableLower, false);
                     break;
                 case SubchannelInstruction.LoadColorTableUpper:
                     var loadColorTableUpper = new LoadCLUT(packet.Data);
-                    // TODO: Load color table data
+                    LoadColorTable(loadColorTableUpper, true);
                     break;
                 case SubchannelInstruction.TileBlockXOR:
                     var tileBlockXor = new TileBlock(packet.Data);
@@ -202,12 +206,12 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
             {
                 int adjustedX = x + tileBlock.Column;
                 int adjustedY = y + tileBlock.Row;
-                int colorIndex = pattern[x,y] == 0 ? tileBlock.Color0 : tileBlock.Color1;
+                byte colorIndex = pattern[x,y] == 0 ? tileBlock.Color0 : tileBlock.Color1;
 
                 if(xor)
-                    this.DisplayData[adjustedX, adjustedY] = (byte)(this.ColorTable[colorIndex] ^ this.DisplayData[adjustedX, adjustedY]);
+                    this.DisplayData[adjustedX, adjustedY] = (byte)(colorIndex ^ this.DisplayData[adjustedX, adjustedY]);
                 else
-                    this.DisplayData[adjustedX, adjustedY] = this.ColorTable[colorIndex];
+                    this.DisplayData[adjustedX, adjustedY] = colorIndex;
             }
         }
 
@@ -242,12 +246,12 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                     }
 
                     // Fill in the now-empty pixels
-                    this.DisplayData[0,y] = copy ? overflow[0] : this.ColorTable[scroll.Color];
-                    this.DisplayData[1,y] = copy ? overflow[1] : this.ColorTable[scroll.Color];
-                    this.DisplayData[2,y] = copy ? overflow[2] : this.ColorTable[scroll.Color];
-                    this.DisplayData[3,y] = copy ? overflow[3] : this.ColorTable[scroll.Color];
-                    this.DisplayData[4,y] = copy ? overflow[4] : this.ColorTable[scroll.Color];
-                    this.DisplayData[5,y] = copy ? overflow[5] : this.ColorTable[scroll.Color];
+                    this.DisplayData[0,y] = copy ? overflow[0] : scroll.Color;
+                    this.DisplayData[1,y] = copy ? overflow[1] : scroll.Color;
+                    this.DisplayData[2,y] = copy ? overflow[2] : scroll.Color;
+                    this.DisplayData[3,y] = copy ? overflow[3] : scroll.Color;
+                    this.DisplayData[4,y] = copy ? overflow[4] : scroll.Color;
+                    this.DisplayData[5,y] = copy ? overflow[5] : scroll.Color;
                 }
             }
             else if(scroll.HScrollCommand == ScrollCommand.Negative)
@@ -264,12 +268,12 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                     }
 
                     // Fill in the now-empty pixels
-                    this.DisplayData[294,y] = copy ? overflow[0] : this.ColorTable[scroll.Color];
-                    this.DisplayData[295,y] = copy ? overflow[1] : this.ColorTable[scroll.Color];
-                    this.DisplayData[296,y] = copy ? overflow[2] : this.ColorTable[scroll.Color];
-                    this.DisplayData[297,y] = copy ? overflow[3] : this.ColorTable[scroll.Color];
-                    this.DisplayData[298,y] = copy ? overflow[4] : this.ColorTable[scroll.Color];
-                    this.DisplayData[299,y] = copy ? overflow[5] : this.ColorTable[scroll.Color];
+                    this.DisplayData[294,y] = copy ? overflow[0] : scroll.Color;
+                    this.DisplayData[295,y] = copy ? overflow[1] : scroll.Color;
+                    this.DisplayData[296,y] = copy ? overflow[2] : scroll.Color;
+                    this.DisplayData[297,y] = copy ? overflow[3] : scroll.Color;
+                    this.DisplayData[298,y] = copy ? overflow[4] : scroll.Color;
+                    this.DisplayData[299,y] = copy ? overflow[5] : scroll.Color;
                 }
             }
 
@@ -288,18 +292,18 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                     }
 
                     // Fill in the now-empty pixels
-                    this.DisplayData[x,0]  = copy ? overflow[0]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,1]  = copy ? overflow[1]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,2]  = copy ? overflow[2]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,3]  = copy ? overflow[3]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,4]  = copy ? overflow[4]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,5]  = copy ? overflow[5]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,6]  = copy ? overflow[6]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,7]  = copy ? overflow[7]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,8]  = copy ? overflow[8]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,9]  = copy ? overflow[9]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,10] = copy ? overflow[10] : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,11] = copy ? overflow[11] : this.ColorTable[scroll.Color];
+                    this.DisplayData[x,0]  = copy ? overflow[0]  : scroll.Color;
+                    this.DisplayData[x,1]  = copy ? overflow[1]  : scroll.Color;
+                    this.DisplayData[x,2]  = copy ? overflow[2]  : scroll.Color;
+                    this.DisplayData[x,3]  = copy ? overflow[3]  : scroll.Color;
+                    this.DisplayData[x,4]  = copy ? overflow[4]  : scroll.Color;
+                    this.DisplayData[x,5]  = copy ? overflow[5]  : scroll.Color;
+                    this.DisplayData[x,6]  = copy ? overflow[6]  : scroll.Color;
+                    this.DisplayData[x,7]  = copy ? overflow[7]  : scroll.Color;
+                    this.DisplayData[x,8]  = copy ? overflow[8]  : scroll.Color;
+                    this.DisplayData[x,9]  = copy ? overflow[9]  : scroll.Color;
+                    this.DisplayData[x,10] = copy ? overflow[10] : scroll.Color;
+                    this.DisplayData[x,11] = copy ? overflow[11] : scroll.Color;
                 }
             }
             else if(scroll.VScrollCommand == ScrollCommand.Negative)
@@ -316,20 +320,42 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                     }
 
                     // Fill in the now-empty pixels
-                    this.DisplayData[x,204] = copy ? overflow[0]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,205] = copy ? overflow[1]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,206] = copy ? overflow[2]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,207] = copy ? overflow[3]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,208] = copy ? overflow[4]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,209] = copy ? overflow[5]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,210] = copy ? overflow[6]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,211] = copy ? overflow[7]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,212] = copy ? overflow[8]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,213] = copy ? overflow[9]  : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,214] = copy ? overflow[10] : this.ColorTable[scroll.Color];
-                    this.DisplayData[x,215] = copy ? overflow[11] : this.ColorTable[scroll.Color];
+                    this.DisplayData[x,204] = copy ? overflow[0]  : scroll.Color;
+                    this.DisplayData[x,205] = copy ? overflow[1]  : scroll.Color;
+                    this.DisplayData[x,206] = copy ? overflow[2]  : scroll.Color;
+                    this.DisplayData[x,207] = copy ? overflow[3]  : scroll.Color;
+                    this.DisplayData[x,208] = copy ? overflow[4]  : scroll.Color;
+                    this.DisplayData[x,209] = copy ? overflow[5]  : scroll.Color;
+                    this.DisplayData[x,210] = copy ? overflow[6]  : scroll.Color;
+                    this.DisplayData[x,211] = copy ? overflow[7]  : scroll.Color;
+                    this.DisplayData[x,212] = copy ? overflow[8]  : scroll.Color;
+                    this.DisplayData[x,213] = copy ? overflow[9]  : scroll.Color;
+                    this.DisplayData[x,214] = copy ? overflow[10] : scroll.Color;
+                    this.DisplayData[x,215] = copy ? overflow[11] : scroll.Color;
                 }
             }
+        }
+
+        /// <summary>
+        /// Load either the upper or lower half of the color table
+        /// </summary>
+        /// <param name="tableData">Color table data to load</param>
+        /// <param name="upper">True for colors 8-15, false for colors 0-7</param>
+        private void LoadColorTable(LoadCLUT tableData, bool upper)
+        {
+            if(tableData == null)
+                return;
+
+            // Load the color table data directly
+            int start = upper ? 8 : 0;
+            this.ColorTable[start]     = tableData.ColorSpec[0];
+            this.ColorTable[start + 1] = tableData.ColorSpec[1];
+            this.ColorTable[start + 2] = tableData.ColorSpec[2];
+            this.ColorTable[start + 3] = tableData.ColorSpec[3];
+            this.ColorTable[start + 4] = tableData.ColorSpec[4];
+            this.ColorTable[start + 5] = tableData.ColorSpec[5];
+            this.ColorTable[start + 6] = tableData.ColorSpec[6];
+            this.ColorTable[start + 7] = tableData.ColorSpec[7];
         }
     }
 }
