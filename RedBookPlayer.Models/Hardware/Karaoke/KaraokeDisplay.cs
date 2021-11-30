@@ -1,3 +1,5 @@
+using System;
+
 namespace RedBookPlayer.Models.Hardware.Karaoke
 {
     /// <see cref="https://jbum.com/cdg_revealed.html"/>
@@ -7,6 +9,9 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
         /// Display data as a 2-dimensional byte array
         /// </summary>
         /// <remarks>
+        /// Coordinate (0,0) is the upper left corner of the display
+        /// Coordinate (299, 215) is the lower right corner of the display
+        ///
         // CONFLICTING INFO:
         ///
         /// In the top part of the document, it states:
@@ -58,6 +63,23 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
         }
 
         /// <summary>
+        /// Print the current color map to console
+        /// </summary>
+        public void DebugPrintScreen()
+        {
+            string screenDump = string.Empty;
+            for(int y = 0; y < 216; y++)
+            {
+                for(int x = 0; x < 300; x++)
+                {
+                    screenDump += $"{this.DisplayData[x,y]:X}";
+                }
+
+                screenDump += Environment.NewLine;
+            }
+        }
+
+        /// <summary>
         /// Process a subchannel packet and update the display as necessary
         /// </summary>
         /// <param name="packet">Subchannel packet data to process</param>
@@ -106,7 +128,9 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                     break;
             };
         }
-    
+
+        #region Command Processors
+
         /// <summary>
         /// Set the screen to a particular color
         /// </summary>
@@ -337,5 +361,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
             this.ColorTable[start + 6] = tableData.ColorSpec[6];
             this.ColorTable[start + 7] = tableData.ColorSpec[7];
         }
+
+        #endregion
     }
 }
