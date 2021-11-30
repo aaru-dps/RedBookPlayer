@@ -1333,36 +1333,78 @@ namespace RedBookPlayer.Models.Hardware
         #region Helpers
 
         /// <summary>
-        /// Reformat raw subchannel data for multiple sectors
+        /// Parse multiple subchannels into object data
         /// </summary>
         /// <param name="subchannelData">Raw subchannel data to format</param>
-        /// <returns>Dictionary mapping subchannel to formatted data</returns>
-        public Dictionary<char, byte[]> ConvertSubchannels(byte[] subchannelData)
+        /// <returns>List of subchannel object data</returns>
+        private List<SubchannelData> ParseSubchannels(byte[] subchannelData)
         {
             if(subchannelData == null || subchannelData.Length % 96 != 0)
                 return null;
 
-            // Prepare the output formatted data
-            int modValue = subchannelData.Length / 96;
-            Dictionary<char, byte[]> formattedData = new Dictionary<char, byte[]>
-            {
-                ['P'] = new byte[8 * modValue],
-                ['Q'] = new byte[8 * modValue],
-                ['R'] = new byte[8 * modValue],
-                ['S'] = new byte[8 * modValue],
-                ['T'] = new byte[8 * modValue],
-                ['U'] = new byte[8 * modValue],
-                ['V'] = new byte[8 * modValue],
-                ['W'] = new byte[8 * modValue],
-            };
+            // Create the list of objects to return
+            var parsedSubchannelData = new List<SubchannelData>();
 
             // Read in 96-byte chunks
+            int modValue = subchannelData.Length / 96;
             for(int i = 0; i < modValue; i++)
             {
                 byte[] buffer = new byte[96];
                 Array.Copy(subchannelData, i * 96, buffer, 0, 96);
                 var singleSubchannel = new SubchannelData(buffer);
-                Dictionary<char, byte[]> singleData = singleSubchannel.ConvertData();
+                parsedSubchannelData.Add(singleSubchannel);
+            }
+
+            return parsedSubchannelData;
+        }
+
+        /// <summary>
+        /// Reformat raw subchannel data for multiple sectors
+        /// </summary>
+        /// <param name="subchannelData">Raw subchannel data to format</param>
+        /// <returns>Dictionary mapping subchannel to formatted data</returns>
+        private Dictionary<char, byte[]> ConvertSubchannels(byte[] subchannelData)
+        {
+            if(subchannelData == null || subchannelData.Length % 96 != 0)
+                return null;
+
+            // Parse the subchannel data, if possible
+            var parsedSubchannelData = ParseSubchannels(subchannelData);
+            return ConvertSubchannels(parsedSubchannelData);
+        }
+
+        /// <summary>
+        /// Reformat subchannel object data for multiple sectors
+        /// </summary>
+        /// <param name="subchannelData">Subchannel object data to format</param>
+        /// <returns>Dictionary mapping subchannel to formatted data</returns>
+        private Dictionary<char, byte[]> ConvertSubchannels(List<SubchannelData> subchannelData)
+        {
+            if(subchannelData == null)
+                return null;
+
+            // Prepare the output formatted data
+            Dictionary<char, byte[]> formattedData = new Dictionary<char, byte[]>
+            {
+                ['P'] = new byte[8 * subchannelData.Count],
+                ['Q'] = new byte[8 * subchannelData.Count],
+                ['R'] = new byte[8 * subchannelData.Count],
+                ['S'] = new byte[8 * subchannelData.Count],
+                ['T'] = new byte[8 * subchannelData.Count],
+                ['U'] = new byte[8 * subchannelData.Count],
+                ['V'] = new byte[8 * subchannelData.Count],
+                ['W'] = new byte[8 * subchannelData.Count],
+            };
+
+            // Read in each object
+            for(int i = 0; i < subchannelData.Count; i++)
+            {
+                if(subchannelData[i] == null)
+                    continue;
+
+                Dictionary<char, byte[]> singleData = subchannelData[i].ConvertData();
+                if(singleData == null)
+                    continue;
 
                 Array.Copy(singleData['P'], 0, formattedData['P'], 8 * i, 8);
                 Array.Copy(singleData['Q'], 0, formattedData['Q'], 8 * i, 8);
