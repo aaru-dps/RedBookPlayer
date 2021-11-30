@@ -11,8 +11,16 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
         // Only lower 6 bits are used, mask with 0x3F
         public byte HScroll { get; private set; }
 
+        public ScrollCommand HScrollCommand => (ScrollCommand)((this.HScroll & 0x30) >> 4);
+
+        public int HScrollOffset => this.HScroll & 0x07;
+
         // Only lower 6 bits are used, mask with 0x3F
         public byte VScroll { get; private set; }
+
+        public ScrollCommand VScrollCommand => (ScrollCommand)((this.VScroll & 0x30) >> 4);
+
+        public int VScrollOffset => this.VScroll & 0x07;
 
         public byte[] Filler { get; private set; } = new byte[13];
 

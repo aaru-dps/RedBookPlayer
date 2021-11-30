@@ -86,6 +86,27 @@ namespace RedBookPlayer.Models
     }
 
     /// <summary>
+    /// Determine how to scroll
+    /// </summary>
+    public enum ScrollCommand
+    {
+        /// <summary>
+        /// No scrolling
+        /// </summary>
+        NoScroll = 0,
+
+        /// <summary>
+        /// Scroll 6 pixels in the positive direction (right/down)
+        /// </summary>
+        Positive = 1,
+
+        /// <summary>
+        /// Scroll 6 pixels in the negative direction (left/up)
+        /// </summary>
+        Negative = 2,
+    }
+
+    /// <summary>
     /// Determine how to handle different sessions
     /// </summary>
     public enum SessionHandling
