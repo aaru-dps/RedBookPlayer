@@ -32,9 +32,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
             this.Column = (byte)(bytes[3] & 0x3F);
 
             for(int i = 0; i < 12; i++)
-            {
                 this.TilePixels[i] = (byte)(bytes[4 + i] & 0x3F);
-            }
         }
     }
 }

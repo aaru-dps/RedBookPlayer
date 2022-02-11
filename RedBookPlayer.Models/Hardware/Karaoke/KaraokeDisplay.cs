@@ -68,12 +68,11 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
         public void DebugPrintScreen()
         {
             string screenDump = string.Empty;
+
             for(int y = 0; y < 216; y++)
             {
                 for(int x = 0; x < 300; x++)
-                {
                     screenDump += $"{this.DisplayData[x,y]:X}";
-                }
 
                 screenDump += Environment.NewLine;
             }
@@ -94,34 +93,42 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                     var memoryPreset = new MemPreset(packet.Data);
                     SetScreenColor(memoryPreset);
                     break;
+
                 case SubchannelInstruction.BorderPreset:
                     var borderPreset = new BorderPreset(packet.Data);
                     SetBorderColor(borderPreset);
                     break;
+
                 case SubchannelInstruction.TileBlockNormal:
                     var tileBlockNormal = new TileBlock(packet.Data);
                     LoadTileBlock(tileBlockNormal, false);
                     break;
+
                 case SubchannelInstruction.ScrollPreset:
                     var scrollPreset = new Scroll(packet.Data);
                     ScrollDisplay(scrollPreset, false);
                     break;
+
                 case SubchannelInstruction.ScrollCopy:
                     var scrollCopy = new Scroll(packet.Data);
                     ScrollDisplay(scrollCopy, true);
                     break;
+
                 case SubchannelInstruction.DefineTransparentColor:
                     var transparentColor = new BorderPreset(packet.Data);
                     this.TransparentColor = transparentColor.Color;
                     break;
+
                 case SubchannelInstruction.LoadColorTableLower:
                     var loadColorTableLower = new LoadCLUT(packet.Data);
                     LoadColorTable(loadColorTableLower, false);
                     break;
+
                 case SubchannelInstruction.LoadColorTableUpper:
                     var loadColorTableUpper = new LoadCLUT(packet.Data);
                     LoadColorTable(loadColorTableUpper, true);
                     break;
+
                 case SubchannelInstruction.TileBlockXOR:
                     var tileBlockXor = new TileBlock(packet.Data);
                     LoadTileBlock(tileBlockXor, true);
@@ -154,10 +161,8 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                 return;
 
             for(int x = 3; x < 297; x++)
-            for(int y = 6; y < 210; y++)
-            {
-                this.DisplayData[x,y] = memPreset.Color;
-            }
+                for(int y = 6; y < 210; y++)
+                    this.DisplayData[x,y] = memPreset.Color;
         }
 
         /// <summary>
@@ -174,28 +179,20 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                 return;
 
             for(int x = 0; x < 3; x++)
-            for(int y = 0; y < 216; y++)
-            {
-                this.DisplayData[x,y] = borderPreset.Color;
-            }
+                for(int y = 0; y < 216; y++)
+                    this.DisplayData[x,y] = borderPreset.Color;
 
             for(int x = 297; x < 300; x++)
-            for(int y = 0; y < 216; y++)
-            {
-                this.DisplayData[x,y] = borderPreset.Color;
-            }
+                for(int y = 0; y < 216; y++)
+                    this.DisplayData[x,y] = borderPreset.Color;
 
             for(int x = 0; x < 300; x++)
-            for(int y = 0; y < 6; y++)
-            {
-                this.DisplayData[x,y] = borderPreset.Color;
-            }
+                for(int y = 0; y < 6; y++)
+                    this.DisplayData[x,y] = borderPreset.Color;
 
             for(int x = 0; x < 300; x++)
-            for(int y = 210; y < 216; y++)
-            {
-                this.DisplayData[x,y] = borderPreset.Color;
-            }
+                for(int y = 210; y < 216; y++)
+                    this.DisplayData[x,y] = borderPreset.Color;
         }
     
         /// <summary>
@@ -226,17 +223,17 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
 
             // Now load the bitmap starting in the correct place
             for(int x = 0; x < 12; x++)
-            for(int y = 0; y < 6; y++)
-            {
-                int adjustedX = x + tileBlock.Column;
-                int adjustedY = y + tileBlock.Row;
-                byte colorIndex = pattern[x,y] == 0 ? tileBlock.Color0 : tileBlock.Color1;
+                for(int y = 0; y < 6; y++)
+                {
+                    int adjustedX = x + tileBlock.Column;
+                    int adjustedY = y + tileBlock.Row;
+                    byte colorIndex = pattern[x,y] == 0 ? tileBlock.Color0 : tileBlock.Color1;
 
-                if(xor)
-                    this.DisplayData[adjustedX, adjustedY] = (byte)(colorIndex ^ this.DisplayData[adjustedX, adjustedY]);
-                else
-                    this.DisplayData[adjustedX, adjustedY] = colorIndex;
-            }
+                    if(xor)
+                        this.DisplayData[adjustedX, adjustedY] = (byte)(colorIndex ^ this.DisplayData[adjustedX, adjustedY]);
+                    else
+                        this.DisplayData[adjustedX, adjustedY] = colorIndex;
+                }
         }
 
         /// <summary>
@@ -246,7 +243,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
         /// <param name="copy">True if data wraps around on scroll, false if filled by a solid color</param>
         private void ScrollDisplay(Scroll scroll, bool copy)
         {
-            if(scroll == null)
+            if(scroll == null || scroll.HScrollOffset < 0 || scroll.VScrollOffset < 0)
                 return;
 
             // Derive the scroll values based on offsets
@@ -260,6 +257,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                 for(int y = 0; y < 216; y++)
                 {
                     byte[] overflow = new byte[hOffsetTotal];
+                    
                     for(int x = 299; x >= 0; x--)
                     {
                         if(x + hOffsetTotal >= 300)
@@ -270,9 +268,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
 
                     // Fill in the now-empty pixels
                     for(int i = 0; i < hOffsetTotal; i++)
-                    {
                         this.DisplayData[i,y] = copy ? overflow[i] : scroll.Color;
-                    }
                 }
             }
             else if(scroll.HScrollCommand == ScrollCommand.Negative)
@@ -280,6 +276,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                 for(int y = 0; y < 216; y++)
                 {
                     byte[] overflow = new byte[hOffsetTotal];
+                    
                     for(int x = 0; x < 300; x++)
                     {
                         if(x - hOffsetTotal < 0)
@@ -290,9 +287,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
 
                     // Fill in the now-empty pixels
                     for(int i = 299; i > 299 - hOffsetTotal; i++)
-                    {
                         this.DisplayData[i,y] = copy ? overflow[i] : scroll.Color;
-                    }
                 }
             }
 
@@ -303,6 +298,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                 for(int x = 0; x < 300; x++)
                 {
                     byte[] overflow = new byte[vOffsetTotal];
+                    
                     for(int y = 215; y >= 0; y--)
                     {
                         if(y + vOffsetTotal >= 216)
@@ -313,9 +309,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
 
                     // Fill in the now-empty pixels
                     for(int i = 0; i < vOffsetTotal; i++)
-                    {
                         this.DisplayData[x,i] = copy ? overflow[i] : scroll.Color;
-                    }
                 }
             }
             else if(scroll.VScrollCommand == ScrollCommand.Negative)
@@ -323,6 +317,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                 for(int x = 0; x < 300; x++)
                 {
                     byte[] overflow = new byte[vOffsetTotal];
+                    
                     for(int y = 0; y < 216; y++)
                     {
                         if(y - vOffsetTotal < 0)
@@ -333,9 +328,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
 
                     // Fill in the now-empty pixels
                     for(int i = 215; i > 215 - vOffsetTotal; i++)
-                    {
                         this.DisplayData[x,i] = copy ? overflow[i] : scroll.Color;
-                    }
                 }
             }
         }

@@ -1369,13 +1369,14 @@ namespace RedBookPlayer.Models.Hardware
         /// </summary>
         /// <param name="subchannelData">Raw subchannel data to format</param>
         /// <returns>Dictionary mapping subchannel to formatted data</returns>
-        private Dictionary<char, byte[]> ConvertSubchannels(byte[] subchannelData)
+        Dictionary<char, byte[]> ConvertSubchannels(byte[] subchannelData)
         {
             if(subchannelData == null || subchannelData.Length % 96 != 0)
                 return null;
 
             // Parse the subchannel data, if possible
             var parsedSubchannelData = ParseSubchannels(subchannelData);
+            
             return ConvertSubchannels(parsedSubchannelData);
         }
 

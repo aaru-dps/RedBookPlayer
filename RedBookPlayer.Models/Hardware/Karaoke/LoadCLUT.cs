@@ -17,9 +17,7 @@ namespace RedBookPlayer.Models.Hardware.Karaoke
                 return;
 
             for(int i = 0; i < 8; i++)
-            {
                 this.ColorSpec[i] = (short)(BitConverter.ToInt16(bytes, 2 * i) & 0x3F3F);
-            }
         }
     }
 }
